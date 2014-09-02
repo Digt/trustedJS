@@ -1,0 +1,1 @@
+copy /b header.txt+src\*.js+footer.txt asn.js

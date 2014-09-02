@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>ASN decoder</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+        <style>
+            *{
+                font-family: Arial;
+            }
+            .caption{
+                font-weight: bold;
+                color:#999;
+                text-align: right;
+            }
+            .label{
+                font-weight: bold;
+                color:#333;
+                text-align: right;
+            }
+            td{
+                padding:0px 5px;
+            }
+        </style>
+        <script src="../trustedJS.js"></script>
+        <script src="../test/js/fileReader.js"></script>
+
+        <script src="../asn/asn.js"></script>
+
+        <!-- PKI module -->
+        <script src="src/schemas/rfc5280.js"></script>
+        <script src="src/common.js"></script>
+        <script src="src/oids.js"></script>
+        <script src="src/certificate.js"></script>
+        <script src="src/extension.js"></script>
+        <script src="src/algorithm.js"></script>
+        <script src="src/key.js"></script>
+        <script src="src/oid.js"></script>
+        <script src="src/generalName.js"></script>
+        <script src="src/extensions/extendedKeyUsage.js"></script>
+        <script src="src/extensions/keyUsage.js"></script>
+        <script src="src/extensions/basicConstraints.js"></script>
+        <script src="src/extensions/issuerAlternativeName.js"></script>
+        <script src="src/extensions/subjectAlternativeName.js"></script>
+        <script src="src/extensions/subjectKeyIdentifier.js"></script>
+        <script src="src/extensions/crlDistributionPoints.js"></script>
+        <script src="src/extensions/authorityKeyIdentifier.js"></script>
+        <script src="src/extensions/issuerSignTool.js"></script>
+        <script src="src/extensions/subjectSignTool.js"></script>
+        <script src="src/extensions/certPolicy.js"></script>
+    </head>
+    <body>
+        <form style="display:none">
+            <input id="file" type="file"  />
+        </form>
+        <div>
+            <table id="certInfo"></table>
+        </div>
+        <script>
+            var der = Hex.toDer("306F3035A033A031862F687474703A2F2F6364702E736B626B6F6E7475722E72752F6364702F6B6F6E7475722D6361332D323031332E63726C3036A034A0328630687474703A2F2F636470322E736B626B6F6E7475722E72752F6364702F6B6F6E7475722D6361332D323031332E63726C");
+            var dps = new trusted.PKI.CRLDistributionPoints(der);
+            console.log(dps.toObject());
+            //var obj = dps.toObject();
+            //console.log(obj);
+            
+            
+        </script>
+    </body>
+</html>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>ASN decoder</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width">
+        <script src="./js/fileReader.js"></script>
+        <script src="../int10.js"></script>
+        <script src="../asn1js/hex.js"></script>
+        <script src="../asn1js/base64.js"></script>
+        
+        <script src="../trustedJS.js"></script>
+        <script src="../asn1js/asn1.js"></script>
+        <script src="../schema.js"></script>
+        <script src="../schemas/rfc5280.js"></script>
+    </head>
+    <body>
+        <h1>ASN1 decoder</h1>
+        <form>
+            <textarea id="pem" rows="10" style="width:100%">
+            </textarea>
+            <input id="file" type="file" />
+            <input type="button" value="Decode" onclick="decode()"/>
+        </form>
+        <script>
+            function decode() {
+            }
+            
+            trusted.shcemas.Test = {
+                val1: {type:"INTEGER"}
+            };
+        </script>
+    </body>
+</html>

@@ -1,0 +1,16 @@
+
+//export
+trusted.schemas = schemas;
+
+trusted.PKI = {};
+
+trusted.ASN = ASN;
+
+window.Der = Der;
+window.Hex = Hex;
+window.Base64 = Base64;
+window.BitString = BitString;
+
+window.MAX = Number.MAX_VALUE;
+
+})();

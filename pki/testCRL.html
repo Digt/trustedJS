@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>ASN decoder</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+        <style>
+            *{
+                font-family: Arial;
+            }
+            .caption{
+                font-weight: bold;
+                color:#999;
+                text-align: right;
+            }
+            .label{
+                font-weight: bold;
+                color:#333;
+                text-align: right;
+            }
+            td{
+                padding:0px 5px;
+            }
+        </style>
+        <script src="../trustedJS.js"></script>
+        <script src="../test/js/fileReader.js"></script>
+
+        <script src="../asn/asn.js"></script>
+
+        <!-- PKI module -->
+        <script src="src/schemas/rfc5280.js"></script>
+        <script src="src/common.js"></script>
+        <script src="src/oids.js"></script>
+        <script src="src/crl.js"></script>
+        <script src="src/extension.js"></script>
+        <script src="src/algorithm.js"></script>
+        <script src="src/key.js"></script>
+        <script src="src/oid.js"></script>
+        <script src="src/generalName.js"></script>
+    </head>
+    <body>
+        <form style="display:none">
+            <input id="file" type="file"  />
+        </form>
+        <div>
+            <table id="CRLInfo"></table>
+        </div>
+        <script>
+            function CRLInfo() {
+                var el;
+                this.__proto__.print = function(c, m) {
+                    if (c === undefined)
+                        c = '&nbsp;';
+                    var tr = document.createElement("tr");
+                    var tc = document.createElement("td");
+                    tc.innerHTML = c;
+                    if (m !== undefined) {
+                        tc.setAttribute("class", "label");
+                    }
+                    else {
+                        tc.setAttribute("class", "caption");
+                        m = "&nbsp;";
+                    }
+                    var td = document.createElement("td");
+                    td.innerHTML = m;
+                    tr.appendChild(tc);
+                    tr.appendChild(td);
+                    el.appendChild(tr);
+                };
+                this.__proto__.clear = function() {
+                    el.innerHTML = "";
+                };
+                function init() {
+                    el = document.getElementById('CRLInfo');
+                }
+                init.call(this);
+            }
+            var info = new CRLInfo();
+            window.fileLoaded = function(der) {
+
+                info.clear();
+
+                console.time("CRL import: ");
+                var crl = new trusted.PKI.CRL(der);
+                console.timeEnd("CRL import: ");
+                
+                function printAttr(l, v) {
+                    if (v)
+                        certInfo.print(l, v.text);
+                }
+                function printSubjectAttr(l, oid) {
+                    printAttr(l, cert.subjectName.getAttributes(oid)[0]);
+                }
+                function printIssuerAttr(l, oid) {
+                    printAttr(l, cert.issuerName.getAttributes(oid)[0]);
+                }
+  
+                info.print("CRL");
+                info.print("Версия:", crl.version);
+                info.print("Подпись:", crl.signatureAlgorithm.toString());
+                info.print("Издатель:", crl.issuerName.toString());
+                info.print("Последнее обновление:", crl.thisUpdate);
+                info.print("Следующее обновление:", crl.nextUpdate);
+                info.print("Подпись:", crl.signature);
+                
+                console.log(crl);
+  
+            };
+        </script>
+    </body>
+</html>

@@ -1,0 +1,25 @@
+load:
+  - ../trustedJS.js
+  - ../asn/asn.js
+  - ../pki/src/common.js
+  - ../pki/src/oids.js
+  - ../pki/src/oid.js
+  - ../pki/src/generalName.js
+  - ../pki/src/extension.js
+  - ../pki/src/extensions/*.js
+  - ../pki/src/schemas/*.js
+  - ../schemas/*.js
+  - src/encoders.js
+
+test:
+    - src-test/*.js
+exclude:
+    - src-test/TemplateTest.js
+    #- src-test/capicom.js
+
+server: http://localhost:4222
+
+#plugin:
+# - name: "coverage"
+#   jar: "plugins/coverage.jar"
+#   module: "com.google.jstestdriver.coverage.CoverageModule"

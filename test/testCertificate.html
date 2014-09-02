@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>ASN decoder</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+        <style>
+            *{
+                font-family: Arial;
+            }
+            .caption{
+                font-weight: bold;
+                color:#999;
+                text-align: right;
+            }
+            .label{
+                font-weight: bold;
+                color:#333;
+                text-align: right;
+            }
+            td{
+                padding:0px 5px;
+            }
+        </style>
+        <script src="../trustedJS.js"></script>
+        <script src="js/fileReader.js"></script>
+        <script src="src/encoders.js"></script>
+        <script src="../int10.js"></script>
+        <script src="../asn1js/base64.js"></script>
+        <script src="../asn1js/asn1.js"></script>
+        <script src="../schemas/rfc5280.js"></script>
+        <script src="../schemas/rfc2315.js"></script>
+        <!-- PKI module -->
+        <script src="../PKI/common.js"></script>
+        <script src="../PKI/oids.js"></script>
+        <script src="../PKI/certificate.js"></script>
+        <script src="../PKI/extension.js"></script>
+        <script src="../PKI/algorithm.js"></script>
+        <script src="../PKI/key.js"></script>
+        <script src="../PKI/oid.js"></script>
+        <script src="../PKI/generalName.js"></script>
+        <script src="../PKI/extensions/extendedKeyUsage.js"></script>
+        <script src="../PKI/extensions/keyUsage.js"></script>
+        <script src="../PKI/extensions/basicConstraints.js"></script>
+        <script src="../PKI/extensions/issuerAlternativeName.js"></script>
+        <script src="../PKI/extensions/subjectAlternativeName.js"></script>
+        <script src="../PKI/extensions/subjectKeyIdentifier.js"></script>
+        <script src="../PKI/extensions/crlDistributionPoints.js"></script>
+        <script src="../PKI/extensions/authorityKeyIdentifier.js"></script>
+        <script src="../PKI/extensions/issuerSignTool.js"></script>
+        <script src="../PKI/extensions/subjectSignTool.js"></script>
+        <script src="../PKI/extensions/certPolicy.js"></script>
+        <script>
+            if (!window.atob) {
+                var tableStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+                var table = tableStr.split("");
+                window.atob = function(base64) {
+                    if (/(=[^=]+|={3,})$/.test(base64))
+                        throw new Error("String contains an invalid character");
+                    base64 = base64.replace(/=/g, "");
+                    var n = base64.length & 3;
+                    if (n === 1)
+                        throw new Error("String contains an invalid character");
+                    for (var i = 0, j = 0, len = base64.length / 4, bin = []; i < len; ++i) {
+                        var a = tableStr.indexOf(base64[j++] || "A"), b = tableStr.indexOf(base64[j++] || "A");
+                        var c = tableStr.indexOf(base64[j++] || "A"), d = tableStr.indexOf(base64[j++] || "A");
+                        if ((a | b | c | d) < 0)
+                            throw new Error("String contains an invalid character");
+                        bin[bin.length] = ((a << 2) | (b >> 4)) & 255;
+                        bin[bin.length] = ((b << 4) | (c >> 2)) & 255;
+                        bin[bin.length] = ((c << 6) | d) & 255;
+                    }
+                    ;
+                    return String.fromCharCode.apply(null, bin).substr(0, bin.length + n - 4);
+                };
+                window.btoa = function(bin) {
+                    for (var i = 0, j = 0, len = bin.length / 3, base64 = []; i < len; ++i) {
+                        var a = bin.charCodeAt(j++), b = bin.charCodeAt(j++), c = bin.charCodeAt(j++);
+                        if ((a | b | c) > 255)
+                            throw new Error("String contains an invalid character");
+                        base64[base64.length] = table[a >> 2] + table[((a << 4) & 63) | (b >> 4)] +
+                                (isNaN(b) ? "=" : table[((b << 2) & 63) | (c >> 6)]) +
+                                (isNaN(b + c) ? "=" : table[c & 63]);
+                    }
+                    return base64.join("");
+                };
+            }
+
+            function hexToBase64(str) {
+                return btoa(String.fromCharCode.apply(null,
+                        str.replace(/\r|\n/g, "").replace(/([\da-fA-F]{2}) ?/g, "0x$1 ").replace(/ +$/, "").split(" "))
+                        );
+            }
+
+            function base64ToHex(str) {
+                for (var i = 0, bin = atob(str.replace(/[ \r\n]+$/, "")), hex = []; i < bin.length; ++i) {
+                    var tmp = bin.charCodeAt(i).toString(16);
+                    if (tmp.length === 1)
+                        tmp = "0" + tmp;
+                    hex[hex.length] = tmp;
+                }
+                return hex.join(" ");
+            }
+        </script>
+    </head>
+    <body>
+        <form style="display:none">
+            <input id="file" type="file"  />
+        </form>
+        <div>
+            <table id="certInfo"></table>
+        </div>
+        <script>
+            function CertInfo() {
+                var el;
+                this.__proto__.print = function(c, m) {
+                    if (c === undefined)
+                        c = '&nbsp;';
+                    var tr = document.createElement("tr");
+                    var tc = document.createElement("td");
+                    tc.innerHTML = c;
+                    if (m !== undefined) {
+                        tc.setAttribute("class", "label");
+                    }
+                    else {
+                        tc.setAttribute("class", "caption");
+                        m = "&nbsp;";
+                    }
+                    var td = document.createElement("td");
+                    td.innerHTML = m;
+                    tr.appendChild(tc);
+                    tr.appendChild(td);
+                    el.appendChild(tr);
+                };
+                this.__proto__.clear = function() {
+                    el.innerHTML = "";
+                };
+                function init() {
+                    el = document.getElementById('certInfo');
+                }
+                init.call(this);
+            }
+            var certInfo = new CertInfo();
+            window.fileLoaded = function(der) {
+                //var asn = new trusted.ASN(der);
+                //console.log(asn.toObject("Certificate"));
+
+                certInfo.clear();
+                console.time("Certificate import: ");
+                var cert = new trusted.PKI.Certificate(der);
+                //cert.import(der);
+                //console.log(cert);
+                console.timeEnd("Certificate import: ");
+                function printAttr(l, v) {
+                    if (v)
+                        certInfo.print(l, v.text);
+                }
+                function printSubjectAttr(l, oid) {
+                    printAttr(l, cert.subjectName.getAttributes(oid)[0]);
+                }
+                function printIssuerAttr(l, oid) {
+                    printAttr(l, cert.issuerName.getAttributes(oid)[0]);
+                }
+
+                certInfo.print("Валидность", (cert.checkValidity()) ? "Да" : "Нет");
+                certInfo.print();
+
+                certInfo.print("Тема");
+                printSubjectAttr("Общее имя", "2.5.4.3");
+                printSubjectAttr("Страна", "2.5.4.6");
+                printSubjectAttr("Город", "2.5.4.7");
+                printSubjectAttr("Организация", "2.5.4.10");
+                printSubjectAttr("Подразделение", "2.5.4.11");
+                printSubjectAttr("Адрес", "2.5.4.9");
+                certInfo.print();
+                certInfo.print("Издатель");
+                printIssuerAttr("Общее имя", "2.5.4.3");
+                printIssuerAttr("Страна", "2.5.4.6");
+                printIssuerAttr("Город", "2.5.4.7");
+                printIssuerAttr("Организация", "2.5.4.10");
+                printIssuerAttr("Подразделение", "2.5.4.11");
+                printIssuerAttr("Адрес", "2.5.4.9");
+                certInfo.print();
+                certInfo.print("Срок действия");
+                certInfo.print("Действителен с", cert.notBefore);
+                certInfo.print("Действителен до", cert.notAfter);
+                certInfo.print();
+                certInfo.print("Серийный номер", cert.serialNumber);
+                certInfo.print("Версия", cert.version);
+                certInfo.print();
+                certInfo.print("Открытый ключ");
+                certInfo.print("Алгоритм", cert.publicKey.algorithm);
+                certInfo.print("Ключ", cert.publicKey);
+                certInfo.print("Параметры", Der.toHex(cert.publicKey.algorithm.params));
+                certInfo.print();
+                certInfo.print("Алгоритм подписи");
+                certInfo.print("Идентификатор", cert.signatureAlgorithm.algorithm.name);
+                certInfo.print("Параметры", Der.toHex(cert.signatureAlgorithm.params));
+                certInfo.print();
+                certInfo.print("Подпись", cert.signature);
+                certInfo.print();
+                certInfo.print("Расширения");
+                certInfo.print("Кол-во", cert.extensions.length);
+                for (var i = 0; i < cert.extensions.length; i++) {
+                    certInfo.print();
+                    certInfo.print(cert.extensions[i].extnID.name);
+                    certInfo.print("Критический", cert.extensions[i].critical ? "Да" : "Нет");
+                }
+                
+                console.log(cert.subjectAlternativeName());
+            };
+
+            console.time("Test");
+
+            var extn1 = {extnID: "2.5.29.32", "critical": false, "extnValue": ""};
+            var un = {
+                noticeRef: {
+                    organization: {utf8String: "OrganizationName"},
+                    noticeNumbers: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+                },
+                explicitText: {
+                    utf8String: "ExplicitText"
+                }
+            };
+            var obj = [
+                {
+                    policyIdentifier: "1.2.643.3.7.2.1",
+                    policyQualifiers: [
+                        {
+                            qualifier: trusted.ASN.fromObject(un, "UserNotice").encode(),
+                            policyQualifierId: "1.3.6.1.5.5.7.2.2"}
+                    ]
+                }
+            ];
+            var cp = new trusted.PKI.CertificatePilicies(obj);
+            extn1.extnValue = trusted.ASN.fromObject(obj, "CertificatePolicies").encode();
+
+            //CRLDistribPoints
+            extn2 = {extnID: "2.5.29.31", "critical": false, "extnValue": ""};
+            var dp = new trusted.PKI.CRLDistributionPoints([{
+                    crlIssuer: [{uniformResourceIdentifier: "http://cdp.skbkontur.ru"}],
+                    distributionPoint: {fullName: {uniformResourceIdentifier: "http://cdp.skbkontur.ru/cdp/kontur-ca3-2013.crl"}},
+                    reasons: new BitString(trusted.PKI.ReasonFlags.keyCompromise)
+                }]);
+            extn2.extnValue = trusted.ASN.fromObject(dp.toObject(), "CRLDistributionPoints").encode();
+            console.log(Der.toHex(extn2.extnValue));
+
+
+            var cer = {
+                tbsCertificate: {
+                    version: 2,
+                    serialNumber: 1,
+                    signature: {
+                        algorithm: "1.2.840.113549.1.1.4",
+                        parameters: Hex.toDer("0500")
+                    },
+                    issuer: {
+                        rdnSequence: [
+                            [{type: "2.5.4.6", value: trusted.ASN.fromObject("US", "UTF8_STRING").encode()}],
+                            [{type: "2.5.4.10", value: trusted.ASN.fromObject("MSFT", "UTF8_STRING").encode()}],
+                            [{type: "2.5.4.3", value: trusted.ASN.fromObject("Microsoft Authenticode(tm) Root Authority", "UTF8_STRING").encode()}]
+                        ]
+                    },
+                    validity: {
+                        notBefore: {
+                            utcTime: new Date()},
+                        notAfter: {
+                            utcTime: new Date()}
+                    },
+                    subject: {
+                        rdnSequence: [
+                            [{type: "2.5.4.6", value: trusted.ASN.fromObject("US", "UTF8_STRING").encode()}],
+                            [{type: "2.5.4.10", value: trusted.ASN.fromObject("MSFT", "UTF8_STRING").encode()}],
+                            [{type: "2.5.4.3", value: trusted.ASN.fromObject("Microsoft Authenticode(tm) Root Authority", "UTF8_STRING").encode()}]
+                        ]
+                    },
+                    subjectPublicKeyInfo: {
+                        algorithm: {
+                            algorithm: "1.2.840.113549.1.1.1",
+                            parameters: Hex.toDer("0500")
+                        },
+                        subjectPublicKey: new BitString(Hex.toDer("0382010F003082010A0282010100DF08BAE33F6E649BF589AF28964A078F1B2E8B3E1DFCB88069A3A1CEDBDFB08E6C8976294FCA603539AD7232E00BAE293D4C16D94B3C9DDAC5D3D109C92C6FA6C2605345DD4BD155CD031CD2595624F3E578D807CCD8B31F903FC01A71501D2DA712086D7CB0866CC7BA853207E1616FAF03C56DE5D6A18F36F6C10BD13E69974872C97FA4C8C24A4C7EA1D194A6D7DCEB05462EB818B4571D8649DB694A2C21F55E0F542D5A43A97A7E6A8E504D2557A1BF1B1505437B2C058DBD3D038C93227D63EA0A5705060ADB6198652D4749A8E7E656755CB8640863A9304066B2F9B6E334E86730E1430B87FFC9BE72105E23F09BA74865BF09887BCD72BC2E799B7B0203010001"), 0)
+                    },
+                    extensions: [
+                        extn1,
+                        extn2
+                    ]},
+                signatureAlgorithm: {
+                    "algorithm": "1.2.840.113549.1.1.4",
+                    parameters: Hex.toDer("0500")},
+                signature: new BitString(Hex.toDer("03820101002DC9E2F6129E5D5667FAFA4B9A7EDC29565C80140228856E26F3CD58DA5080C5F819B3A67CE29D6B5F3B8F2274E61804FC4740D87A3F3066F012A4D1EB1DE7B6F498AB5322865158EE230976E41D455C4BFF4CE302500113CC41A45297D486D5C4FE8383657DEABEA2683BC1B12998BFA2A5FC9DD384EE701750F30BFA3CEFA9278B91B448C845A0E101424B4476041CC219A28E6B2098C4DD02ACB4D2A20E8D5DB9368E4A1B5D6C1AE2CB007F10F4B295EFE3E8FFA17358A9752CA2499585FECCDA448AC21244D244C8A5A21FA95A8E56C2C37BCF4260DC821FFBCE74067ED6F1AC196A4F745CC51566316CC16271910F595B7D2A821ADFB1B4D81D37DE0D0F"), 0)
+            };
+
+            var b64 = hexToBase64(Der.toHex(trusted.ASN.fromObject(cer, "Certificate").encode()));
+
+            var cert_b64 = "-----BEGIN CERTIFICATE-----\n";
+            var b64_counter = 0;
+            for (var i = 0; i < b64.length; i++) {
+                cert_b64 += b64.charAt(i);
+                b64_counter++;
+                if (b64_counter === 64) {
+                    cert_b64 += "\n";
+                    b64_counter = 0;
+                }
+            }
+            cert_b64 += "\n-----END CERTIFICATE-----\n";
+
+            console.log(cert_b64);
+            console.timeEnd("Test");
+
+            console.log((new Date("2015-01-01") < new Date()) ? "Да" : "Нет");
+        </script>
+    </body>
+</html>

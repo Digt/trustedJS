@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width">
+        <script src="../trustedJS.js"></script>
+        <script src="./asn.js"></script>
+    </head>
+    <body>
+        <div>TODO write content</div>
+        <script>
+
+            //console.log((trusted.isObject("asa"))?"Да":"Нет");
+
+            trusted.schemas.Test = {
+                type: "SEQUENCE",
+                value: {
+                    v1: {type: "INTEGER", context: 0, optional: true, default: 33, explicit: true},
+                    v2: {type: "INTEGER", context: 1},
+                    v3: {type: "GN", context: 2},
+                    v4: {
+                        type: "SEQUENCE",
+                        maxOccurs: 10,
+                        value: {
+                            v: {type: "INTEGER"}
+                        }
+                    },
+                    v5: {type: "ANY", optional: true}
+                }
+            };
+
+            trusted.schemas.GN = {
+                type: "CHOICE",
+                value: {
+                    ch1: {type: "INTEGER", context: 0},
+                    ch3: {type: "N", context: 3}
+                }
+            };
+
+            trusted.schemas.N = {
+                type: "CHOICE",
+                value: {
+                    num: {type: "INTEGER"},
+                    bool: {type: "BOOLEAN"}
+                }
+            };
+
+            var o = {
+                v1: 1,
+                v2: 3,
+                v3: {
+                    ch3: {
+                        bool: true
+                    }
+                },
+                v4: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+                v5: Hex.toDer("010101")
+            };
+
+            var a = '';
+            //console.log(new Schema("Test").value);
+            console.log(a = Der.toHex(trusted.ASN.fromObject(o, "Test").encode()));
+            a = Hex.toDer(a); // hex to der
+            a = new trusted.ASN(a); // a to asn
+            console.log(a.toObject("Test"));
+
+            console.log();
+            console.log("Test cases:");
+            
+            trusted.schemas.Test = {
+                type: "SEQUENCE",
+                value: {
+                    signature: {type: "BIT_STRING"}
+                }
+            };
+            
+            var o = {
+                signature: new BitString(Hex.toDer("002DC9E2F6129E5D5667FAFA4B9A7EDC29565C80140228856E26F3CD58DA5080C5F819B3A67CE29D6B5F3B8F2274E61804FC4740D87A3F3066F012A4D1EB1DE7B6F498AB5322865158EE230976E41D455C4BFF4CE302500113CC41A45297D486D5C4FE8383657DEABEA2683BC1B12998BFA2A5FC9DD384EE701750F30BFA3CEFA9278B91B448C845A0E101424B4476041CC219A28E6B2098C4DD02ACB4D2A20E8D5DB9368E4A1B5D6C1AE2CB007F10F4B295EFE3E8FFA17358A9752CA2499585FECCDA448AC21244D244C8A5A21FA95A8E56C2C37BCF4260DC821FFBCE74067ED6F1AC196A4F745CC51566316CC16271910F595B7D2A821ADFB1B4D81D37DE0D0F"), 0)
+            };
+            var a = trusted.ASN.fromObject(o,"Test");
+                        
+            console.log(Der.toHex(a.encode()));
+
+        </script>
+    </body>
+</html>
