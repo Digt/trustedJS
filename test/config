@@ -11,7 +11,7 @@ load:
   - src/encoders.js
 
 test:
-    - src-test/authorityInfoAccess.js
+    - src-test/infoAccess.js
 exclude:
     - src-test/TemplateTest.js
     #- src-test/capicom.js
