@@ -3,32 +3,24 @@
         var obj;
         var cache = {};
 
-        //location
-        Object.defineProperty(this.__proto__, "location", {
-            get: function() {
+        this.__proto__ = {
+            get location() {
                 if (cache.l === undefined) {
                     cache.l = new trusted.PKI.GeneralName(obj.accessLocation);
                 }
                 return cache.l;
             },
-            set: function(v) {
+            set location(v) {
             },
-            enumerable: true,
-            configurable: true
-        });
-        //  method
-        Object.defineProperty(this.__proto__, "method", {
-            get: function() {
+            get method() {
                 if (cache.m === undefined) {
                     cache.m = new trusted.PKI.OID(obj.accessMethod);
                 }
                 return cache.m;
             },
-            set: function(v) {
-            },
-            enumerable: true,
-            configurable: true
-        });
+            set method(v) {
+            }
+        };
 
         this.__proto__.toObject = function() {
             var o = {};
@@ -56,15 +48,13 @@
     function InfoAccess() {
         var obj;
 
-        // description
-        Object.defineProperty(this.__proto__, "descriptions", {
-            get: function() {
+        this.__proto__ = {
+            get descriptions() {
                 return obj;
             },
-            set: function(v) {
-            },
-            enumerable: true
-        });
+            set descriptions(v) {
+            }
+        };
 
         this.__proto__.toObject = function() {
             var o = [];
