@@ -59,8 +59,8 @@
         this.__proto__.toObject = function() {
             var o = [];
 
-            for (var i = 0; i < obj.length; i++)
-                o.push(this.descriptions[i]);
+            for (var i = 0; i < this.descriptions.length; i++)
+                o.push(this.descriptions[i].toObject());
 
             return o;
         };
