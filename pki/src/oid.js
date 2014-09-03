@@ -29,6 +29,10 @@
         this.__proto__.toString=function(){
             return this.name;
         };
+        
+        this.__proto__.toObject=function(){
+            return this.value;
+        };
 
         function checkValue(v) {
             if (typeof (v) !== "string")
