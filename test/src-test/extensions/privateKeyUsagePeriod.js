@@ -1,6 +1,5 @@
 PrivateKeyUsagePeriodTest = TestCase("PrivateKeyUsagePeriod");
 
-//Инициализация параметров
 PrivateKeyUsagePeriodTest.prototype.setUp = function() {
 
 };
