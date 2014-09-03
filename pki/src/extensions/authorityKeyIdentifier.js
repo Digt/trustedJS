@@ -21,9 +21,9 @@
             get keyIdentifier() {
                 return obj.keyIdentifier === undefined ? null : obj.keyIdentifier;
             },
-            set CAIssuer(v) {
+            set issuerName(v) {
             },
-            get CAIssuer() {
+            get issuerName() {
                 if (authorityCertIssuer === undefined)
                     if (obj.authorityCertIssuer !== undefined)
                         switch (version) {
@@ -71,16 +71,6 @@
                 obj.keyIdentifier = this.keyIdentifier;
             }
             return obj;
-        };
-
-        this.__proto__.hasKeyIdentifier = function() {
-            return (obj.keyIdentifier === undefined);
-        };
-        this.__proto__.hasCAIssuer = function() {
-            return (obj.authorityCertIssuer === undefined);
-        };
-        this.__proto__.hasCASerialNumber = function() {
-            return (obj.authorityCertSerialNumber === undefined);
         };
 
         function init(v, oid) {

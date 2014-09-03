@@ -4,6 +4,12 @@
   dslVersion="1.0.0.0"
   Id="787dd2a4-b57c-4977-99bc-a7514f66280a"
   name="PKI">
+  <ownedCommentsInternal>
+    <comment
+      Id="09dd823f-56c4-4e9a-a5ef-26b055ac2080">
+      <body>Revoked Certificate Extensions</body>
+    </comment>
+  </ownedCommentsInternal>
   <packagedElements>
     <packageHasNamedElement>
       <class
@@ -69,37 +75,6 @@
           </association>
         </targetEnds>
         <ownedAttributesInternal>
-          <property
-            Id="1ba5ba2d-312c-419f-86ac-c5ad3eabfbcd"
-            name="generalNames"
-            isLeaf="false"
-            isStatic="false"
-            isReadOnly="true"
-            isUnique="false"
-            isDerived="false"
-            isDerivedUnion="false"
-            aggregation="None"
-            isComposite="false">
-            <description>Коллекция GeneralName</description>
-            <lowerValueInternal>
-              <literalString
-                Id="bf6ee4d5-520a-4081-87cd-c71fa49583ef"
-                name="Lower"
-                value="1" />
-            </lowerValueInternal>
-            <upperValueInternal>
-              <literalString
-                Id="4fecda99-a399-4597-8508-257ad6bbfdf0"
-                name="Upper"
-                value="*" />
-            </upperValueInternal>
-            <type_NamedElement>
-              <classMoniker
-                Id="2ac7bb17-a88f-43a8-9377-f8080eef9d76"
-                LastKnownName="GeneralName"
-                LastKnownLocation="Package_1040.uml" />
-            </type_NamedElement>
-          </property>
           <property
             Id="42c3ea3f-55cb-417f-8acf-891b9a1e2fad"
             name="items"
@@ -4334,7 +4309,7 @@
         <ownedAttributesInternal>
           <property
             Id="a16ee5c8-864f-4254-bb3b-6bd04af3334a"
-            name="policyInformations"
+            name="policies"
             isLeaf="false"
             isStatic="false"
             isReadOnly="true"
@@ -4535,7 +4510,7 @@
         <ownedAttributesInternal>
           <property
             Id="281b49c1-e9bf-4db3-8bb4-5bf0ddb058d2"
-            name="policyIdentifier"
+            name="OID"
             isLeaf="false"
             isStatic="false"
             isReadOnly="true"
@@ -4554,7 +4529,7 @@
           </property>
           <property
             Id="6f4b4bd3-cacb-47c1-9b37-f1b8f157d932"
-            name="policyQualifiers"
+            name="qualifiers"
             isLeaf="false"
             isStatic="false"
             isReadOnly="true"
@@ -4580,25 +4555,6 @@
               <classMoniker
                 Id="f56830e5-449f-4a60-a4aa-2ad0f6e69720"
                 LastKnownName="QualifierInfo"
-                LastKnownLocation="Package_1040.uml" />
-            </type_NamedElement>
-          </property>
-          <property
-            Id="440bc073-daa1-442d-993f-33a0b8edd437"
-            name="OID"
-            isLeaf="false"
-            isStatic="false"
-            isReadOnly="true"
-            isUnique="false"
-            isDerived="false"
-            isDerivedUnion="false"
-            aggregation="None"
-            isComposite="false">
-            <description>Идентификатор политики. Дубликат policyIdentifier</description>
-            <type_NamedElement>
-              <classMoniker
-                Id="80967cb4-7a48-40c2-964f-6096abb4952a"
-                LastKnownName="OID"
                 LastKnownLocation="Package_1040.uml" />
             </type_NamedElement>
           </property>
@@ -4787,7 +4743,7 @@
           </property>
           <property
             Id="df1e7337-14f9-431e-8170-ae046021646e"
-            name="policyQualifierId"
+            name="OID"
             isLeaf="false"
             isStatic="false"
             isReadOnly="false"
@@ -4806,7 +4762,7 @@
           </property>
           <property
             Id="aef14308-3d55-4f5f-889f-42e5a144684f"
-            name="organization"
+            name="organizationName"
             isLeaf="false"
             isStatic="false"
             isReadOnly="false"
@@ -6525,45 +6481,6 @@
             </ownedParameters>
           </operation>
           <operation
-            Id="5f0c9f21-74bd-4fa2-8a94-e214a2c0cd87"
-            name="getExtnByOID"
-            visibility="Private"
-            isLeaf="false"
-            isStatic="false"
-            isAbstract="false"
-            concurrency="Sequential"
-            isQuery="false">
-            <ownedParameters>
-              <operationHasOwnedParameters>
-                <parameter
-                  Id="77bf558d-0dbe-496a-9993-d959fcdb0d4e"
-                  direction="Return"
-                  isUnique="false">
-                  <type_NamedElement>
-                    <classMoniker
-                      Id="8fced1d3-580a-441e-a2e0-b6522f3f7ad0"
-                      LastKnownName="Extension"
-                      LastKnownLocation="Package_1040.uml" />
-                  </type_NamedElement>
-                </parameter>
-              </operationHasOwnedParameters>
-              <operationHasOwnedParameters>
-                <parameter
-                  Id="3ac0e24f-7e78-4b17-a13a-bf110001d80d"
-                  name="oid"
-                  direction="In"
-                  isUnique="false">
-                  <type_NamedElement>
-                    <classMoniker
-                      Id="80967cb4-7a48-40c2-964f-6096abb4952a"
-                      LastKnownName="OID"
-                      LastKnownLocation="Package_1040.uml" />
-                  </type_NamedElement>
-                </parameter>
-              </operationHasOwnedParameters>
-            </ownedParameters>
-          </operation>
-          <operation
             Id="bb6fc93d-a7d1-47eb-9be2-2149c1879f9f"
             name="getExtension"
             isLeaf="false"
@@ -6760,12 +6677,1928 @@
             </type_NamedElement>
           </property>
         </ownedAttributesInternal>
+        <ownedOperationsInternal>
+          <operation
+            Id="e78521aa-432e-49a5-9935-c7effb3153e2"
+            name="toString"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <description>Возвращет строку формата: &lt;OID.name&gt;(&lt;BitsCount&gt; Bits)</description>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="44c3067d-0d73-416f-bec9-3933aea3cbdb"
+                  direction="Return"
+                  isUnique="false">
+                  <type_NamedElement>
+                    <primitiveTypeMoniker
+                      Id="59259974-6d55-42c6-b7bd-763d77ac8ef9"
+                      LastKnownName="String"
+                      LastKnownLocation="trusted.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+        </ownedOperationsInternal>
       </class>
     </packageHasNamedElement>
     <packageHasNamedElement>
       <undefinedType
         Id="6254a913-2378-4ffd-9843-6a08ee66cbf0"
         name="trusted::Extension" />
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <class
+        Id="0e5c708a-9190-4a05-9f3b-81791f62e179"
+        name="RevokedCertificate"
+        isAbstract="false"
+        isLeaf="false"
+        isActiveClass="false">
+        <ownedAttributesInternal>
+          <property
+            Id="0eada904-1b4a-47d8-99ec-03ad6e3ac5dc"
+            name="serialNumber"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="true"
+            isUnique="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <description>Возвращает серийный номер сертификата.</description>
+            <type_NamedElement>
+              <primitiveTypeMoniker
+                Id="220a3521-e091-4221-bae9-3ef9018e845c"
+                LastKnownName="Integer"
+                LastKnownLocation="trusted.uml" />
+            </type_NamedElement>
+          </property>
+          <property
+            Id="88358922-0ae3-44fc-863d-18a2355f4454"
+            name="revocationDate"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="true"
+            isUnique="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <description>Возвращает дату отзыва сертификата.</description>
+            <type_NamedElement>
+              <undefinedTypeMoniker
+                Id="9e8122c7-3d55-4f96-ae05-edbdf2bdbc62"
+                LastKnownName="Date"
+                LastKnownLocation="trusted.uml" />
+            </type_NamedElement>
+          </property>
+          <property
+            Id="191ab6c8-633a-4183-87f5-19e5103660f6"
+            name="extensions"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="true"
+            isUnique="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <description>Расширения сертификата списка отзыва сертификатов CRL.</description>
+            <lowerValueInternal>
+              <literalString
+                Id="5dfc9e3d-7c3c-48e2-af27-304281a292b4"
+                name="Lower"
+                value="*" />
+            </lowerValueInternal>
+            <upperValueInternal>
+              <literalString
+                Id="664e1ef3-f89c-4503-9aec-fb157992a64d"
+                name="Upper"
+                value="*" />
+            </upperValueInternal>
+            <type_NamedElement>
+              <classMoniker
+                Id="8fced1d3-580a-441e-a2e0-b6522f3f7ad0"
+                LastKnownName="Extension"
+                LastKnownLocation="Package_1040.uml" />
+            </type_NamedElement>
+          </property>
+          <property
+            Id="9c126871-19a6-455d-a677-786916546484"
+            name="invalidityDate"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="true"
+            isUnique="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <description>Возвращает дату компрометации ключа сертификата. Опциональное поле.</description>
+            <type_NamedElement>
+              <undefinedTypeMoniker
+                Id="9e8122c7-3d55-4f96-ae05-edbdf2bdbc62"
+                LastKnownName="Date"
+                LastKnownLocation="trusted.uml" />
+            </type_NamedElement>
+          </property>
+          <property
+            Id="4ff7b8c8-328e-4457-8b8c-cdb531031d44"
+            name="reason"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="true"
+            isUnique="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <description>Возвращает причину отзыва сертификата. Опциональное поле.</description>
+            <type_NamedElement>
+              <enumerationMoniker
+                Id="e03f49d6-28ec-4382-b9ca-a41c08803d1e"
+                LastKnownName="CRLReason"
+                LastKnownLocation="Package_1040.uml" />
+            </type_NamedElement>
+          </property>
+          <property
+            Id="39cbba9a-99c7-41ae-98d8-adfab7ec429e"
+            name="issuerName"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="true"
+            isUnique="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <description>Возвращает имя издателя.  Опциональное поле.</description>
+            <type_NamedElement>
+              <classMoniker
+                Id="d2ac707b-2f85-4039-b946-eb0ff5380b03"
+                LastKnownName="GeneralNames"
+                LastKnownLocation="Package_1040.uml" />
+            </type_NamedElement>
+          </property>
+        </ownedAttributesInternal>
+        <ownedOperationsInternal>
+          <operation
+            Id="df0a6ef9-ed75-4684-b720-2474d256b45b"
+            name="getExtension"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <description>Возвращает Extension по заданному OID. Если расширение не найдено, то возвращает null.</description>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="84fb7c92-1eaf-4e17-8563-63904d4f8a68"
+                  direction="Return"
+                  isUnique="false">
+                  <type_NamedElement>
+                    <classMoniker
+                      Id="8fced1d3-580a-441e-a2e0-b6522f3f7ad0"
+                      LastKnownName="Extension"
+                      LastKnownLocation="Package_1040.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="2f8c5c9d-4c39-49bb-8c23-6b099009165c"
+                  name="oid"
+                  direction="In"
+                  isUnique="false">
+                  <type_NamedElement>
+                    <classMoniker
+                      Id="80967cb4-7a48-40c2-964f-6096abb4952a"
+                      LastKnownName="OID"
+                      LastKnownLocation="Package_1040.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+          <operation
+            Id="35858f40-8694-41cf-8992-007971127dd2"
+            name="getExtension"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <description>Возвращает Extension по заданному OID. Если расширение не найдено, то возвращает null.</description>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="6140eaca-5cd9-4d82-a6f9-dfbb82d5b2d3"
+                  direction="Return"
+                  isUnique="false">
+                  <type_NamedElement>
+                    <classMoniker
+                      Id="8fced1d3-580a-441e-a2e0-b6522f3f7ad0"
+                      LastKnownName="Extension"
+                      LastKnownLocation="Package_1040.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="c76b5c05-e8a5-424a-865f-3a394d2c2f0d"
+                  name="oid"
+                  direction="In"
+                  isUnique="false">
+                  <type_NamedElement>
+                    <primitiveTypeMoniker
+                      Id="59259974-6d55-42c6-b7bd-763d77ac8ef9"
+                      LastKnownName="String"
+                      LastKnownLocation="trusted.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+          <operation
+            Id="9c16762a-f47c-47b3-9605-c5d60c6da991"
+            name="new"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <description>Конструктор.</description>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="645f4fed-76c2-4b1c-a559-c33da3cfd7ad"
+                  name="der"
+                  direction="In"
+                  isUnique="false">
+                  <description>Строка представляющая набор байтов (DER ASN) для создания Объекта.</description>
+                  <type_NamedElement>
+                    <primitiveTypeMoniker
+                      Id="59259974-6d55-42c6-b7bd-763d77ac8ef9"
+                      LastKnownName="String"
+                      LastKnownLocation="trusted.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+          <operation
+            Id="c2379dfb-7b4d-4ba7-8566-40099bd4fc35"
+            name="new"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <description>Конструктор.</description>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="da5cf0ec-96e1-446f-a4a0-9910205fdc2c"
+                  name="obj"
+                  direction="In"
+                  isUnique="false">
+                  <description>Объект соответствующий Схеме.</description>
+                  <type_NamedElement>
+                    <undefinedTypeMoniker
+                      Id="00661e88-53e6-49ba-9d55-721035572ae7"
+                      LastKnownName="Object"
+                      LastKnownLocation="trusted.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+          <operation
+            Id="2d4e2c01-5888-410d-8604-27e1e3ffab77"
+            name="toObject"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="2aae626c-cb07-49be-8855-0ad798bc416f"
+                  direction="Return"
+                  isUnique="false">
+                  <type_NamedElement>
+                    <undefinedTypeMoniker
+                      Id="00661e88-53e6-49ba-9d55-721035572ae7"
+                      LastKnownName="Object"
+                      LastKnownLocation="trusted.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+          <operation
+            Id="d225912f-39e8-4bb1-9b3d-677580d5b1f0"
+            name="toString"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <description>Возвращаен текстовое представление сертификата.</description>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="6bb21260-1fc8-44e9-a0c9-8667aba0a7fe"
+                  direction="Return"
+                  isUnique="false">
+                  <type_NamedElement>
+                    <primitiveTypeMoniker
+                      Id="59259974-6d55-42c6-b7bd-763d77ac8ef9"
+                      LastKnownName="String"
+                      LastKnownLocation="trusted.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+        </ownedOperationsInternal>
+      </class>
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <class
+        Id="30b7dc5f-f290-4366-9728-00d24a839c0f"
+        name="CRL"
+        isAbstract="false"
+        isLeaf="false"
+        isActiveClass="false">
+        <description>Представляет списко отзыва сертификатов.</description>
+        <targetEnds>
+          <association
+            Id="cdc0cb74-0729-48f6-8a2e-cf03b73233e5"
+            isDerived="false"
+            sourceEndRoleName="X509CRL"
+            targetEndRoleName="RevokedCertificate"
+            isLeaf="false"
+            isAbstract="false">
+            <classMoniker
+              Id="0e5c708a-9190-4a05-9f3b-81791f62e179"
+              LastKnownName="RevokedCertificate"
+              LastKnownLocation="Package_1040.uml" />
+            <relationshipOwnedElementsInternal>
+              <associationHasOwnedEnds>
+                <memberEnd
+                  Id="aead8c5a-1945-4161-b30f-57f6eb952903"
+                  name="X509CRL"
+                  isLeaf="false"
+                  isStatic="false"
+                  isReadOnly="false"
+                  isDerived="false"
+                  isDerivedUnion="false"
+                  aggregation="None"
+                  isComposite="false"
+                  isNavigableOwned="false" />
+              </associationHasOwnedEnds>
+              <associationHasOwnedEnds>
+                <memberEnd
+                  Id="59501b8f-0ba7-4534-9932-23235e48a0c0"
+                  name="RevokedCertificate"
+                  isLeaf="false"
+                  isStatic="false"
+                  isReadOnly="false"
+                  isDerived="false"
+                  isDerivedUnion="false"
+                  aggregation="None"
+                  isComposite="false">
+                  <lowerValueInternal>
+                    <literalString
+                      Id="55c8bed8-29d8-4dcf-ad99-352e52797c62"
+                      name="Lower"
+                      value="*" />
+                  </lowerValueInternal>
+                  <upperValueInternal>
+                    <literalString
+                      Id="6628ce0c-6f01-4259-944b-36e19ba201b3"
+                      name="Upper"
+                      value="*" />
+                  </upperValueInternal>
+                </memberEnd>
+              </associationHasOwnedEnds>
+            </relationshipOwnedElementsInternal>
+          </association>
+        </targetEnds>
+        <ownedAttributesInternal>
+          <property
+            Id="cbb01e55-be8b-47de-82e8-6c88cdc12411"
+            name="TBSCertList"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="true"
+            isUnique="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <description>Возвращает подписанную часть CRL. Возвращаемое значение - строка в формате DER. Если объект создан из объекта, то TBS будет равен Null.</description>
+          </property>
+          <property
+            Id="89ad6293-0b49-4996-aedb-f21fb8773778"
+            name="signature"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="true"
+            isUnique="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <description>Электронная подпись списка отзыва сертификатов (CRL). DER строка</description>
+            <lowerValueInternal>
+              <literalString
+                Id="4a8dac15-fbee-459a-bb13-ea1e29aeb1f6"
+                name="Lower"
+                value="1" />
+            </lowerValueInternal>
+            <upperValueInternal>
+              <literalString
+                Id="51b3e91f-f32b-4557-9c0c-dc3bdddef00f"
+                name="Upper"
+                value="1" />
+            </upperValueInternal>
+            <type_NamedElement>
+              <primitiveTypeMoniker
+                Id="59259974-6d55-42c6-b7bd-763d77ac8ef9"
+                LastKnownName="String"
+                LastKnownLocation="trusted.uml" />
+            </type_NamedElement>
+          </property>
+          <property
+            Id="467ea471-d824-4ab8-b542-0234ecbda35a"
+            name="signatureAlgorithm"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="true"
+            isUnique="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <description>Алгоритм эелектронной подписи списка отзыва сертификатов (CRL).</description>
+            <type_NamedElement>
+              <classMoniker
+                Id="ca89fb34-58f9-458c-aff0-e5e87fc770c2"
+                LastKnownName="Algorithm"
+                LastKnownLocation="Package_1040.uml" />
+            </type_NamedElement>
+          </property>
+          <property
+            Id="a9e43de2-28ae-44e3-b9b9-ee6d5c3a6cea"
+            name="version"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="true"
+            isUnique="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <description>Возвращает версию CRL</description>
+            <type_NamedElement>
+              <primitiveTypeMoniker
+                Id="220a3521-e091-4221-bae9-3ef9018e845c"
+                LastKnownName="Integer"
+                LastKnownLocation="trusted.uml" />
+            </type_NamedElement>
+          </property>
+          <property
+            Id="2c3049c4-5a45-4795-93a1-23db339b977d"
+            name="issuerName"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="true"
+            isUnique="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <description>Имя издателя списка отзыва сертификатов CRL.</description>
+            <type_NamedElement>
+              <classMoniker
+                Id="c2ba0ba6-e5f2-44a9-8e0a-88468eacdef2"
+                LastKnownName="Name"
+                LastKnownLocation="Package_1040.uml" />
+            </type_NamedElement>
+          </property>
+          <property
+            Id="57d62f6f-9d14-400c-9128-49d7d96ed98b"
+            name="thisUpdate"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="true"
+            isUnique="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <description>Возвращает дату текущего обновдения CRL.</description>
+            <type_NamedElement>
+              <undefinedTypeMoniker
+                Id="9e8122c7-3d55-4f96-ae05-edbdf2bdbc62"
+                LastKnownName="Date"
+                LastKnownLocation="trusted.uml" />
+            </type_NamedElement>
+          </property>
+          <property
+            Id="0250a5b9-4368-4a4f-9c26-2aa43ff2d7e2"
+            name="nextUpdate"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="true"
+            isUnique="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <description>Возвращает дату следующего обновления.</description>
+            <type_NamedElement>
+              <undefinedTypeMoniker
+                Id="9e8122c7-3d55-4f96-ae05-edbdf2bdbc62"
+                LastKnownName="Date"
+                LastKnownLocation="trusted.uml" />
+            </type_NamedElement>
+          </property>
+          <property
+            Id="327c7b7b-df3a-4a4e-bb2e-bd91f04f7e00"
+            name="extensions"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="true"
+            isUnique="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <description>Возвращает коллекцию расширений списка отзыва сертификатов CRL.</description>
+            <lowerValueInternal>
+              <literalString
+                Id="41a54070-0f53-489c-8e31-94940526b0e2"
+                name="Lower"
+                value="*" />
+            </lowerValueInternal>
+            <upperValueInternal>
+              <literalString
+                Id="b8bf3407-66ed-4673-9099-60323d049d9a"
+                name="Upper"
+                value="*" />
+            </upperValueInternal>
+            <type_NamedElement>
+              <classMoniker
+                Id="8fced1d3-580a-441e-a2e0-b6522f3f7ad0"
+                LastKnownName="Extension"
+                LastKnownLocation="Package_1040.uml" />
+            </type_NamedElement>
+          </property>
+          <property
+            Id="a38d30b1-7421-46cf-90d5-28cf8b4e0a7f"
+            name="certificates"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="true"
+            isUnique="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <description>Коллекция отозванных сертификатов.</description>
+            <lowerValueInternal>
+              <literalString
+                Id="20139e9e-f6cb-4729-9544-38c0b46933ef"
+                name="Lower"
+                value="*" />
+            </lowerValueInternal>
+            <upperValueInternal>
+              <literalString
+                Id="3f29ec49-af08-4a8f-ae35-657f485cb925"
+                name="Upper"
+                value="*" />
+            </upperValueInternal>
+            <type_NamedElement>
+              <classMoniker
+                Id="0e5c708a-9190-4a05-9f3b-81791f62e179"
+                LastKnownName="RevokedCertificate"
+                LastKnownLocation="Package_1040.uml" />
+            </type_NamedElement>
+          </property>
+          <property
+            Id="c77e3410-7387-4b69-b54d-c5395ba50a3f"
+            name="deltaNumber"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="true"
+            isUnique="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <description>Возвращает дополнительный номер CRL. Служит для определения промежуточной версии CRL. CRL имеющая дополнительный номер отображает список сертификатов еще не вошедших в последний CRL. Опциональное поле.</description>
+            <type_NamedElement>
+              <primitiveTypeMoniker
+                Id="220a3521-e091-4221-bae9-3ef9018e845c"
+                LastKnownName="Integer"
+                LastKnownLocation="trusted.uml" />
+            </type_NamedElement>
+          </property>
+          <property
+            Id="57798b61-64d6-4f79-a888-3dbe43e9dd36"
+            name="sequenceNumber"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="true"
+            isUnique="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <description>Возвращает номер CRL. Номер CRL служит для определения текущей верси файла CRL. При обновлении списка отзва удостоверяющим центром должно происзодить увелиение номера CRL. Опциональное поле.</description>
+            <type_NamedElement>
+              <primitiveTypeMoniker
+                Id="220a3521-e091-4221-bae9-3ef9018e845c"
+                LastKnownName="Integer"
+                LastKnownLocation="trusted.uml" />
+            </type_NamedElement>
+          </property>
+          <property
+            Id="bbf0a79d-a949-462c-bb1f-f8776c8c11a0"
+            name="issuerAlternativeName"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="true"
+            isUnique="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <description>Возвращает расширение из коллекции расширений IssuerAlternativeName. Поддержана только версия IssuerAlternativeName с OID 2.5.29.18. Опциональное поле.</description>
+            <type_NamedElement>
+              <classMoniker
+                Id="d2ac707b-2f85-4039-b946-eb0ff5380b03"
+                LastKnownName="GeneralNames"
+                LastKnownLocation="Package_1040.uml" />
+            </type_NamedElement>
+            <defaultValue>
+              <literalString
+                Id="a1a03986-3212-4c94-a7f0-fc3008c431f6"
+                name="DefaultValue" />
+            </defaultValue>
+          </property>
+        </ownedAttributesInternal>
+        <ownedOperationsInternal>
+          <operation
+            Id="18b0375c-388a-40be-864a-f7432342a4fa"
+            name="hasCertificate"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <description>Проверяет наличие заданного сертификата среди сертификатов списка отзыва.</description>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="b50260fc-c60f-4d72-a667-21a82c552ff9"
+                  direction="Return"
+                  isUnique="false">
+                  <type_NamedElement>
+                    <primitiveTypeMoniker
+                      Id="8943dc84-709e-4f62-b15a-a3273aa6f165"
+                      LastKnownName="Boolean"
+                      LastKnownLocation="trusted.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="4fc1a04c-3f74-4eca-ac28-2a366eb7f651"
+                  name="certificate"
+                  direction="In"
+                  isUnique="false">
+                  <type_NamedElement>
+                    <classMoniker
+                      Id="ffdee7a1-9915-4ab7-861a-3f558b3ab33e"
+                      LastKnownName="Certificate"
+                      LastKnownLocation="Package_1040.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+          <operation
+            Id="f1990fd8-87dc-45c6-80a2-32528d11a3e7"
+            name="getExtension"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <description>Возвращает Extension по заданному OID. Если расширение не найдено, то возвращает null.</description>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="371649a0-202e-4b79-bb91-8e8acd4dd5ca"
+                  direction="Return"
+                  isUnique="false">
+                  <type_NamedElement>
+                    <classMoniker
+                      Id="8fced1d3-580a-441e-a2e0-b6522f3f7ad0"
+                      LastKnownName="Extension"
+                      LastKnownLocation="Package_1040.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="f666b9a1-3023-42ac-af14-9d292bcccff9"
+                  name="oid"
+                  direction="In"
+                  isUnique="false">
+                  <type_NamedElement>
+                    <classMoniker
+                      Id="80967cb4-7a48-40c2-964f-6096abb4952a"
+                      LastKnownName="OID"
+                      LastKnownLocation="Package_1040.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+          <operation
+            Id="c6277bf4-62de-4710-9ba2-47f7149bb8a9"
+            name="getExtension"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <description>Возвращает Extension по заданному OID. Если расширение не найдено, то возвращает null.</description>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="203d00cf-46b2-47cf-8065-5cf2f9b5ae65"
+                  direction="Return"
+                  isUnique="false">
+                  <type_NamedElement>
+                    <classMoniker
+                      Id="8fced1d3-580a-441e-a2e0-b6522f3f7ad0"
+                      LastKnownName="Extension"
+                      LastKnownLocation="Package_1040.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="005b7f07-55aa-46db-9162-acf116ccf388"
+                  name="oid"
+                  direction="In"
+                  isUnique="false">
+                  <type_NamedElement>
+                    <primitiveTypeMoniker
+                      Id="59259974-6d55-42c6-b7bd-763d77ac8ef9"
+                      LastKnownName="String"
+                      LastKnownLocation="trusted.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+          <operation
+            Id="8d111f27-259a-4c92-9e05-252e52a78a93"
+            name="new"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <description>Конструктор.</description>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="ce2f4d2d-7710-4aee-8173-ce273f96bc1c"
+                  name="der"
+                  direction="In"
+                  isUnique="false">
+                  <description>Строка представляющая набор байтов (DER ASN) для создания Объекта.</description>
+                  <type_NamedElement>
+                    <primitiveTypeMoniker
+                      Id="59259974-6d55-42c6-b7bd-763d77ac8ef9"
+                      LastKnownName="String"
+                      LastKnownLocation="trusted.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+          <operation
+            Id="62fe3859-cf96-416d-a66b-4d7c1745af36"
+            name="new"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <description>Конструктор.</description>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="a2667374-2923-4587-b755-553dcef357f0"
+                  name="obj"
+                  direction="In"
+                  isUnique="false">
+                  <description>Объект соответствующий Схеме.</description>
+                  <type_NamedElement>
+                    <undefinedTypeMoniker
+                      Id="00661e88-53e6-49ba-9d55-721035572ae7"
+                      LastKnownName="Object"
+                      LastKnownLocation="trusted.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+          <operation
+            Id="44a8d519-5874-4fe3-ae33-94dc351e2423"
+            name="toObject"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <description>Возвращает Объект соответствующий Схеме.</description>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="86a40c7a-b704-4572-a762-aa007858ad54"
+                  direction="Return"
+                  isUnique="false">
+                  <type_NamedElement>
+                    <undefinedTypeMoniker
+                      Id="00661e88-53e6-49ba-9d55-721035572ae7"
+                      LastKnownName="Object"
+                      LastKnownLocation="trusted.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+          <operation
+            Id="fff8d230-fdcc-4105-a152-658409f6bd36"
+            name="toString"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <description>Возвращаен текстовое представление сертификата.</description>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="eaff1bfd-f9e3-4106-988f-22e8957d0d0d"
+                  direction="Return"
+                  isUnique="false">
+                  <type_NamedElement>
+                    <primitiveTypeMoniker
+                      Id="59259974-6d55-42c6-b7bd-763d77ac8ef9"
+                      LastKnownName="String"
+                      LastKnownLocation="trusted.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+        </ownedOperationsInternal>
+      </class>
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <undefinedType
+        Id="08a3a9dc-dbb2-4aed-bc77-83c5ad3cd7f4"
+        name="Integer;" />
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <enumeration
+        Id="e03f49d6-28ec-4382-b9ca-a41c08803d1e"
+        name="CRLReason"
+        isAbstract="false"
+        isLeaf="false">
+        <ownedLiterals>
+          <enumerationLiteral
+            Id="01cefe6a-ed9c-4980-8f3c-a7d3b8ce678e"
+            name="CACompromise" />
+          <enumerationLiteral
+            Id="96e31b40-4add-49f3-99bd-55d7ace763f2"
+            name="Unspecified" />
+          <enumerationLiteral
+            Id="258d1528-02a5-42a3-81f1-3d4c44cf28d5"
+            name="KeyCompromise" />
+          <enumerationLiteral
+            Id="b81d17c9-5a41-473f-b824-a767c6964caf"
+            name="AffiliationChanged" />
+          <enumerationLiteral
+            Id="c06ff96c-a5f8-4e8e-83b7-04031d016113"
+            name="Superseded" />
+          <enumerationLiteral
+            Id="159be1d0-8790-413b-8b82-907b68b647e6"
+            name="CessationOfOperation" />
+          <enumerationLiteral
+            Id="a96adb9f-544c-4618-b848-a8955909b06e"
+            name="CertificateHold" />
+          <enumerationLiteral
+            Id="0a6bc0b0-7a1e-4825-8d99-39fd4b63b9cd"
+            name="PrivilegeWithdrawn" />
+          <enumerationLiteral
+            Id="11ec3ec3-4f44-4e75-b60e-6336851bf1bc"
+            name="AACompromise" />
+          <enumerationLiteral
+            Id="94da3a76-9a94-496b-a744-19ff7f95c05b"
+            name="RemoveFromCRL" />
+        </ownedLiterals>
+      </enumeration>
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <undefinedType
+        Id="5137f1cc-9e69-46fc-ae9f-a68b548e1cd6"
+        name="trusted::PKI:CRLReason" />
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <class
+        Id="7b28fb3c-10a7-4904-a3bf-83d6ba78f460"
+        name="ReasonCode"
+        isAbstract="false"
+        isLeaf="false"
+        isActiveClass="false">
+        <description>Класс расширения отозванного сертификата ReasonCode.</description>
+        <ownedAttributesInternal>
+          <property
+            Id="ea0d89c1-444c-49ed-aeeb-41a739912fde"
+            name="value"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="false"
+            isUnique="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <description>Возвращает число указывающее причину отзыва сертификата. Перечисления указаны в CRLReason</description>
+            <type_NamedElement>
+              <primitiveTypeMoniker
+                Id="220a3521-e091-4221-bae9-3ef9018e845c"
+                LastKnownName="Integer"
+                LastKnownLocation="trusted.uml" />
+            </type_NamedElement>
+          </property>
+        </ownedAttributesInternal>
+        <ownedOperationsInternal>
+          <operation
+            Id="2145c9a3-5922-4f3d-972c-837549e2ff4f"
+            name="toObject"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="f76c6b50-336c-44e2-b5d5-958fef973fc7"
+                  direction="Return"
+                  isUnique="false">
+                  <type_NamedElement>
+                    <undefinedTypeMoniker
+                      Id="00661e88-53e6-49ba-9d55-721035572ae7"
+                      LastKnownName="Object"
+                      LastKnownLocation="trusted.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+          <operation
+            Id="fa32dfbd-692c-4930-9043-03be6c2b14e7"
+            name="toString"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <description>Возвращает текстовое представление расширения.</description>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="70681bf4-2acf-4383-8d96-2deab690685e"
+                  direction="Return"
+                  isUnique="false">
+                  <type_NamedElement>
+                    <primitiveTypeMoniker
+                      Id="59259974-6d55-42c6-b7bd-763d77ac8ef9"
+                      LastKnownName="String"
+                      LastKnownLocation="trusted.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+          <operation
+            Id="a2aa9d00-49e6-4db0-8933-5c94d7a1ca65"
+            name="new"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <description>Конструктор.</description>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="00b7a3e9-4a26-451e-b783-d8dd20a61e25"
+                  name="der"
+                  direction="In"
+                  isUnique="false">
+                  <description>Строка представляющая набор байтов (DER ASN) для создания Объекта.</description>
+                  <type_NamedElement>
+                    <primitiveTypeMoniker
+                      Id="59259974-6d55-42c6-b7bd-763d77ac8ef9"
+                      LastKnownName="String"
+                      LastKnownLocation="trusted.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+          <operation
+            Id="66a627d5-acc0-4214-8c9c-5c7e11b78d0f"
+            name="new"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <description>Конструктор.</description>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="8f7b3e00-2155-439b-9044-5a19ca8f3d76"
+                  name="obj"
+                  direction="In"
+                  isUnique="false">
+                  <description>Объект соответствующий Схеме.</description>
+                  <type_NamedElement>
+                    <undefinedTypeMoniker
+                      Id="00661e88-53e6-49ba-9d55-721035572ae7"
+                      LastKnownName="Object"
+                      LastKnownLocation="trusted.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+          <operation
+            Id="dcce9574-55e3-4beb-997d-8c99afc28131"
+            name="reasonName"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <description>Возвращает имя для значениея из перечисления CRLReason</description>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="6e42eb83-575a-4dd5-959b-a7f38ee68f4d"
+                  name="num"
+                  direction="In"
+                  isUnique="false">
+                  <type_NamedElement>
+                    <primitiveTypeMoniker
+                      Id="220a3521-e091-4221-bae9-3ef9018e845c"
+                      LastKnownName="Integer"
+                      LastKnownLocation="trusted.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+        </ownedOperationsInternal>
+      </class>
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <class
+        Id="bdb65715-4893-4117-ae04-a48aaf2739a0"
+        name="InvalidityDate"
+        isAbstract="false"
+        isLeaf="false"
+        isActiveClass="false">
+        <ownedAttributesInternal>
+          <property
+            Id="332becc6-b84e-4195-8d43-b302cd657072"
+            name="value"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="false"
+            isUnique="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <type_NamedElement>
+              <undefinedTypeMoniker
+                Id="9e8122c7-3d55-4f96-ae05-edbdf2bdbc62"
+                LastKnownName="Date"
+                LastKnownLocation="trusted.uml" />
+            </type_NamedElement>
+          </property>
+        </ownedAttributesInternal>
+        <ownedOperationsInternal>
+          <operation
+            Id="081e9f62-b651-452c-b451-e2d5de7d26e7"
+            name="new"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <description>Конструктор.</description>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="65efc54f-7dc5-4b9f-95a9-671bf56e71c0"
+                  name="der"
+                  direction="In"
+                  isUnique="false">
+                  <description>Строка представляющая набор байтов (DER ASN) для создания Объекта.</description>
+                  <type_NamedElement>
+                    <primitiveTypeMoniker
+                      Id="59259974-6d55-42c6-b7bd-763d77ac8ef9"
+                      LastKnownName="String"
+                      LastKnownLocation="trusted.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+          <operation
+            Id="73fc80d1-403d-4f6b-b1da-17a282dbcbae"
+            name="new"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <description>Конструктор.</description>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="e5769e3a-c3fb-4f53-9cd2-535c9833b721"
+                  name="obj"
+                  direction="In"
+                  isUnique="false">
+                  <description>Объект соответствующий Схеме.</description>
+                  <type_NamedElement>
+                    <undefinedTypeMoniker
+                      Id="00661e88-53e6-49ba-9d55-721035572ae7"
+                      LastKnownName="Object"
+                      LastKnownLocation="trusted.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+          <operation
+            Id="586d0ac5-5e48-4342-a0dd-3c47a7fa4858"
+            name="toObject"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="45f6259e-aad9-4b29-9ba1-75cd04a67176"
+                  direction="Return"
+                  isUnique="false">
+                  <type_NamedElement>
+                    <undefinedTypeMoniker
+                      Id="00661e88-53e6-49ba-9d55-721035572ae7"
+                      LastKnownName="Object"
+                      LastKnownLocation="trusted.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+          <operation
+            Id="72148e0b-addc-42fc-b8d1-db21d3a1e403"
+            name="toString"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <description>Возвращает текстовое представление расширения.</description>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="f085c921-0112-465f-b996-d91ec8745fea"
+                  direction="Return"
+                  isUnique="false">
+                  <type_NamedElement>
+                    <primitiveTypeMoniker
+                      Id="59259974-6d55-42c6-b7bd-763d77ac8ef9"
+                      LastKnownName="String"
+                      LastKnownLocation="trusted.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+        </ownedOperationsInternal>
+      </class>
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <undefinedType
+        Id="74017e44-ea51-434c-9d70-dbf1ab7cd951"
+        name="trusted::PKI::GeneralNameы" />
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <class
+        Id="e8c98cca-6ec2-4114-a3e0-082c36408b99"
+        name="subjectSignTool"
+        isAbstract="false"
+        isLeaf="false"
+        isActiveClass="false">
+        <description>Не критичное расширение сертификата. Применяется для указания в квалифицированном сертификате наименования используемого владельцем квалифицированного сертификата средства ЭП.</description>
+        <ownedAttributesInternal>
+          <property
+            Id="020ddb81-c6d1-4068-9561-1028e16b489a"
+            name="subject"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="false"
+            isUnique="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <description>Возвращает имя владельца.</description>
+          </property>
+        </ownedAttributesInternal>
+        <ownedOperationsInternal>
+          <operation
+            Id="6e6e954b-d1d9-402b-92b5-57a5011a03e7"
+            name="new"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <description>Конструктор.</description>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="44c9c562-5af6-43ee-bd68-a5b53511e756"
+                  name="der"
+                  direction="In"
+                  isUnique="false">
+                  <description>Строка представляющая набор байтов (DER ASN) для создания Объекта.</description>
+                  <type_NamedElement>
+                    <primitiveTypeMoniker
+                      Id="59259974-6d55-42c6-b7bd-763d77ac8ef9"
+                      LastKnownName="String"
+                      LastKnownLocation="trusted.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+          <operation
+            Id="5596161b-29a1-49ff-b142-722f4dffaf6d"
+            name="new"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <description>Конструктор.</description>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="6f1b4932-df6b-4ad8-af2d-0f142277a759"
+                  name="obj"
+                  direction="In"
+                  isUnique="false">
+                  <description>Объект соответствующий Схеме.</description>
+                  <type_NamedElement>
+                    <undefinedTypeMoniker
+                      Id="00661e88-53e6-49ba-9d55-721035572ae7"
+                      LastKnownName="Object"
+                      LastKnownLocation="trusted.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+          <operation
+            Id="8738a8a4-8d3d-4382-847f-f98562534802"
+            name="toObject"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <description>Преобразует объект в Объект соответсвующий схеме.</description>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="3d9c9913-6a15-4967-bcfa-717d8dfece61"
+                  direction="Return">
+                  <type_NamedElement>
+                    <undefinedTypeMoniker
+                      Id="00661e88-53e6-49ba-9d55-721035572ae7"
+                      LastKnownName="Object"
+                      LastKnownLocation="trusted.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+          <operation
+            Id="4e3747f0-35f9-4348-b211-c49e859cd846"
+            name="toString"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <description>Выводит элемент в виде строки.</description>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="6061f8a0-0e0d-4851-9525-2181ca862b3c"
+                  direction="Return">
+                  <type_NamedElement>
+                    <primitiveTypeMoniker
+                      Id="59259974-6d55-42c6-b7bd-763d77ac8ef9"
+                      LastKnownName="String"
+                      LastKnownLocation="trusted.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+        </ownedOperationsInternal>
+      </class>
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <class
+        Id="612222c9-6df8-4943-9794-4dd8c41c4a1e"
+        name="AuthorityKeyIdentifier"
+        isAbstract="false"
+        isLeaf="false"
+        isActiveClass="false">
+        <description>Представляет расширение типа AuthorityKeyIdentifier</description>
+        <ownedAttributesInternal>
+          <property
+            Id="778b172f-09c8-4fd2-be67-fbf03a06ac6c"
+            name="issuerName"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="true"
+            isUnique="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <description>Имя сертификата издателя</description>
+            <type_NamedElement>
+              <classMoniker
+                Id="2ac7bb17-a88f-43a8-9377-f8080eef9d76"
+                LastKnownName="GeneralName"
+                LastKnownLocation="Package_1040.uml" />
+            </type_NamedElement>
+          </property>
+          <property
+            Id="250c6559-4a38-465f-8c1b-79513f3fa3ba"
+            name="CASerialNumber"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="true"
+            isUnique="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <description>Серийный номер сертификата издателя</description>
+            <type_NamedElement>
+              <primitiveTypeMoniker
+                Id="59259974-6d55-42c6-b7bd-763d77ac8ef9"
+                LastKnownName="String"
+                LastKnownLocation="trusted.uml" />
+            </type_NamedElement>
+          </property>
+          <property
+            Id="433fe166-77d9-419b-8139-3dbfd8c3ae1b"
+            name="keyIdentifier"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="true"
+            isUnique="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <description>Идентификатор ключа</description>
+            <type_NamedElement>
+              <primitiveTypeMoniker
+                Id="59259974-6d55-42c6-b7bd-763d77ac8ef9"
+                LastKnownName="String"
+                LastKnownLocation="trusted.uml" />
+            </type_NamedElement>
+          </property>
+          <property
+            Id="e436b23a-095f-46b0-bc14-5c96e0b73f95"
+            name="version"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="false"
+            isUnique="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <description>Возвращает версию расширения.  Значение по умолчанию равно 2.
+Доступны следующие варианты:
+    1: Расширение для OID "2.5.29.1"
+    2: Расширение для OID "2.5.29.35".</description>
+            <type_NamedElement>
+              <primitiveTypeMoniker
+                Id="220a3521-e091-4221-bae9-3ef9018e845c"
+                LastKnownName="Integer"
+                LastKnownLocation="trusted.uml" />
+            </type_NamedElement>
+          </property>
+        </ownedAttributesInternal>
+        <ownedOperationsInternal>
+          <operation
+            Id="aeae61f0-5bd6-444a-88ef-e12902c337cf"
+            name="new"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <description>Конструктор.</description>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="2e223e26-b449-4b05-b079-958715b7f385"
+                  name="der"
+                  direction="In"
+                  isUnique="false">
+                  <description>Строка представляющая набор байтов (DER ASN) для создания Объекта.</description>
+                  <type_NamedElement>
+                    <primitiveTypeMoniker
+                      Id="59259974-6d55-42c6-b7bd-763d77ac8ef9"
+                      LastKnownName="String"
+                      LastKnownLocation="trusted.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+          <operation
+            Id="35b5135d-5db0-4a6c-9e33-32bfabbff051"
+            name="new"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <description>Конструктор.</description>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="6ef61011-3564-4319-b31b-7a6051c417f2"
+                  name="obj"
+                  direction="In"
+                  isUnique="false">
+                  <description>Объект соответствующий Схеме.</description>
+                  <type_NamedElement>
+                    <undefinedTypeMoniker
+                      Id="00661e88-53e6-49ba-9d55-721035572ae7"
+                      LastKnownName="Object"
+                      LastKnownLocation="trusted.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+          <operation
+            Id="91677a84-ba3e-40e3-ba52-c2593edbe945"
+            name="toObject"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="343a939a-da74-4a95-b797-57f01cea62a7"
+                  direction="Return"
+                  isUnique="false">
+                  <type_NamedElement>
+                    <undefinedTypeMoniker
+                      Id="00661e88-53e6-49ba-9d55-721035572ae7"
+                      LastKnownName="Object"
+                      LastKnownLocation="trusted.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+          <operation
+            Id="f28fe2d2-92d0-40dd-b129-8be151b73fae"
+            name="toString"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <description>Возвращает текстовое представление расширения.</description>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="ddffabae-4484-4950-ae55-f0a86a1a14af"
+                  direction="Return"
+                  isUnique="false">
+                  <type_NamedElement>
+                    <primitiveTypeMoniker
+                      Id="59259974-6d55-42c6-b7bd-763d77ac8ef9"
+                      LastKnownName="String"
+                      LastKnownLocation="trusted.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+        </ownedOperationsInternal>
+      </class>
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <class
+        Id="4d53f9b3-8d1f-4e74-ae97-98a85e53f177"
+        name="SubjectKeyIdentifier"
+        isAbstract="false"
+        isLeaf="false"
+        isActiveClass="false">
+        <description>Представляет расширение в формате X509SubjectKeyIdentifier</description>
+        <ownedAttributesInternal>
+          <property
+            Id="5b4361e8-8f9b-4790-86e9-d07ca4fc04e4"
+            name="keyIdentifier"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="true"
+            isUnique="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <description>Идентификатор ключа</description>
+            <type_NamedElement>
+              <primitiveTypeMoniker
+                Id="59259974-6d55-42c6-b7bd-763d77ac8ef9"
+                LastKnownName="String"
+                LastKnownLocation="trusted.uml" />
+            </type_NamedElement>
+          </property>
+        </ownedAttributesInternal>
+      </class>
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <class
+        Id="4bb977f1-99f4-45e5-9e7b-217b638e8741"
+        name="CRLNumber"
+        isAbstract="false"
+        isLeaf="false"
+        isActiveClass="false">
+        <ownedAttributesInternal>
+          <property
+            Id="ce0f1607-ae10-432b-a0d0-c0e6d8188e81"
+            name="value"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="false"
+            isUnique="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <type_NamedElement>
+              <primitiveTypeMoniker
+                Id="220a3521-e091-4221-bae9-3ef9018e845c"
+                LastKnownName="Integer"
+                LastKnownLocation="trusted.uml" />
+            </type_NamedElement>
+          </property>
+        </ownedAttributesInternal>
+        <ownedOperationsInternal>
+          <operation
+            Id="099c8ca7-d5b6-4c74-aff7-f7682b4307ed"
+            name="new"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <description>Конструктор.</description>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="01ea890c-9b3b-426f-9171-703eb90700b8"
+                  name="der"
+                  direction="In"
+                  isUnique="false">
+                  <description>Строка представляющая набор байтов (DER ASN) для создания Объекта.</description>
+                  <type_NamedElement>
+                    <primitiveTypeMoniker
+                      Id="59259974-6d55-42c6-b7bd-763d77ac8ef9"
+                      LastKnownName="String"
+                      LastKnownLocation="trusted.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+          <operation
+            Id="fa8ef28e-14ee-4ad8-9eaa-ac3908266665"
+            name="new"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <description>Конструктор.</description>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="3e2b5cc3-acb9-41b9-97a0-38e24cd1e985"
+                  name="obj"
+                  direction="In"
+                  isUnique="false">
+                  <description>Объект соответствующий Схеме.</description>
+                  <type_NamedElement>
+                    <undefinedTypeMoniker
+                      Id="00661e88-53e6-49ba-9d55-721035572ae7"
+                      LastKnownName="Object"
+                      LastKnownLocation="trusted.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+          <operation
+            Id="837605b9-81f7-4ea1-88cf-99c66490d9b2"
+            name="toObject"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="6d13611e-1942-4ee5-b820-024ce3bf4ad6"
+                  direction="Return"
+                  isUnique="false">
+                  <type_NamedElement>
+                    <undefinedTypeMoniker
+                      Id="00661e88-53e6-49ba-9d55-721035572ae7"
+                      LastKnownName="Object"
+                      LastKnownLocation="trusted.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+          <operation
+            Id="d732eceb-0fd9-4fac-911d-6e0a38a8ffc5"
+            name="toString"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false">
+            <description>Возвращает текстовое представление расширения.</description>
+            <ownedParameters>
+              <operationHasOwnedParameters>
+                <parameter
+                  Id="f8986d79-410a-4c05-bda3-9d4cbb6377f9"
+                  direction="Return"
+                  isUnique="false">
+                  <type_NamedElement>
+                    <primitiveTypeMoniker
+                      Id="59259974-6d55-42c6-b7bd-763d77ac8ef9"
+                      LastKnownName="String"
+                      LastKnownLocation="trusted.uml" />
+                  </type_NamedElement>
+                </parameter>
+              </operationHasOwnedParameters>
+            </ownedParameters>
+          </operation>
+        </ownedOperationsInternal>
+      </class>
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <class
+        Id="83342f66-72d6-4f96-a5ae-25899d36d279"
+        name="BasceCRLNumber"
+        isAbstract="false"
+        isLeaf="false"
+        isActiveClass="false">
+        <generalsInternal>
+          <generalization
+            Id="3a47019a-450a-4071-81a0-31b7359b09c8"
+            isSubstitutable="false">
+            <classMoniker
+              Id="4bb977f1-99f4-45e5-9e7b-217b638e8741"
+              LastKnownName="CRLNumber"
+              LastKnownLocation="Package_1040.uml" />
+          </generalization>
+        </generalsInternal>
+      </class>
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <class
+        Id="fda9c484-f47c-4142-acb6-da8885cffa51"
+        name="IssuingDistributionPoint"
+        isAbstract="false"
+        isLeaf="false"
+        isActiveClass="false">
+        <ownedAttributesInternal>
+          <property
+            Id="8bbbb827-df2c-47d1-843f-51e02eafa5d1"
+            name="pointName"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="true"
+            isUnique="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <description>Возвращает имя точки распространения</description>
+            <type_NamedElement>
+              <primitiveTypeMoniker
+                Id="59259974-6d55-42c6-b7bd-763d77ac8ef9"
+                LastKnownName="String"
+                LastKnownLocation="trusted.uml" />
+            </type_NamedElement>
+          </property>
+          <property
+            Id="3bb3bd5f-7256-464a-9005-ceb3ce16b198"
+            name="onlyContainsUserCerts"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="true"
+            isUnique="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <type_NamedElement>
+              <primitiveTypeMoniker
+                Id="8943dc84-709e-4f62-b15a-a3273aa6f165"
+                LastKnownName="Boolean"
+                LastKnownLocation="trusted.uml" />
+            </type_NamedElement>
+            <defaultValue>
+              <literalBoolean
+                Id="7828dcba-8146-4a4a-ba7f-2bf3b00eb7e5"
+                name="DefaultValue"
+                value="false" />
+            </defaultValue>
+          </property>
+          <property
+            Id="c98185c4-1212-457f-8845-e84b4beb3647"
+            name="onlyContainsCACerts"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="true"
+            isUnique="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <defaultValue>
+              <literalString
+                Id="a0e29fa3-b63b-4a68-a70b-ff6f63e53712"
+                name="DefaultValue"
+                value="False" />
+            </defaultValue>
+          </property>
+          <property
+            Id="760905e0-1ef0-4303-9fdd-702ad7fe00f7"
+            name="onlySomeReasons"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="true"
+            isUnique="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <type_NamedElement>
+              <enumerationMoniker
+                Id="efec8629-62cd-4021-bf48-da9de0d571ac"
+                LastKnownName="ReasonFlags"
+                LastKnownLocation="Package_1040.uml" />
+            </type_NamedElement>
+          </property>
+          <property
+            Id="c8e91b82-7ebe-499d-a366-bce83bc0864b"
+            name="indirectCRL"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="true"
+            isUnique="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <type_NamedElement>
+              <primitiveTypeMoniker
+                Id="8943dc84-709e-4f62-b15a-a3273aa6f165"
+                LastKnownName="Boolean"
+                LastKnownLocation="trusted.uml" />
+            </type_NamedElement>
+            <defaultValue>
+              <literalBoolean
+                Id="985bb897-2758-42fb-ae60-bd57ca726cf7"
+                name="DefaultValue"
+                value="false" />
+            </defaultValue>
+          </property>
+          <property
+            Id="26a468ba-4b55-42fd-996e-175bcd0ba03d"
+            name="onlyContainsAttributeCerts"
+            isLeaf="false"
+            isStatic="false"
+            isReadOnly="true"
+            isUnique="false"
+            isDerived="false"
+            isDerivedUnion="false"
+            aggregation="None"
+            isComposite="false">
+            <type_NamedElement>
+              <primitiveTypeMoniker
+                Id="8943dc84-709e-4f62-b15a-a3273aa6f165"
+                LastKnownName="Boolean"
+                LastKnownLocation="trusted.uml" />
+            </type_NamedElement>
+            <defaultValue>
+              <literalBoolean
+                Id="3473983b-ba16-4b3d-bd52-a0bc26a7770f"
+                name="DefaultValue"
+                value="false" />
+            </defaultValue>
+          </property>
+        </ownedAttributesInternal>
+      </class>
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <class
+        Id="02c684fb-0a47-4ced-af18-34767282822b"
+        name="CertificateIssuer"
+        isAbstract="false"
+        isLeaf="false"
+        isActiveClass="false">
+        <generalsInternal>
+          <generalization
+            Id="fa4b9cd7-ce93-456a-9cbc-46b789ca1a80"
+            isSubstitutable="false">
+            <classMoniker
+              Id="d2ac707b-2f85-4039-b946-eb0ff5380b03"
+              LastKnownName="GeneralNames"
+              LastKnownLocation="Package_1040.uml" />
+          </generalization>
+        </generalsInternal>
+      </class>
     </packageHasNamedElement>
   </packagedElements>
 </package>

@@ -37,6 +37,7 @@
         <script src="src/key.js"></script>
         <script src="src/oid.js"></script>
         <script src="src/generalName.js"></script>
+        <script src="src/extensions/crlExtensions.js"></script>
     </head>
     <body>
         <form style="display:none">
@@ -83,18 +84,7 @@
                 console.time("CRL import: ");
                 var crl = new trusted.PKI.CRL(der);
                 console.timeEnd("CRL import: ");
-                
-                function printAttr(l, v) {
-                    if (v)
-                        certInfo.print(l, v.text);
-                }
-                function printSubjectAttr(l, oid) {
-                    printAttr(l, cert.subjectName.getAttributes(oid)[0]);
-                }
-                function printIssuerAttr(l, oid) {
-                    printAttr(l, cert.issuerName.getAttributes(oid)[0]);
-                }
-  
+
                 info.print("CRL");
                 info.print("Версия:", crl.version);
                 info.print("Подпись:", crl.signatureAlgorithm.toString());
@@ -102,9 +92,29 @@
                 info.print("Последнее обновление:", crl.thisUpdate);
                 info.print("Следующее обновление:", crl.nextUpdate);
                 info.print("Подпись:", crl.signature);
-                
+                info.print("TBS:", Der.toHex(crl.TBSCertList));
+                info.print();
+                info.print("Расширения");
+                info.print("Кол-во:", crl.extensions.length);
+                for (var i = 0; i < crl.extensions.length; i++) {
+                    info.print("#:", i + 1);
+                    info.print("Расширение:", crl.extensions[i].OID.name);
+                }
+                info.print("Номер CRL:", crl.sequenceNumber);
+                info.print();
+                info.print("Сертификаты:");
+                for (var i = 0; i < crl.certificates.length && i<50; i++) {
+                    info.print("#:", i + 1);
+                    info.print("Серийный номер:", crl.certificates[i].serialNumber);
+                    info.print("Дата отзыва:", crl.certificates[i].revocationDate);
+                    info.print("Причина отзыва:"," ("+crl.certificates[i].reason+") "+trusted.PKI.ReasonCode.reasonName(crl.certificates[i].reason));
+                    info.print("Дата отмены:", crl.certificates[i].invalidityDate);
+                    info.print("Имя издателя:", crl.certificates[i].issuerName);
+                    info.print();
+                }
+
                 console.log(crl);
-  
+                
             };
         </script>
     </body>

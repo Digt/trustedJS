@@ -463,7 +463,7 @@ if (window.trusted.schemas === undefined)
 
     // 5.3.  CRL Entry Extensions
     // Reason Code 2.5.29.21
-    namespace.CRLReason = {
+    namespace.ReasonCode = {
         type: "ENUMERATED"
                 /*
                  unspecified             (0),
@@ -482,7 +482,7 @@ if (window.trusted.schemas === undefined)
 
     // Invalidity Date 2.5.29.24
     namespace.InvalidityDate = {
-        type: "GeneralizedTime"
+        type: "GENERALIZED_TIME"
     };
     
     // Certificate Issuer 2.5.29.29

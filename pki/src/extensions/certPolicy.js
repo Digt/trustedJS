@@ -4,9 +4,9 @@
     function CertificatePilicies() {
         var obj, pis;
         this.__proto__ = {
-            set policyInformations(v) {
+            set policies(v) {
             },
-            get policyInformations() {
+            get policies() {
                 if (pis === undefined) {
                     pis = [];
                     for (var i = 0; i < obj.length; i++)
@@ -18,8 +18,8 @@
 
         this.__proto__.toObject = function() {
             var o = [];
-            for (var i = 0; i < this.policyInformations.length; i++)
-                o.push(this.policyInformations[i].toObject());
+            for (var i = 0; i < this.policies.length; i++)
+                o.push(this.policies[i].toObject());
             return o;
         };
 
@@ -46,21 +46,16 @@
         var qlf;
 
         this.__proto__ = {
-            set policyIdentifier(v) {
+            set OID(v) {
             },
-            get policyIdentifier() {
+            get OID() {
                 if (idf === undefined)
                     idf = new trusted.PKI.OID(obj.policyIdentifier);
                 return idf;
             },
-            set OID(v) {
+            set qualifiers(v) {
             },
-            get OID() {
-                return this.policyIdentifier;
-            },
-            set policyQualifiers(v) {
-            },
-            get policyQualifiers() {
+            get qualifiers() {
                 if (qlf === undefined) {
                     if (obj.policyQualifiers !== undefined) {
                         qlf = [];
@@ -77,11 +72,11 @@
 
         this.__proto__.toObject = function() {
             var o = {};
-            o.policyIdentifier = this.policyIdentifier.value;
-            if (this.policyQualifiers !== null) {
+            o.policyIdentifier = this.OID.value;
+            if (this.qualifiers !== null) {
                 o.policyQualifiers = [];
-                for (var i = 0; i < this.policyQualifiers.length; i++)
-                    o.policyQualifiers.push(this.policyQualifiers[i].toObject());
+                for (var i = 0; i < this.qualifiers.length; i++)
+                    o.policyQualifiers.push(this.qualifiers[i].toObject());
             }
             return o;
         };
@@ -104,9 +99,9 @@
         var obj, pqid, cps, un;
 
         this.__proto__ = {
-            set policyQualifierID(v) {
+            set OID(v) {
             },
-            get  policyQualifierID() {
+            get  OID() {
                 if (pqid === undefined) {
                     pqid = new trusted.PKI.OID(obj.policyQualifierId);
                 }
@@ -179,7 +174,7 @@
 
         this.__proto__.toObject = function() {
             var o = {};
-            switch (this.policyQualifierID.value) {
+            switch (this.OID.value) {
                 case "1.3.6.1.5.5.7.2.1":
                     o.qualifier = trusted.ASN.fromObject(this.CPSPointer, "CPSuri").encode();
                     break
@@ -202,7 +197,7 @@
                 default:
                     o.qualifier = this.encoded;
             }
-            o.policyQualifierId = this.policyQualifierID.value;
+            o.policyQualifierId = this.OID.value;
             return o;
         };
 

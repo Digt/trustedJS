@@ -46,7 +46,7 @@
             set nextUpdate(v) {
             },
             get certificates() {
-                if (cache.crts === undefined) {
+                if (cache.certs === undefined) {
                     var certs = obj.tbsCertList.revokedCertificates;
                     cache.certs = [];
                     for (var i = 0; i < certs.length; i++)
@@ -63,7 +63,7 @@
                     if (extns !== null) {
                         cache.extns = [];
                         for (var i = 0; i < extns.length; i++)
-                            cache.extns.push(extns[i]);
+                            cache.extns.push(new trusted.PKI.Extension(extns[i]));
                     }
                 }
                 return cache.extns;
@@ -74,11 +74,63 @@
             },
             get signature() {
                 return obj.signatureValue;
+            },
+            set sequenceNumber(v) {
+            },
+            //return CRLNumber extension value
+            get sequenceNumber() {
+                if (cache.seqNum === undefined) {
+                    cache.seqNum = null;
+                    var ext = this.getExtension("2.5.29.20");
+                    if (ext !== null)
+                        cache.seqNum = (new trusted.PKI.CRLNumber(ext.value)).value;
+                }
+                return cache.seqNum;
+            },
+            set deltaNumber(v) {
+            },
+            //return BaseCRLNumber extension value
+            get deltaNumber() {
+                if (cache.delNum === undefined) {
+                    cache.delNum = null;
+                    var ext = this.getExtension("2.5.29.27");
+                    if (ext)
+                        cache.delNum = (new trusted.PKI.CRLNumber(ext.value)).value;
+                }
+                return cache.delNum;
+            },
+            set issuerAlternativeName(v) {
+            },
+            //return IssuerAlternativeName extension value ONLY  2.5.29.18
+            get issuerAlternativeName() {
+                if (cache.ian === undefined) {
+                    cache.ian = null;
+                    var extn = this.getExtension("2.5.29.18");
+                    if (extn) {
+                        var asn = new trusted.ASN(extn.value);
+                        cache.ian = new trusted.PKI.IssuerAlternativeName(asn.toObject("IssuerAlternativeName2"));
+
+                    }
+                }
+                return cache.ian;
+            },
+            set TBSCertList(v){},
+            get TBSCertList (){
+                return cache.tbs;
             }
         };
 
         this.__proto__.verify = function() {
             //TODO: Провевить на равенство SignatureAlgorithm и tbsCertList.Signature
+        };
+
+        // check if certificate is in CRL list of certificates.
+        this.__proto__.hasCertificate = function(cert) {
+            var certs = this.certificates;
+            for (var i = 0; i < certs.length; i++)
+                if (certs.serialNumber === cert.serialNumber)
+                    return true;
+            return false;
         };
 
         this.__proto__.getExtension = function(oid) {
@@ -120,13 +172,17 @@
         function init(v) {
             if (v === undefined)
                 throw "CRL.new: Параметр не может быть Undefined";
-            if (trusted.isString(v))
-                v = (new trusted.ASN(v)).toObject("CertificateList");
+            var asn=null;
+            if (trusted.isString(v)){
+                asn = new trusted.ASN(v);
+                v = asn.toObject("CertificateList");
+            }
             if (!(trusted.isObject(v) || (true)))
                 throw "CRL.new: Задан неверный параметр.";
 
             obj = v;
             cache = {};
+            cache.tbs = asn.structure.sub[0].encode();
         }
 
         init.call(this, arguments[0]);
@@ -156,12 +212,51 @@
                     if (obj.crlEntryExtensions !== null) {
                         cache.extns = [];
                         for (var i = 0; i < obj.crlEntryExtensions.length; i++)
-                            cache.extns.push(obj.crlEntryExtensions[i]);
+                            cache.extns.push(new trusted.PKI.Extension(obj.crlEntryExtensions[i]));
                     }
                 }
                 return cache.extns;
             },
             set extensions(v) {
+            },
+            set invalidityDate(v) {
+            },
+            get invalidityDate() {
+                if (cache.invd === undefined) {
+                    cache.invd = null;
+                    var ext = this.getExtension("2.5.29.24");
+                    if (ext !== null) {
+                        var r = new trusted.PKI.InvalidityDate(ext.value);
+                        cache.invd = r.value;
+                    }
+                }
+                return cache.invd;
+            },
+            set reason(v) {
+            },
+            get reason() {
+                if (cache.reason === undefined) {
+                    cache.reason = null;
+                    var ext = this.getExtension("2.5.29.21");
+                    if (ext !== null) {
+                        var r = new trusted.PKI.ReasonCode(ext.value);
+                        cache.reason = r.value;
+                    }
+                }
+                return cache.reason;
+            },
+            set issuerName(v) {
+            },
+            get issuerName() {
+                if (cache.issuer === undefined) {
+                    cache.issuer = null;
+                    var ext = this.getExtension("2.5.29.29");
+                    if (ext !== null) {
+                        var r = new trusted.PKI.CertificateIssuer(ext.value);
+                        cache.issuer = r;
+                    }
+                }
+                return cache.issuer;
             }
         };
 
@@ -189,8 +284,10 @@
         function init(v) {
             if (v === undefined)
                 throw "RevokedCertificate.new: Параметр не может быть Undefined";
-            if (trusted.isString(v))
-                v = (new trusted.ASN(v)).toObject("RevokedCertificate");
+            if (trusted.isString(v)) {
+                var asn = new trusted.ASN(v);
+                v = asn.toObject("RevokedCertificate");
+            }
             if (!(trusted.isObject(v) || ("userCertificate" in v && "revocationDate" in v)))
                 throw "RevokedCertificate.new: Задан неверный параметр.";
 
