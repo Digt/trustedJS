@@ -1,5 +1,5 @@
-(function() {  
-    
+(function() {
+
     function PublicKey() {
         var obj, alg;
 
@@ -20,7 +20,7 @@
 
         this.__proto__.toString = function() {
             var res = '';
-            switch (this.algorithm.algorithm.value) {
+            switch (this.algorithm.OID.value) {
                 case "1.2.840.113549.1.1.1":
                     var asn = new trusted.ASN(this.key.encoded);
                     var RSAPublicKey = asn.toObject("RSAPublicKey");
@@ -36,7 +36,15 @@
                 default:
                     res = this.key.toString();
             }
-            return this.algorithm.algorithm.toString()+res;
+            return this.algorithm.OID.toString() + res;
+        };
+
+        this.__proto__.toObject = function() {
+            var o = {
+                algorithm: this.algorithm.toObject(),
+                subjectPublicKey: this.key
+            };
+            return o;
         };
 
         function init(v) {

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>ASN decoder</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+        <style>
+            *{
+                font-family: Arial;
+            }
+            .caption{
+                font-weight: bold;
+                color:#999;
+                text-align: right;
+            }
+            .label{
+                font-weight: bold;
+                color:#333;
+                text-align: right;
+                width: 150px;
+            }
+            td{
+                padding:0px 5px;
+            }
+        </style>
+        <script src="../trustedJS.js"></script>
+        <script src="../test/js/fileReader.js"></script>
+
+        <script src="../asn/asn.js"></script>
+
+        <!-- PKI module -->
+        <script src="src/schemas/rfc5280.js"></script>
+        <script src="src/schemas/pkcs9.js"></script>
+        <script src="src/schemas/pkcs10.js"></script>
+        <script src="src/common.js"></script>
+        <script src="src/oids.js"></script>
+        <script src="src/crl.js"></script>
+        <script src="src/extension.js"></script>
+        <script src="src/algorithm.js"></script>
+        <script src="src/key.js"></script>
+        <script src="src/oid.js"></script>
+        <script src="src/generalName.js"></script>
+        <script src="src/request.js"></script>
+    </head>
+    <body>
+        <form style="display:none">
+            <input id="file" type="file"  />
+        </form>
+        <div>
+            <table id="info"></table>
+        </div>
+        <script>
+            function Info() {
+                var el;
+                this.__proto__.print = function(c, m) {
+                    if (c === undefined)
+                        c = '&nbsp;';
+                    var tr = document.createElement("tr");
+                    var tc = document.createElement("td");
+                    tc.innerHTML = c;
+                    if (m !== undefined) {
+                        tc.setAttribute("class", "label");
+                    }
+                    else {
+                        tc.setAttribute("class", "caption");
+                        m = "&nbsp;";
+                    }
+                    var td = document.createElement("td");
+                    td.innerHTML = m;
+                    tr.appendChild(tc);
+                    tr.appendChild(td);
+                    el.appendChild(tr);
+                };
+                this.__proto__.clear = function() {
+                    el.innerHTML = "";
+                };
+                function init() {
+                    el = document.getElementById('info');
+                }
+                init.call(this);
+            }
+            var info = new Info();
+            window.fileLoaded = function(der) {
+
+                info.clear();
+
+                der = Base64.toDer(der);
+
+                console.time("Request import: ");
+                var req = new trusted.PKI.Request(der);
+                console.timeEnd("Request import: ");
+
+                info.print("Certificate request");
+                info.print("Версия", req.version);
+                info.print("Имя объекта", req.subjectName);
+                info.print("Открытый ключ", req.publicKey);
+
+                if (req.challengePassword !== null) {
+                    info.print("Пароль для отзыва", req.challengePassword);
+                }
+
+                if (req.unstructuredName !== null) {
+                    info.print("Не структурированное имя", req.unstructuredName);
+                }
+
+                if (req.attributes !== null) {
+                    info.print();
+                    info.print("Атрибуты");
+                    info.print("Кол-во", req.attributes.length);
+                    for (var i = 0; i < req.attributes.length; i++) {
+                        info.print();
+                        info.print("#", i + 1);
+                        info.print("Тип", req.attributes[i]);
+                    }
+                }
+                if (req.extensions !== null) {
+                    info.print();
+                    info.print("Расширения");
+                    info.print("Кол-во", req.extensions.length);
+
+                    for (var i = 0; i < req.extensions.length; i++) {
+                        var extn = req.extensions[i];
+                        info.print();
+                        info.print("#", i + 1);
+                        info.print("Тип", extn.OID);
+                    }
+
+                }
+                
+                console.log(req.toObject());
+            };
+        </script>
+    </body>
+</html>

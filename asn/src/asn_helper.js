@@ -142,7 +142,7 @@ function atoo(a, s) {
             } catch (e) {
                 step++;
                 if (!("optional"in value || "default" in value))
-                    throw svt + " Элемент ASN не соответсвует схеме";
+                    throw svt + " Элемент ASN не соответсвует схеме "+value.name+" ("+value.type+")";
                 if ("default" in value)
                     _a = value.default;
                 else {
