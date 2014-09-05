@@ -5,6 +5,7 @@ trusted.schemas = schemas;
 trusted.PKI = {};
 
 trusted.ASN = ASN;
+trusted.Schema= Schema;
 
 window.Der = Der;
 window.Hex = Hex;

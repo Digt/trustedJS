@@ -25,7 +25,7 @@
         };
 
         this.__proto__.toString = function() {
-            return this.algorithm.name;
+            return this.OID.name;
         };
 
         this.__proto__.toObject = function() {

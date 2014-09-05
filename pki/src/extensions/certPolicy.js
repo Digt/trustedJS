@@ -1,7 +1,7 @@
 (function() {
 
-// <editor-fold defaultstate="collapsed" desc=" CertificatePilicies ">
-    function CertificatePilicies() {
+// <editor-fold defaultstate="collapsed" desc=" CertificatePolicies ">
+    function CertificatePolicies() {
         var obj, pis;
         this.__proto__ = {
             set policies(v) {
@@ -25,19 +25,19 @@
 
         function init(v) {
             if (v === undefined)
-                throw "CertificatePilicies.new: parameter can not be undefined."
+                throw "CertificatePolicies.new: parameter can not be undefined."
             if (trusted.isString(v)) {
                 var asn = new trusted.ASN(v);
                 v = asn.toObject("CertificatePolicies");
             }
             if (!(trusted.isArray(v) && v.length > 0))
-                throw "CertificatePilicies.new: parameter is not valid."
+                throw "CertificatePolicies.new: parameter is not valid."
             obj = v;
         }
 
         init.call(this, arguments[0]);
     }
-    trusted.PKI.CertificatePilicies = CertificatePilicies;
+    trusted.PKI.CertificatePolicies = CertificatePolicies;
     // </editor-fold>
 
     function PolicyInformation() {

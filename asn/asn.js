@@ -1432,7 +1432,7 @@ var ASN1TagType = {
     schemas.SET.value = {};
     schemas.CHOICE = {
         isChoice: true,
-        explicit:true,
+        explicit: true,
         type: "CHOICE",
         isSimpleType: true,
         value: {}
@@ -1463,6 +1463,13 @@ function Schema() {
                 throw "Schema.new: Неверное количество параметров."
         }
     }
+
+    this.__proto__.load = function(s) {
+        if (!trusted.isString(arg[0])) {
+            throw "Schema.load: Неверный тип параметра."
+        }
+        this.value = compile(arg[0]);
+    };
 
     function getSchema(s) {
         if (trusted.isString(s)) {
@@ -1511,7 +1518,7 @@ function Schema() {
         name: null,
         implicit: null,
         explicit: null,
-        length:null
+        length: null
     };
 
     function verify(schema) {
@@ -1550,6 +1557,7 @@ trusted.schemas = schemas;
 trusted.PKI = {};
 
 trusted.ASN = ASN;
+trusted.Schema= Schema;
 
 window.Der = Der;
 window.Hex = Hex;

@@ -194,7 +194,7 @@
                 certInfo.print("Параметры", Der.toHex(cert.publicKey.algorithm.params));
                 certInfo.print();
                 certInfo.print("Алгоритм подписи");
-                certInfo.print("Идентификатор", cert.signatureAlgorithm.algorithm.name);
+                certInfo.print("Идентификатор", cert.signatureAlgorithm);
                 certInfo.print("Параметры", Der.toHex(cert.signatureAlgorithm.params));
                 certInfo.print();
                 certInfo.print("Подпись", cert.signature);
@@ -207,7 +207,9 @@
                     certInfo.print("Критический", cert.extensions[i].critical ? "Да" : "Нет");
                 }
 
-                console.log(cert.subjectAlternativeName());
+                console.log(cert.subjectAlternativeName);
+                
+                console.log("Certificate: %o", cert.toObject());
             };
 
             console.time("Test");
@@ -232,7 +234,7 @@
                     ]
                 }
             ];
-            var cp = new trusted.PKI.CertificatePilicies(obj);
+            var cp = new trusted.PKI.CertificatePolicies(obj);
             extn1.extnValue = trusted.ASN.fromObject(obj, "CertificatePolicies").encode();
 
             //CRLDistribPoints
@@ -310,8 +312,8 @@
             console.timeEnd("Test");
 
             var e = new trusted.PKI.PrivateKeyUsagePeriod(Hex.toDer("3022800F32303132303830393131343330305A810F32303133303830393131343330305A"));
-            console.log(e)
-            console.log(e.toObject())
+            console.log(e);
+            console.log(e.toObject());
         </script>
     </body>
 </html>
