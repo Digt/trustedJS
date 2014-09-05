@@ -80,9 +80,9 @@ QualifierInfoTest.prototype.setUp = function() {
             assertEquals("020101", Der.toHex(tmp.qualifiers[0].encoded));
             assertEquals("2", tmp.qualifiers.length);
         };
-        //TEST9 Policy Information to strin
+        //TEST9 Policy Information to string
         QualifierInfoTest.prototype.test_PolicyInformation_toString = function() {
-            //fail("Sory, but test transforming Policy Information to string doesn't created for this time! Please try later!");
+            fail("Sory, but test transforming Policy Information to string doesn't created for this time! Please try later!");
         };
         //TEST10 Certificate Policies
         QualifierInfoTest.prototype.test_CertificatePilicies_new_1 = function() {
@@ -99,43 +99,48 @@ QualifierInfoTest.prototype.setUp = function() {
             assertEquals("http://ca.skbkontur.ru/policy", dps.policies[0].qualifiers[0].CPSPointer);
             assertEquals("PKIX policy qualifier", dps.policies[0].qualifiers[0].OID.comment);
             assertEquals("2", dps.policies.length);
-            console.log(JSON.stringify(dps.toObject()));
         };
-        //TEST12 Policy Information
+        //TEST12 Certificate Policies from Object
         QualifierInfoTest.prototype.test_CertificatePilicies_fromObject = function() {
             var obj = [
                 {
-                    "policyIdentifier": "1.2.643.3.7.2.1", 
+                    "policyIdentifier": "1.1", 
                     "policyQualifiers": [
                         {
-                            "qualifier": "\u0016\u001dhttp://ca.skbkontur.ru/policy", 
-                            "policyQualifierId": "1.3.6.1.5.5.7.2.1"
+                            "qualifier": "\u0016\u001dhttp://ca.skbkontur.ru/policyFIRST", 
+                            "policyQualifierId": "1.1.1"
                         }, 
                         {
-                            "qualifier": "\u0016\u001dhttp://ca.skbkontur.ru/policy", 
-                            "policyQualifierId": "1.3.6.1.5.5.7.2.1"
+                            "qualifier": "\u0016\u001dhttp://ca.skbkontur.ru/policySECOND", 
+                            "policyQualifierId": "1.1.2"
                         }
                     ]
                 }, 
                 {
-                    "policyIdentifier": "1.2.643.3.7.2.1", 
+                    "policyIdentifier": "1.2", 
                     "policyQualifiers": [
                         {
-                            "qualifier": "\u0016\u001dhttp://ca.skbkontur.ru/policy",
-                            "policyQualifierId": "1.3.6.1.5.5.7.2.1"
+                            "qualifier": "\u0016\u001dhttp://ca.skbkontur.ru/policyTHIRD",
+                            "policyQualifierId": "1.2.1"
                         }, 
                         {
-                            "qualifier": "\u0016\u001dhttp://ca.skbkontur.ru/policy",
-                            "policyQualifierId": "1.3.6.1.5.5.7.2.1"
+                            "qualifier": "\u0016\u001dhttp://ca.skbkontur.ru/policyFOURTH",
+                            "policyQualifierId": "1.2.2"
                         }
                     ]
                 }
             ];
             var tmp = new trusted.PKI.CertificatePolicies(obj);
-            //DONT finished
-            assertEquals("1.3", tmp.qualifiers[0].OID.value);
-            assertEquals("020101", Der.toHex(tmp.qualifiers[0].encoded));
-            assertEquals("2", tmp.qualifiers.length);
+            console.log(tmp);
+            assertEquals("1.1", tmp.policies[0].OID.value);
+            assertEquals("\u0016\u001dhttp://ca.skbkontur.ru/policyFIRST", tmp.policies[0].qualifiers[0].encoded);
+            assertEquals("1.1.1", tmp.policies[0].qualifiers[0].OID.value);
+            assertEquals("2", tmp.policies.length);
+            assertEquals("2", tmp.policies[0].qualifiers.length);
+        };
+        //TEST13 Certificate Policies to string
+        QualifierInfoTest.prototype.test_CertificatePolicies_toString = function() {
+            fail("Sory, but test transforming Certificate Policies to string doesn't created for this time! Please try later!");
         };
     }
 }
