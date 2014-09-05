@@ -8,10 +8,13 @@ load:
   - ../pki/src/extension.js
   - ../pki/src/extensions/*.js
   - ../pki/src/schemas/*.js
+  - ../pki/src/certificate.js  
+  - ../pki/src/key.js  
+  - ../pki/src/algorithm.js  
   - src/encoders.js
 
 test:
-    - src-test/policyInformation.js
+    - src-test/certificate.js
 exclude:
     - src-test/TemplateTest.js
     #- src-test/capicom.js
