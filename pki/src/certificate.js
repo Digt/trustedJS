@@ -1,7 +1,7 @@
 (function(undefined) {
     function Certificate() {
-        var obj, asn;
-        var cache = {};
+        var obj;
+        var cache;
 
         this.__proto__ = {
             set version(v) {
@@ -31,7 +31,7 @@
             set TBSCertificate(v) {
             },
             get TBSCertificate() {
-                return asn.asn.sub[0].toString();
+                return cache.tbs;
             },
             set subjectName(v) {
             },
@@ -200,8 +200,11 @@
 
         this.__proto__.import = function() {
             cache = {}; // clear cashe
-            asn = new trusted.ASN(arguments[0]);
-            obj = asn.toObject("Certificate");
+            if (trusted.isString){
+                var asn = new trusted.ASN(arguments[0]);
+                obj = asn.toObject("Certificate");
+                cache.tbs = asn.structure.sub[0].encode();
+            }
         };
 
         /**
@@ -216,6 +219,7 @@
         };
 
         function init(args) {
+            cache = {};
             var certDer = args[0];
             if (certDer !== undefined && trusted.isString(certDer)) {
                 this.import(certDer);
