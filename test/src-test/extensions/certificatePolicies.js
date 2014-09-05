@@ -85,13 +85,13 @@ QualifierInfoTest.prototype.setUp = function() {
             fail("Sory, but test transforming Policy Information to string doesn't created for this time! Please try later!");
         };
         //TEST10 Certificate Policies
-        QualifierInfoTest.prototype.test_CertificatePilicies_new_1 = function() {
+        QualifierInfoTest.prototype.test_CertificatePolicies_new_1 = function() {
             assertException(function() {
                 new trusted.PKI.CertificatePolicies();
             });
         };
         //TEST11 Certificate Policies
-        QualifierInfoTest.prototype.test_CertificatePilicies_new_2 = function() {
+        QualifierInfoTest.prototype.test_CertificatePolicies_new_2 = function() {
             var der = Hex.toDer("3080308006072A8503030702013080302906082B06010505070201161D687474703A2F2F63612E736B626B6F6E7475722E72752F706F6C696379302906082B06010505070201161D687474703A2F2F63612E736B626B6F6E7475722E72752F706F6C69637900000000308006072A8503030702013080302906082B06010505070201161D687474703A2F2F63612E736B626B6F6E7475722E72752F706F6C696379302906082B06010505070201161D687474703A2F2F63612E736B626B6F6E7475722E72752F706F6C696379000000000000");
             var dps = new trusted.PKI.CertificatePolicies(der);
             //var oidValue = dps.qualifiers[0].CPSPointer;
@@ -101,7 +101,7 @@ QualifierInfoTest.prototype.setUp = function() {
             assertEquals("2", dps.policies.length);
         };
         //TEST12 Certificate Policies from Object
-        QualifierInfoTest.prototype.test_CertificatePilicies_fromObject = function() {
+        QualifierInfoTest.prototype.test_CertificatePolicies_fromObject = function() {
             var obj = [
                 {
                     "policyIdentifier": "1.1", 
@@ -138,6 +138,7 @@ QualifierInfoTest.prototype.setUp = function() {
             assertEquals("2", tmp.policies.length);
             assertEquals("2", tmp.policies[0].qualifiers.length);
         };
+        
         //TEST13 Certificate Policies to string
         QualifierInfoTest.prototype.test_CertificatePolicies_toString = function() {
             fail("Sory, but test transforming Certificate Policies to string doesn't created for this time! Please try later!");
