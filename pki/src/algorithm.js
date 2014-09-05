@@ -1,12 +1,12 @@
-(function(){
+(function() {
     function Algorithm() {
         var obj;
         var alg;
 
         this.__proto__ = {
-            set algorithm(v) {
+            set OID(v) {
             },
-            get algorithm() {
+            get OID() {
                 if (alg === undefined)
                     alg = new trusted.PKI.OID(obj.algorithm);
                 return alg;
@@ -19,13 +19,21 @@
                 return null;
             }
         };
-        
-        this.__proto__.hasParams = function(){
+
+        this.__proto__.hasParams = function() {
             return obj.parameters !== undefined;
         };
-        
-        this.__proto__.toString=function(){
+
+        this.__proto__.toString = function() {
             return this.algorithm.name;
+        };
+
+        this.__proto__.toObject = function() {
+            var o = {
+                algorithm: this.OID,
+                parameters: this.params
+            };
+            return o;
         };
 
         function init(v) {
@@ -43,6 +51,6 @@
 
         init.call(this, arguments[0]);
     }
-    
+
     trusted.PKI.Algorithm = Algorithm;
 })();
