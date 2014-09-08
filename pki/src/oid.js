@@ -1,9 +1,9 @@
 (function(undefined) {
     function OID() {
         var _value;
-        
-        this.name=null;
-        this.comment=null;
+
+        this.name = null;
+        this.comment = null;
 
         this.__proto__ = {
             set value(v) {
@@ -21,16 +21,20 @@
                     }
                 }
             },
-            get value(){
+            get value() {
                 return _value;
             }
         };
-        
-        this.__proto__.toString=function(){
-            return this.name;
+
+        this.__proto__.toString = function() {
+            var s = this.name;
+            if (s !== this.value) {
+                s += " (" + this.value + ")";
+            }
+            return s;
         };
-        
-        this.__proto__.toObject=function(){
+
+        this.__proto__.toObject = function() {
             return this.value;
         };
 
@@ -46,7 +50,7 @@
             case 1:
                 this.value = arguments[0];
         }
-        
+
     }
 
     trusted.PKI.OID = OID;

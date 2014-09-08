@@ -128,7 +128,7 @@
         this.__proto__.hasCertificate = function(cert) {
             var certs = this.certificates;
             for (var i = 0; i < certs.length; i++)
-                if (certs.serialNumber === cert.serialNumber)
+                if (cert.compare(certs[i]))
                     return true;
             return false;
         };

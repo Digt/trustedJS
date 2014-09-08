@@ -29,7 +29,7 @@ trusted.schemas.Attribute = {
     type: "SEQUENCE",
     value: {
         type: {type: "OBJECT_IDENTIFIER", index: 0},
-        values: {type: "SET", minOccurs: 1, maxOccurs: MAX, value: {v:{type: "ANY"}}, index: 1}
+        value: {type: "ANY"}
     }
 };
 

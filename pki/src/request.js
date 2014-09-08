@@ -37,7 +37,7 @@
                     cache.psw = null;
                     var attr = this.getAttribute("1.2.840.113549.1.9.7");
                     if (attr !== null) {
-                        var asn = new trusted.ASN(attr.values[0]);
+                        var asn = new trusted.ASN(attr.value);
                         cache.psw = asn.toObject("ChallengePassword").utf8String;
                     }
                 }
@@ -48,7 +48,7 @@
                     cache.unstrName = null;
                     var attr = this.getAttribute("1.2.840.113549.1.9.2");
                     if (attr !== null) {
-                        var asn = new trusted.ASN(attr.values[0]);
+                        var asn = new trusted.ASN(attr.value);
                         var val = asn.toObject("UnstructuredName");
                         val = val[Object.keys(val)[0]];
                         if (trusted.isObject(val)) {
@@ -65,7 +65,7 @@
                     var attr = this.getAttribute("1.3.6.1.4.1.311.2.1.14");
                     cache.extns = null;
                     if (attr !== null) {
-                        var asn = new trusted.ASN(attr.values[0]);
+                        var asn = new trusted.ASN(attr.value);
                         var extns = asn.toObject("Extensions");
                         cache.extns = [];
                         for (var i = 0; i < extns.length; i++)

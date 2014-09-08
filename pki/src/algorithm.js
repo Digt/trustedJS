@@ -14,7 +14,7 @@
             set params(v) {
             },
             get params() {
-                if (this.hasParams())
+                if (this.hasParams() && obj.parameters !== Hex.toDer("0500"))
                     return obj.parameters;
                 return null;
             }
@@ -30,8 +30,8 @@
 
         this.__proto__.toObject = function() {
             var o = {
-                algorithm: this.OID,
-                parameters: this.params
+                algorithm: this.OID.toObject(),
+                parameters: (Der.toHex(this.params) === "0500" ? Hex.toDer("0500") : this.params)
             };
             return o;
         };

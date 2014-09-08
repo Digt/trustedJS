@@ -200,7 +200,7 @@
 
         this.__proto__.import = function() {
             cache = {}; // clear cashe
-            if (trusted.isString){
+            if (trusted.isString) {
                 var asn = new trusted.ASN(arguments[0]);
                 obj = asn.toObject("Certificate");
                 cache.tbs = asn.structure.sub[0].encode();
@@ -216,6 +216,13 @@
             if (date === undefined)
                 date = new Date();
             return (date >= this.notBefore && date < this.notAfter);
+        };
+
+        this.__proto__.compare = function(cert) {
+            if (cert.issuerName === undefined && cert.serialNumber === undefined)
+                throw "Certificate.compare: Параметр имеет неверный формат."
+            return (this.issuerName.toString() === cert.issuerName.toString() &&
+                    this.serialNumber === cert.serialNumber);
         };
 
         function init(args) {
