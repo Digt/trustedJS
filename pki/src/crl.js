@@ -273,7 +273,7 @@
             if (this.extensions !== null) {
                 var extns = [];
                 for (var i = 0; i < this.extensions.length; i++)
-                    extns.push(this.extensions[i].toObjcet());
+                    extns.push(this.extensions[i].toObject());
                 o.crlEntryExtensions = extns;
             }
 
