@@ -9,12 +9,13 @@ load:
   - ../pki/src/extensions/*.js
   - ../pki/src/schemas/*.js
   - ../pki/src/certificate.js  
+  - ../pki/src/crl.js
   - ../pki/src/key.js  
   - ../pki/src/algorithm.js  
   - src/encoders.js
 
 test:
-    - src-test/certificate.js
+    - src-test/crl.js
 exclude:
     - src-test/TemplateTest.js
     #- src-test/capicom.js
