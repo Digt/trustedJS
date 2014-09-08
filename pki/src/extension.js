@@ -9,31 +9,19 @@
             get critical() {
                 return (obj === undefined) ? undefined : obj.critical;
             },
-            set extnID(v) {
-            },
-            get extnID() {
-                return (obj === undefined) ? undefined : new trusted.PKI.OID(obj.extnID);
-            },
-            set extnValue(v) {
-            },
-            get extnValue() {
+            get value(){
                 return (obj === undefined) ? undefined : obj.extnValue;
             },
-            set value(v){},
-            get value(){
-                return this.extnValue;
-            },
-            set OID(v){},
             get OID(){
-                return this.extnID;
+                return (obj === undefined) ? undefined : new trusted.PKI.OID(obj.extnID);
             }
         };
         
         this.__proto__.toObject = function(){
             var o = {};
             o.critical = this.critical;
-            o.extnId = this.extnID;
-            o.extnValue = this.extnValue;
+            o.extnId = this.OID.value;
+            o.extnValue = this.value;
             return o;
         };
 
