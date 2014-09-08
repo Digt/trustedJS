@@ -10,7 +10,7 @@ function getExtnByOID(extns, oid) {
         throw "Certificate.getExtnByOID: Параметр oid имеет неверное значение";
     var res = null;
     for (var i = 0; i < extns.length; i++) {
-        if (extns[i].extnID.value === oid.value)
+        if (extns[i].OID.value === oid.value)
             return extns[i];
     }
     return res;
