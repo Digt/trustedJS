@@ -37,7 +37,7 @@
                 throw "AccessDescription.new: parameter can not be undefined."
             if (trusted.isString(v))
                 v = (new trusted.ASN(v)).toObject("AccessDescription");
-            if (!trusted.isObject(v) && !("accessLocation" in v && "accessMethod" in v))
+            if (!(trusted.isObject(v) && ("accessLocation" in v && "accessMethod" in v)))
                 throw "AccessDescription.new: parameter is not valid."
             obj = v;
         }

@@ -112,7 +112,7 @@
             get CPSPointer() {
                 if (cps === undefined) {
                     cps = null;
-                    if (this.policyQualifierID.value === "1.3.6.1.5.5.7.2.1") {
+                    if (this.OID.value === "1.3.6.1.5.5.7.2.1") {
                         var asn = new trusted.ASN(this.encoded);
                         cps = asn.toObject("CPSuri");
                     }

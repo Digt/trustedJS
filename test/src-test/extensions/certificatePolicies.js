@@ -32,8 +32,7 @@ QualifierInfoTest.prototype.setUp = function() {
         QualifierInfoTest.prototype.test_toString = function() {
             var der = Hex.toDer("302906082B06010505070201161D687474703A2F2F63612E736B626B6F6E7475722E72752F706F6C696379");
             var tmp = new trusted.PKI.QualifierInfo(der);
-            var str = tmp.toString();
-            //assertEquals("Maybe QualifierInfo doesn't have toString method","",str);
+            assertEquals("Maybe QualifierInfo doesn't have toString method","",tmp.toString());
 
         };
 
@@ -141,7 +140,7 @@ QualifierInfoTest.prototype.setUp = function() {
         
         //TEST13 Certificate Policies to string
         QualifierInfoTest.prototype.test_CertificatePolicies_toString = function() {
-            fail("Sory, but test transforming Certificate Policies to string doesn't created for this time! Please try later!");
+            fail("Sorry, but test of transformating Certificate Policies to string isn't created for this time! Please try later!");
         };
     }
 }

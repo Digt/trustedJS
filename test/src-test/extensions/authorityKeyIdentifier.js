@@ -23,19 +23,19 @@ AuthorityKeyIdentifierTest.prototype.setUp = function() {
             assertNoException(function() {
                 new trusted.PKI.AuthorityKeyIdentifier(der);  // По умолчанию 2.5.29.35
             });
-            assertObject(aki.CAIssuer);
-            assertEquals("4bfe4677f9e885ad443c620f6b032647", aki.CASerialNumber);
+            assertObject(aki.issuerName);
+            assertEquals("4bfe4677f9e885ad443c620f6b032647", aki.serialNumber);
             assertEquals("2E19D700C30A5A98E70AD0C84B480BE4B1FE658B", Der.toHex(aki.keyIdentifier));
         };
         // from Object
         AuthorityKeyIdentifierTest.prototype.test_AuthorityKeyIdentifier_New_3 = function() {
             var obj = {authorityCertSerialNumber: "0101"};
             var aki = new trusted.PKI.AuthorityKeyIdentifier(obj);
-            assertEquals("0101", aki.CASerialNumber);
+            assertEquals("0101", aki.serialNumber);
             obj = aki.toObject();
             var asn = trusted.ASN.fromObject(obj, "AuthorityKeyIdentifier2");
             var aki = new trusted.PKI.AuthorityKeyIdentifier(asn.encode());
-            assertEquals(257, aki.CASerialNumber);
+            assertEquals(257, aki.serialNumber);
         };
         AuthorityKeyIdentifierTest.prototype.test_AuthorityKeyIdentifier_New_4 = function() {
             var obj = {keyIdentifier: Hex.toDer("010203040506070809")};
@@ -50,17 +50,17 @@ AuthorityKeyIdentifierTest.prototype.setUp = function() {
             var str = trusted.ASN.fromObject("My text value", "IA5_STRING").encode();
             var obj = {authorityCertIssuer: [{directoryName: {rdnSequence: [[{type: "2.5.4.3", value: str}]]}}]};
             var aki = new trusted.PKI.AuthorityKeyIdentifier(obj);
-            assertEquals("commonName=My text value", aki.CAIssuer.toString());
+            assertEquals("commonName=My text value", aki.issuerName.toString());
             obj = aki.toObject();
             var asn = trusted.ASN.fromObject(obj, "AuthorityKeyIdentifier2");
             var aki = new trusted.PKI.AuthorityKeyIdentifier(asn.encode());
-            assertEquals("commonName=My text value", aki.CAIssuer.toString());
+            assertEquals("commonName=My text value", aki.issuerName.toString());
         };
         AuthorityKeyIdentifierTest.prototype.test_AuthorityKeyIdentifier_New_6 = function() {
             var obj = {};
             var aki = new trusted.PKI.AuthorityKeyIdentifier(obj);
-            assertNull(aki.CAIssuer);
-            assertNull(aki.CASerialNumber);
+            assertNull(aki.issuerName);
+            assertNull(aki.serialNumber);
             assertNull(aki.keyIdentifier);
         };
     }

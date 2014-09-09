@@ -103,7 +103,7 @@ trusted.PKI.ReasonFlags = {
                 var asn = new trusted.ASN(v);
                 v = asn.toObject("DistributionPointName");
             }
-            if (!trusted.isObject(v) && !("fullName" in v || "nameRelativeToCRLIssuer" in v))
+            if (!(trusted.isObject(v) && ("fullName" in v || "nameRelativeToCRLIssuer" in v)))
                 throw "DistributionPointName.new: parameter is not valid."
 
             obj = v;

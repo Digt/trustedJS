@@ -39,9 +39,9 @@
                         authorityCertIssuer = null;
                 return authorityCertIssuer;
             },
-            set CASerialNumber(v) {
+            set serialNumber(v) {
             },
-            get CASerialNumber() {
+            get serialNumber() {
                 return obj.authorityCertSerialNumber === undefined ? null : obj.authorityCertSerialNumber;
             },
             set version(v) {
@@ -53,19 +53,19 @@
 
         this.__proto__.toObject = function() {
             var obj = {};
-            if (this.CAIssuer !== null) {
+            if (this.issuerName !== null) {
                 var aci;
                 switch (this.version) {
                     case 1:
-                        aci = this.CAIssuer[0].toObject();
+                        aci = this.issuerName[0].toObject();
                         break;
                     default:
-                        aci = this.CAIssuer.toObject();
+                        aci = this.issuerName.toObject();
                 }
                 obj.authorityCertIssuer = aci;
             }
-            if (this.CASerialNumber !== null) {
-                obj.authorityCertSerialNumber = this.CASerialNumber;
+            if (this.serialNumber !== null) {
+                obj.authorityCertSerialNumber = this.serialNumber;
             }
             if (this.keyIdentifier !== null) {
                 obj.keyIdentifier = this.keyIdentifier;

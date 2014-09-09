@@ -176,7 +176,7 @@
                 issuerUniqueID: this.issuerUniqueID,
                 subjectUniqueID: this.subjectUniqueID
             };
-            if (this.extensions !== null) {
+            if (this.extensions.length !== 0) {
                 o.tbsCertificate.extensions = [];
                 for (var i = 0; i < this.extensions.length; i++) {
                     o.tbsCertificate.extensions.push(this.extensions[i].toObject());

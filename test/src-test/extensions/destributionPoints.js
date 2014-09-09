@@ -54,14 +54,14 @@ DistributionPointsTest.prototype.setUp = function() {
         };
         //from object
         DistributionPointsTest.prototype.test_DistributionPoint_New_3 = function() {
-            var dp = new trusted.PKI.CRLDistributionPoints([{
+            var dp = new trusted.PKI.DistributionPoint({
                     cRLIssuer: [{uniformResourceIdentifier: "http://cdp.skbkontur.ru"}],
                     distributionPoint: {fullName: [{uniformResourceIdentifier: "http://cdp.skbkontur.ru/cdp/kontur-ca3-2013.crl"}]},
                     reasons: new BitString(trusted.PKI.ReasonFlags.KeyCompromise)
-                }]);
+                });
             assertEquals("http://cdp.skbkontur.ru", dp.CRLIssuer.toString());
-            assertEquals("http://cdp.skbkontur.ru/cdp/kontur-ca3-2013.crl", dp.distributionPoint.fullName.toString());
-            assertEquals(260, dp.reasons);
+            assertEquals("http://cdp.skbkontur.ru/cdp/kontur-ca3-2013.crl", dp.name.fullName.toString());
+            assertEquals(2, dp.reasons);
         };
     }
 

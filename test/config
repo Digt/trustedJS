@@ -15,7 +15,7 @@ load:
   - src/encoders.js
 
 test:
-    - src-test/crl.js
+    - src-test/*.js
 exclude:
     - src-test/TemplateTest.js
     #- src-test/capicom.js
