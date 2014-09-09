@@ -54,7 +54,7 @@ trusted.PKI.CRLReason = {
             get pointName() {
                 if (cache.pn === undefined) {
                     cache.pn = null;
-                    if (obj.distributionPoint !== undefined) {
+                    if (obj.distributionPoint !== null) {
                         cache.pn = obj.distributionPoint.fullName;
                     }
                 }

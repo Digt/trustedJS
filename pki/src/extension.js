@@ -9,18 +9,18 @@
             get critical() {
                 return (obj === undefined) ? undefined : obj.critical;
             },
-            get value(){
+            get value() {
                 return (obj === undefined) ? undefined : obj.extnValue;
             },
-            get OID(){
+            get OID() {
                 return (obj === undefined) ? undefined : new trusted.PKI.OID(obj.extnID);
             }
         };
-        
-        this.__proto__.toObject = function(){
+
+        this.__proto__.toObject = function() {
             var o = {};
             o.critical = this.critical;
-            o.extnId = this.OID.value;
+            o.extnID = this.OID.value;
             o.extnValue = this.value;
             return o;
         };
@@ -28,17 +28,17 @@
         function init(v) {
             if (v === undefined)
                 throw "Extension.new: parameter can not be undefined."
-            if (typeof(v)==="string")
+            if (typeof (v) === "string")
                 v = (new trusted.ASN(v)).toObject("Extension");
-            if (!(typeof (v) === "object" &&
-                    v.hasOwnProperty("critical") &&
-                    v.hasOwnProperty("extnID") &&
-                    v.hasOwnProperty("extnValue")))
+            if (!(trusted.isObject(v) &&
+                    "critical" in v &&
+                    "extnID" in v &&
+                    "extnValue" in v))
                 throw "Extension.new: parameter is not valid."
             obj = v;
         }
 
-        init.call(this,arguments[0]);
+        init.call(this, arguments[0]);
     }
 
     trusted.PKI.Extension = Extension;

@@ -37,7 +37,7 @@
             set thisUpdate(v) {
             },
             get nextUpdate() {
-                if (obj.tbsCertList.nextUpdate === null)
+                if (obj.tbsCertList.nextUpdate === null || obj.tbsCertList.nextUpdate === undefined)
                     return null;
                 return (obj.tbsCertList.nextUpdate.utcTime === undefined)
                         ? obj.tbsCertList.nextUpdate.generalTime
@@ -58,17 +58,14 @@
             },
             get extensions() {
                 if (cache.extns === undefined) {
-                    cache.extns = null;
+                    cache.extns = [];
                     var extns = obj.tbsCertList.crlExtensions;
                     if (extns !== null) {
-                        cache.extns = [];
                         for (var i = 0; i < extns.length; i++)
                             cache.extns.push(new trusted.PKI.Extension(extns[i]));
                     }
                 }
                 return cache.extns;
-            },
-            set extensions(v) {
             },
             set signature(v) {
             },
@@ -114,8 +111,9 @@
                 }
                 return cache.ian;
             },
-            set TBSCertList(v){},
-            get TBSCertList (){
+            set TBSCertList(v) {
+            },
+            get TBSCertList() {
                 return cache.tbs;
             }
         };
@@ -127,8 +125,18 @@
         // check if certificate is in CRL list of certificates.
         this.__proto__.hasCertificate = function(cert) {
             var certs = this.certificates;
+            // check for extn(2.5.29.28).indirectCRL
+            var extn = this.getExtension("2.5.29.28");
+            if (extn!==null)
+                extn = new trusted.PKI.IssuingDistributionPoint(extn.value);
+            var issuerName = null;
+            if (extn === null || !extn.indirectCRL)
+                issuerName = this.issuerName;
             for (var i = 0; i < certs.length; i++)
-                if (cert.compare(certs[i]))
+                if (cert.compare({
+                    issuerName: (issuerName !== null ? issuerName.toString() : certs[i].issuerName.toString()),
+                    serialNumber: certs[i].serialNumber
+                }))
                     return true;
             return false;
         };
@@ -141,7 +149,7 @@
 
         this.__proto__.toObject = function() {
             var o = {};
-            o.tbsCertLis = {
+            o.tbsCertList = {
                 version: this.version,
                 signature: this.signatureAlgorithm.toObject(),
                 issuer: this.issuerName.toObject(),
@@ -172,17 +180,17 @@
         function init(v) {
             if (v === undefined)
                 throw "CRL.new: Параметр не может быть Undefined";
-            var asn=null;
-            if (trusted.isString(v)){
+            var asn = null;
+            cache = {};
+            cache.tbs = null;
+            if (trusted.isString(v)) {
                 asn = new trusted.ASN(v);
                 v = asn.toObject("CertificateList");
+                cache.tbs = asn.structure.sub[0].encode();
             }
             if (!(trusted.isObject(v) || (true)))
                 throw "CRL.new: Задан неверный параметр.";
-
             obj = v;
-            cache = {};
-            cache.tbs = asn.structure.sub[0].encode();
         }
 
         init.call(this, arguments[0]);
@@ -208,9 +216,8 @@
             },
             get extensions() {
                 if (cache.extns === undefined) {
-                    cache.extns = null;
+                    cache.extns = [];
                     if (obj.crlEntryExtensions !== null) {
-                        cache.extns = [];
                         for (var i = 0; i < obj.crlEntryExtensions.length; i++)
                             cache.extns.push(new trusted.PKI.Extension(obj.crlEntryExtensions[i]));
                     }
@@ -300,4 +307,5 @@
 
     // export
     trusted.PKI.CRL = CRL;
+    trusted.PKI.RevokedCertificate = RevokedCertificate;
 })();
