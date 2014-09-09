@@ -74,9 +74,8 @@
             },
             get extensions() {
                 if (cache.extns === undefined) {
-                    cache.extns = null;
+                    cache.extns = [];
                     if (obj.tbsCertificate.extensions !== null) {
-                        cache.extns = [];
                         var e = obj.tbsCertificate.extensions;
                         if (e !== undefined)
                             for (var i = 0; i < e.length; i++)
@@ -200,11 +199,15 @@
 
         this.__proto__.import = function() {
             cache = {}; // clear cashe
-            if (trusted.isString) {
-                var asn = new trusted.ASN(arguments[0]);
-                obj = asn.toObject("Certificate");
+            var cert = arguments[0];
+            if (trusted.isString(cert)) {
+                var asn = new trusted.ASN(cert);
+                cert = asn.toObject("Certificate");
                 cache.tbs = asn.structure.sub[0].encode();
             }
+            if (!trusted.isObject(cert)) 
+                throw "Certificate.import: Параметр имеет неверный формат."
+            obj = cert;
         };
 
         /**
@@ -215,7 +218,7 @@
         this.__proto__.checkValidity = function(date) {
             if (date === undefined)
                 date = new Date();
-            return (date >= this.notBefore && date < this.notAfter);
+            return (date >= this.notBefore && date <= this.notAfter);
         };
 
         this.__proto__.compare = function(cert) {
@@ -227,9 +230,9 @@
 
         function init(args) {
             cache = {};
-            var certDer = args[0];
-            if (certDer !== undefined && trusted.isString(certDer)) {
-                this.import(certDer);
+            var cert = args[0];
+            if (cert !== undefined) {
+                this.import(cert);
             }
         }
 
