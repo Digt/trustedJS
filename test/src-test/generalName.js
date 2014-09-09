@@ -286,7 +286,7 @@ GeneralNameTest.prototype.setUp = function() {
     GeneralNameTest.prototype.test_GeneralName_New_8 = function() {
         var obj = {registeredID: "2.5.4.6"};
         var n = new trusted.PKI.GeneralName(obj);
-        assertEquals("countryName", n.name.toString());
+        assertEquals("countryName (2.5.4.6)", n.name.toString());
         assertEquals(8, n.type);
         assertTrue(n.isRegisteredID());
     };
@@ -308,7 +308,7 @@ GeneralNameTest.prototype.setUp = function() {
         var der = Hex.toDer("3016810456616C3187030201018803550406820456616C33");
         var n = new trusted.PKI.GeneralNames(der);
         assertEquals(4, n.generalNames.length);
-        assertEquals("Val1;020101;countryName;Val3", n.toString());
+        assertEquals("Val1;020101;countryName (2.5.4.6);Val3", n.toString());
     };
 
     // from Object
@@ -319,7 +319,7 @@ GeneralNameTest.prototype.setUp = function() {
             {registeredID: "2.5.4.6"},
             {dNSName: "Val3"}];
         var n = new trusted.PKI.GeneralNames(obj);
-        assertEquals("Val1;020101;countryName;Val3", n.toString());
+        assertEquals("Val1;020101;countryName (2.5.4.6);Val3", n.toString());
     };
 }
 
