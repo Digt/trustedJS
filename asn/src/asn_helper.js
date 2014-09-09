@@ -584,7 +584,7 @@ function encodeTime(val, utc) {
     if (utc)
         year = year.substring(2);
     fd += year;
-    fd += formatNum(val.getMonth());
+    fd += formatNum(val.getMonth()+1);
     fd += formatNum(val.getDate());
     fd += formatNum(val.getHours());
     fd += formatNum(val.getMinutes());

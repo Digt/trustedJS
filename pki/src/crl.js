@@ -160,13 +160,13 @@
                 var certs = [];
                 for (var i = 0; i < this.certificates.length; i++)
                     certs.push(this.certificates[i].toObject());
-                o.tbsCertLis.revokedCertificates = certs;
+                o.tbsCertList.revokedCertificates = certs;
             }
             if (this.extensions !== null) {
                 var extns = [];
                 for (var i = 0; i < this.extensions.length; i++)
                     extns.push(this.extensions[i].toObject());
-                o.tbsCertLis.crlExtensions = extns;
+                o.tbsCertList.crlExtensions = extns;
             }
 
             o.signatureAlgorithm = this.signatureAlgorithm.toObject();

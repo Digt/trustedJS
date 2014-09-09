@@ -672,7 +672,7 @@ function otoa(o, s) {
     if (s.tag.constructed) {
         var values = (s.tag.class === 0 && s.tag.number === 16) ? sortSequenceElements(s) : trusted.objToArray(s.value);
         var sub = [];
-        var step = 0;
+        //var step = 0;
         for (var i = 0; i < values.length; i++) {
             var value = values[i];
             if (s.hasOwnProperty("maxOccurs")) {
@@ -687,13 +687,20 @@ function otoa(o, s) {
             if (!(value.name in o)) {
                 if (!(value.hasOwnProperty("optional") || value.hasOwnProperty("default")))
                     throw new SchemaValidityException("'" + value.name + "' не найден в объекте.")
-                step++;
+                //step++;
                 continue;
+            }
+            
+            if (value===null) {
+                if (value.hasOwnProperty("optional"))
+                    continue;
+                else
+                    return Hex.toDer("0500");
             }
 
             if (value.hasOwnProperty("default")) {
                 if (value.default === o[value.name]) {
-                    step++;
+                    //step++;
                     continue;
                 }
             }
@@ -1012,7 +1019,7 @@ function encodeTime(val, utc) {
     if (utc)
         year = year.substring(2);
     fd += year;
-    fd += formatNum(val.getMonth());
+    fd += formatNum(val.getMonth()+1);
     fd += formatNum(val.getDate());
     fd += formatNum(val.getHours());
     fd += formatNum(val.getMinutes());

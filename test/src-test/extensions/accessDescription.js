@@ -57,7 +57,8 @@ AccessDescriptionTest.prototype.setUp = function() {
            var der = Hex.toDer("A41C301A3118301606082A850303810D0101120A31323135303139383832");
            var gn = new trusted.PKI.GeneralName(der);
            var obj = {
-               accessLocation: gn.toObject()
+               accessLocation: gn.toObject(),
+               accessMethod: "2.5.29.23"
            };
            var des = new trusted.PKI.AccessDescription(obj);
            var o =des.toObject();

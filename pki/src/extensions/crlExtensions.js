@@ -218,7 +218,7 @@ trusted.PKI.CRLReason = {
     // revoced cert extensions
     trusted.PKI.ReasonCode = ReasonCode;
     trusted.PKI.InvalidityDate = InvalidityDate;
-    trusted.PKI.CertificateIssue = trusted.PKI.GeneralNames;
+    trusted.PKI.CertificateIssuer = trusted.PKI.GeneralNames;
 
 })();
 
