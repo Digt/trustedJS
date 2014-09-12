@@ -295,6 +295,7 @@ function encode(obj, schema) {
     var asn = [];
     
     if (schema.isAny) { //encode ANY
+        if (obj===null) return [5,0];
         try { //Check for ASN
             new trusted.ASN(obj);
         } catch (e) {

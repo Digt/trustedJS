@@ -22,3 +22,11 @@ Der.fromNumArray = function(numArray) {
     }
     return der;
 };
+
+Der.toUint8Array = function(der) {
+    var buf = new ArrayBuffer(der.length);
+    var bufView = new Uint8Array(buf);
+    for (var i = 0; i < der.length; i++)
+        bufView[i] = der.charCodeAt(i);
+    return buf;
+};

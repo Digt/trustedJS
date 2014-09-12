@@ -730,6 +730,7 @@ function encode(obj, schema) {
     var asn = [];
     
     if (schema.isAny) { //encode ANY
+        if (obj===null) return [5,0];
         try { //Check for ASN
             new trusted.ASN(obj);
         } catch (e) {
@@ -1067,10 +1068,10 @@ function encodeTime(val, utc) {
         var bits = 0, char_count = 0;
         for (i = 0; i < a.length; ++i) {
             var c = a.charAt(i);
-            if (c == '=')
+            if (c === '=')
                 break;
             c = decoder[c];
-            if (c == -1)
+            if (c === -1)
                 continue;
             if (c === undefined)
                 throw 'Illegal character at offset ' + i;
@@ -1100,7 +1101,7 @@ function encodeTime(val, utc) {
         for (var i = 0; i < out.length; i++) {
             der += String.fromCharCode(out[i]);
         }
-        return out;
+        return der;
     };
 
     Base64.re = /-----BEGIN [^-]+-----([A-Za-z0-9+\/=\s]+)-----END [^-]+-----|begin-base64[^\n]+\n([A-Za-z0-9+\/=\s]+)====/;
@@ -1152,6 +1153,28 @@ function encodeTime(val, utc) {
         return btoa(String.fromCharCode.apply(null,
                 str.replace(/\r|\n/g, "").replace(/([\da-fA-F]{2}) ?/g, "0x$1 ").replace(/ +$/, "").split(" "))
                 );
+    };
+
+    Base64.format = function(base64, name) {
+        if (name === undefined)
+            throw "Base64.format: Параметр name не может быть пустым";
+        if (!trusted.isString(name))
+            throw "Base64.format: Параметр name должен быть строкой";
+
+        name = name.toUpperCase();
+
+        var b64 = "-----BEGIN " + name + "-----\n";
+        var b64_counter = 0;
+        for (var i = 0; i < base64.length; i++) {
+            b64 += base64.charAt(i);
+            b64_counter++;
+            if (b64_counter === 64) {
+                b64 += "\n";
+                b64_counter = 0;
+            }
+        }
+        b64 += "\n-----END " + name + "-----\n";
+        return b64;
     };
 
 // exports
@@ -1279,7 +1302,14 @@ Der.fromNumArray = function(numArray) {
     }
     return der;
 };
-var Hex = {}, hex_decoder;
+
+Der.toUint8Array = function(der) {
+    var buf = new ArrayBuffer(der.length);
+    var bufView = new Uint8Array(buf);
+    for (var i = 0; i < der.length; i++)
+        bufView[i] = der.charCodeAt(i);
+    return buf;
+};var Hex = {}, hex_decoder;
 Hex.toDer = function(a) {
     if (!Hex.test(a))
         throw "Hex.toDer: param is not Hex."

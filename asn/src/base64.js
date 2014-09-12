@@ -35,10 +35,10 @@
         var bits = 0, char_count = 0;
         for (i = 0; i < a.length; ++i) {
             var c = a.charAt(i);
-            if (c == '=')
+            if (c === '=')
                 break;
             c = decoder[c];
-            if (c == -1)
+            if (c === -1)
                 continue;
             if (c === undefined)
                 throw 'Illegal character at offset ' + i;
@@ -68,7 +68,7 @@
         for (var i = 0; i < out.length; i++) {
             der += String.fromCharCode(out[i]);
         }
-        return out;
+        return der;
     };
 
     Base64.re = /-----BEGIN [^-]+-----([A-Za-z0-9+\/=\s]+)-----END [^-]+-----|begin-base64[^\n]+\n([A-Za-z0-9+\/=\s]+)====/;
@@ -120,6 +120,28 @@
         return btoa(String.fromCharCode.apply(null,
                 str.replace(/\r|\n/g, "").replace(/([\da-fA-F]{2}) ?/g, "0x$1 ").replace(/ +$/, "").split(" "))
                 );
+    };
+
+    Base64.format = function(base64, name) {
+        if (name === undefined)
+            throw "Base64.format: Параметр name не может быть пустым";
+        if (!trusted.isString(name))
+            throw "Base64.format: Параметр name должен быть строкой";
+
+        name = name.toUpperCase();
+
+        var b64 = "-----BEGIN " + name + "-----\n";
+        var b64_counter = 0;
+        for (var i = 0; i < base64.length; i++) {
+            b64 += base64.charAt(i);
+            b64_counter++;
+            if (b64_counter === 64) {
+                b64 += "\n";
+                b64_counter = 0;
+            }
+        }
+        b64 += "\n-----END " + name + "-----\n";
+        return b64;
     };
 
 // exports
