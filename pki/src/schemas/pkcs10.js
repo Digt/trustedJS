@@ -20,8 +20,8 @@ trusted.schemas.CertificationRequestInfo = {
 trusted.schemas.Attributes = {
     type: "SET",
     maxOccurs: MAX,
-    value:{
-        v: {type:"Attribute"}
+    value: {
+        v: {type: "Attribute"}
     }
 };
 
@@ -29,7 +29,14 @@ trusted.schemas.Attribute = {
     type: "SEQUENCE",
     value: {
         type: {type: "OBJECT_IDENTIFIER", index: 0},
-        value: {type: "ANY"}
+        values: {
+            type: "SET",
+            minOccurs: 1,
+            maxOccurs: MAX,
+            value: {
+                v: {type: "ANY"}
+            }
+        }
     }
 };
 

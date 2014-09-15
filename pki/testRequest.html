@@ -84,7 +84,20 @@
 
                 info.clear();
 
-                der = Base64.toDer(der);
+                //проверка входных данных
+                try { //try Base64
+                    if (Base64.re.test(der))
+                        der = Base64.unarmor(der);
+                    else
+                        der = Base64.toDer(der);
+                }
+                catch (e) { //try Hex
+                    try {
+                        der = Hex.toDer(der);
+                    }
+                    catch (e) {
+                    }
+                }
 
                 console.time("Request import: ");
                 var req = new trusted.PKI.Request(der);
@@ -126,7 +139,7 @@
                     }
 
                 }
-                
+
                 console.log(req.toObject());
             };
         </script>
