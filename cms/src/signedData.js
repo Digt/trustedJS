@@ -70,7 +70,7 @@ function SignedData() {
         if (algorithm === undefined)
             algorithm = {name: "SHA-1"};
         var sequence = new Promise(function(resolve, reject) {
-            if ()
+            null;
         });
         return sequence;
 
