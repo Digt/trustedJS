@@ -14,6 +14,9 @@
             },
             get OID() {
                 return (obj === undefined) ? undefined : new trusted.PKI.OID(obj.extnID);
+            },
+            get type(){
+                return "Extension";
             }
         };
 

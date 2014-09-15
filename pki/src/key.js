@@ -4,7 +4,7 @@
         var obj, alg;
 
         this.__proto__ = {
-            set algorith(v) {
+            set algorithm(v) {
             },
             get algorithm() {
                 if (alg === undefined)
@@ -15,7 +15,16 @@
             },
             get key() {
                 return obj.subjectPublicKey;
+            },
+            get type(){
+                return "PublicKey";
             }
+        };
+        
+        this.__proto__.encode=function(){
+            var key = this.toObject();
+            console.log(key);
+            return trusted.ASN.fromObject(key,"SubjectPublicKeyInfo").encode();
         };
 
         this.__proto__.toString = function() {

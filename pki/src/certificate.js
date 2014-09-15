@@ -4,6 +4,9 @@
         var cache;
 
         this.__proto__ = {
+            get type(){
+                return "Certificate";
+            },
             set version(v) {
             },
             get version() {
@@ -157,6 +160,72 @@
             }
         };
 
+        this.__proto__.isSelfSigned = function() {
+            return this.subjectName.toString() === this.issuerName.toString();
+        };
+
+        this.__proto__.verify = function(issuerCert) {
+            var key = null;
+            var _this = this;
+            if (issuerCert === undefined && !this.isSelfSigned())
+                return Promise.reject("Certificate.verify: Параметр не может быть Undefined.");
+
+            var keyData = Der.toUint8Array(issuerCert.publicKey.encode());
+            var usages = ['verify'];
+            var extractable = false;
+
+            // (1) Import the key
+            return crypto.subtle.importKey('spki', keyData, this.publicKey.algorithm.crypto, extractable, usages).then(
+                    function(result) {
+                        key = result;
+                        return Promise.resolve();
+                    },
+                    function(err) {
+                        return Promise.reject("ImportKey: " + err);
+                    }
+            // (2) Verify certificate signature
+            ).then(
+                    function(res) {
+                        return trusted.Crypto.verify(
+                                _this.signatureAlgorithm.crypto,
+                                key,
+                                Der.toUint8Array(_this.signature.encoded),
+                                Der.toUint8Array(_this.TBSCertificate)
+                                );
+                    },
+                    function(err) {
+                        return Promise.reject(err);
+                    }
+            );
+        };
+
+        this.__proto__.getHash = function(alg) {
+            if (alg === undefined)
+                alg = {name: "SHA-1"};
+            if (trusted.isString(alg))
+                alg = {name: alg};
+            cache.hash = undefined;
+            return trusted.Crypto.digest(alg, Der.toUint8Array(this.encode())).then(
+                    function(digest) {
+                        return new Promise(
+                                function(resolve, reject) {
+                                    resolve(String.fromCharCode.apply(null, new Uint8Array(digest)));
+                                }
+                        );
+                    },
+                    function(error) {
+                        return Promise.reject("Unable to get hash of certificate by '" + alg.name + "' algorithm.");
+                    }
+            );
+        };
+
+        this.__proto__.encode = function() {
+            if (cache.encoded !== undefined) {
+                return cache.encoded;
+            }
+            return null;
+        };
+
         this.__proto__.toObject = function() {
             var o = {
                 signatureAlgorithm: this.signatureAlgorithm.toObject(),
@@ -201,11 +270,28 @@
             cache = {}; // clear cashe
             var cert = arguments[0];
             if (trusted.isString(cert)) {
-                var asn = new trusted.ASN(cert);
+                //проверка входных данных
+                var der = cert;
+                try { //try Base64
+                    if (Base64.re.test(der))
+                        der = Base64.unarmor(der);
+                    else
+                        der = Base64.toDer(der);
+                }
+                catch (e) { //try Hex
+                    try {
+                        der = Hex.toDer(der);
+                    }
+                    catch (e) {
+                    }
+                }
+                var asn = new trusted.ASN(der);
                 cert = asn.toObject("Certificate");
+                
                 cache.tbs = asn.structure.sub[0].encode();
+                cache.encoded = asn.encode();
             }
-            if (!trusted.isObject(cert)) 
+            if (!trusted.isObject(cert))
                 throw "Certificate.import: Параметр имеет неверный формат."
             obj = cert;
         };

@@ -15,3 +15,27 @@ function getExtnByOID(extns, oid) {
     }
     return res;
 }
+
+// private
+function Time() {
+    var obj;
+    function init(v){
+        if (v===undefined)
+            throw "Time.new: Парметр не может быть Undefined";
+        if (trusted.isString(v)){
+            var asn = new trusted.ASN(v);
+            v = asn.toObject("Time");
+        }
+        if (!(trusted.isObject(v) && ("utcTime" in v || "generalTime" in v )))
+            throw "Time.new: Парметр имеет неверный формат";
+        obj = v;            
+    }
+    
+    init.call(this, arguments[0]);
+    
+    if ("utcTime" in obj)
+        obj = obj.utcTime;
+    else
+        obj = obj.generalTime;
+    return  obj;
+};

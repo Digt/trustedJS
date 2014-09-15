@@ -396,7 +396,7 @@ trusted.PKI.GeneralNameType = {
             },
             set items(v){},
             get items(){
-                return this.generalNames(v);
+                return this.generalNames();
             }
         };
         this.__proto__.toString = function() {

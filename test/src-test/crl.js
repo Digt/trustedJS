@@ -25,7 +25,7 @@ CRLTest.prototype.setUp = function() {
         };
         CRLTest.prototype.test_CRL_fromObject = function() {
             var obj = {
-                "tbsCertLis":
+                "tbsCertList":
                         {
                             version: 1,
                             signature:
