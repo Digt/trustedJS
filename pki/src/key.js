@@ -23,7 +23,7 @@
         
         this.__proto__.encode=function(){
             var key = this.toObject();
-            console.log(key);
+            //console.log(key);
             return trusted.ASN.fromObject(key,"SubjectPublicKeyInfo").encode();
         };
 

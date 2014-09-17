@@ -32,8 +32,7 @@ QualifierInfoTest.prototype.setUp = function() {
         QualifierInfoTest.prototype.test_toString = function() {
             var der = Hex.toDer("302906082B06010505070201161D687474703A2F2F63612E736B626B6F6E7475722E72752F706F6C696379");
             var tmp = new trusted.PKI.QualifierInfo(der);
-            assertEquals("Maybe QualifierInfo doesn't have toString method","",tmp.toString());
-
+            fail("Maybe QualifierInfo doesn't have toString method");
         };
 
         //TEST5 from Object
@@ -130,7 +129,6 @@ QualifierInfoTest.prototype.setUp = function() {
                 }
             ];
             var tmp = new trusted.PKI.CertificatePolicies(obj);
-            console.log(tmp);
             assertEquals("1.1", tmp.policies[0].OID.value);
             assertEquals("\u0016\u001dhttp://ca.skbkontur.ru/policyFIRST", tmp.policies[0].qualifiers[0].encoded);
             assertEquals("1.1.1", tmp.policies[0].qualifiers[0].OID.value);

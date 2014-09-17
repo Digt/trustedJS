@@ -59,67 +59,9 @@
             <table id="info"></table>
         </div>
         <script>
-            function Info() {
-                var el;
-                this.__proto__.print = function(c, m) {
-                    if (c === undefined)
-                        c = '&nbsp;';
-                    var tr = document.createElement("tr");
-                    var tc = document.createElement("td");
-                    tc.innerHTML = c;
-                    if (m !== undefined) {
-                        tc.setAttribute("class", "label");
-                    }
-                    else {
-                        tc.setAttribute("class", "caption");
-                        m = "&nbsp;";
-                    }
-                    var td = document.createElement("td");
-                    td.innerHTML = m;
-                    tr.appendChild(tc);
-                    tr.appendChild(td);
-                    el.appendChild(tr);
-                };
-                this.__proto__.clear = function() {
-                    el.innerHTML = "";
-                };
-                function init() {
-                    el = document.getElementById('info');
-                }
-                init.call(this);
-            }
-
-            var info = new Info();
-            window.fileLoaded = function(der) {
-                info.clear(); // очистить список
-
-                //проверка входных данных
-                try { //try Base64
-                    if (Base64.re.test(der))
-                        der = Base64.unarmor(der);
-                    else
-                        der = Base64.toDer(der);
-                }
-                catch (e) { //try Hex
-                    try {
-                        der = Hex.toDer(der);
-                    }
-                    catch (e) {
-                    }
-                }
-
-                //контроль времени на декодирование
-                console.time("ASN decode");
-                var ctl = new CTL(der);
-                console.timeEnd("ASN decode");
-                console.log(ctl);
-
-                ctl.getTrustCertificates(ctl.certificates).then(
-                        function(v) {
-                            console.log(v);
-                        }
-                );
-            };
+            var der = Hex.toDer("308202B006092A864886F70D010702A08202A13082029D0201013100304906092B0601040182370A01A03C303A300004020000170D3134303931303037353034345A300906052B0E03021A05003018301604145520FEFFBFA3ADBA556C676F2852DA69F6E3514DA082024730820243308201F0A0030201020210698403286AA659BA4635622D49DE5FD3300A06062A8503020203050030653120301E06092A864886F70D0109011611696E666F4063727970746F70726F2E7275310B300906035504061302525531133011060355040A130A43525950544F2D50524F311F301D06035504031316546573742043656E7465722043525950544F2D50524F301E170D3039303430373132303231355A170D3134313030343037303934315A30653120301E06092A864886F70D0109011611696E666F4063727970746F70726F2E7275310B300906035504061302525531133011060355040A130A43525950544F2D50524F311F301D06035504031316546573742043656E7465722043525950544F2D50524F3063301C06062A8503020213301206072A85030202230106072A850302021E01034300044002E4FFD1A6F69C809ADAEC7F4A78C1CC2DD3E596EACBED223279B202E2C67C35E674641B0977118C673F0FD0E823A67E6D3B7FC4C428FD2B1C680120A05CD879A3783076300B0603551D0F0404030201C6300F0603551D130101FF040530030101FF301D0603551D0E041604146D8F5E05D95FAC9117941E959A053038377A102A301206092B060104018237150104050203020002302306092B0601040182371502041604147AC9C709DB201C96942FFC46AD6D93D05E69120E300A06062A850302020305000341005873D293BC6321B10E7372EEF172B51B8BBBC93B08BB4C5AF2E1A5354F99C4D552527026DDAED0A927E9B65B7D6F44FD264DFDA163745C74D849730A7777634D3100");
+            var ctl = CTL(der);
+            console.log(ctl);
         </script>
     </body>
 </html>

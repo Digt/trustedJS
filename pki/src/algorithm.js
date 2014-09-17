@@ -137,16 +137,16 @@ trusted.RegisteredAlgorithms = {
     }
 };
 
-trusted.RegisteredAlgorithms.getAlgorithms = function(usage) {
+trusted.RegisteredAlgorithms.getAlgorithms = function (usage) {
     var algs = {};
-    trusted.objEach(trusted.RegisteredAlgorithms, function(v, n) {
+    trusted.objEach(trusted.RegisteredAlgorithms, function (v, n) {
         if (usage in v)
             algs[n] = v;
     });
     return algs;
 };
 
-(function() {
+(function () {
     function Algorithm() {
         var obj;
         var cache;
@@ -173,6 +173,7 @@ trusted.RegisteredAlgorithms.getAlgorithms = function(usage) {
                 switch (this.OID.value) {
                     case "1.2.840.113549.1.1.1":
                     case "1.2.840.113549.1.1.5":
+                    case "1.3.14.3.2.26":
                         o.hash.name = "SHA-1";
                         break;
                     case "1.2.840.113549.1.1.11":
@@ -191,15 +192,15 @@ trusted.RegisteredAlgorithms.getAlgorithms = function(usage) {
             }
         };
 
-        this.__proto__.hasParams = function() {
+        this.__proto__.hasParams = function () {
             return obj.parameters !== undefined;
         };
 
-        this.__proto__.toString = function() {
+        this.__proto__.toString = function () {
             return this.OID.name;
         };
 
-        this.__proto__.toObject = function() {
+        this.__proto__.toObject = function () {
             var o = {
                 algorithm: this.OID.toObject(),
                 parameters: (Der.toHex(this.params) === "0500" ? Hex.toDer("0500") : this.params),

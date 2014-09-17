@@ -101,7 +101,6 @@ function CTL() {
                     sd = new SignedData(v);
                     var asn = new trusted.ASN(sd.content);
                     obj = asn.toObject("CertificateTrustList");
-                    console.log(obj);
                 }
                 break;
             default:

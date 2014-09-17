@@ -321,6 +321,14 @@ GeneralNameTest.prototype.setUp = function() {
         var n = new trusted.PKI.GeneralNames(obj);
         assertEquals("Val1;020101;countryName (2.5.4.6);Val3", n.toString());
     };
+
+    // to String
+    GeneralNameTest.prototype.test_GeneralNames_New_2 = function() {
+        var der = Hex.toDer("3016810456616C3187030201018803550406820456616C33");
+        var n = new trusted.PKI.GeneralNames(der);
+        var str = n.toString();
+        assertEquals("Val1;020101;countryName (2.5.4.6);Val3", str);
+    };
 }
 
 

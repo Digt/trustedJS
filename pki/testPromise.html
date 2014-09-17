@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Test PROMISE</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+        <script src="../trustedJS.js"></script>
+        <script src="../test/js/fileReader.js"></script>
+
+        <script src="../asn/asn.js"></script>
+
+        <!-- PKI module -->
+        <script src="src/schemas/rfc5280.js"></script>
+        <script src="src/common.js"></script>
+        <script src="src/oids.js"></script>
+        <script src="src/crypto.js"></script>
+        <script src="src/certificate.js"></script>
+        <script src="src/extension.js"></script>
+        <script src="src/algorithm.js"></script>
+        <script src="src/key.js"></script>
+        <script src="src/oid.js"></script>
+        <script src="src/generalName.js"></script>
+        <script src="src/extensions/extendedKeyUsage.js"></script>
+        <script src="src/extensions/keyUsage.js"></script>
+        <script src="src/extensions/basicConstraints.js"></script>
+        <script src="src/extensions/issuerAlternativeName.js"></script>
+        <script src="src/extensions/subjectAlternativeName.js"></script>
+        <script src="src/extensions/subjectKeyIdentifier.js"></script>
+        <script src="src/extensions/crlDistributionPoints.js"></script>
+        <script src="src/extensions/authorityKeyIdentifier.js"></script>
+        <script src="src/extensions/issuerSignTool.js"></script>
+        <script src="src/extensions/subjectSignTool.js"></script>
+        <script src="src/extensions/certPolicy.js"></script>
+        <script src="src/extensions/infoAccess.js"></script>
+        <script src="src/extensions/privateKeyUsagePeriod.js"></script>
+        <style type="text/css">
+            #verify{
+                width: 300px;
+                height: 40px;
+                -moz-border-radius: 5px; 
+                -webkit-border-radius: 5px; 
+                border-radius: 5px;
+                font: 700 13px monospace;
+            }
+            #table{
+                margin: auto;
+            }
+            #table th{
+                width: 450px;
+                background-color:  #cccccc;
+            } 
+            .green{
+                color: #009933;
+                text-align: center;
+                font: bold 100% serif;
+            }
+            .red{ 
+                color: #990000;
+                text-align: center;
+                font: bold 100% serif;
+            }
+            .yellow{
+                color: #999900;
+                text-align: center;
+                font: bold 100% serif;
+            }
+            #resultMessage{
+                visibility: hidden;
+            }
+        </style>
+    </head>
+    <body>
+        <h1 align="center">Promise TEST</h1>
+        <hr />
+        <div id="resultDiv"></div>
+        <table id='table'>
+            <tr>
+                <th>Тест</th>
+                <th>Условие</th>
+                <th>Результат</th>
+            </tr>
+        </table>
+        <p id="resultMessage" class="green" align="center">Все тесты завершились успешно!</p>
+        <script>
+            var der1 = Hex.toDer("308207C9308205B1A003020102020101300D06092A864886F70D0101050500307D310B300906035504061302494C31163014060355040A130D5374617274436F6D204C74642E312B3029060355040B1322536563757265204469676974616C204365727469666963617465205369676E696E6731293027060355040313205374617274436F6D2043657274696669636174696F6E20417574686F72697479301E170D3036303931373139343633365A170D3336303931373139343633365A307D310B300906035504061302494C31163014060355040A130D5374617274436F6D204C74642E312B3029060355040B1322536563757265204469676974616C204365727469666963617465205369676E696E6731293027060355040313205374617274436F6D2043657274696669636174696F6E20417574686F7269747930820222300D06092A864886F70D01010105000382020F003082020A0282020100C188DB09BC6C467C789F957BB53390F27262D6C1362022245ECEE977F2430AA20664A4CC8E36F838E623F06E6DB13CDD72A3851CA1D33DB4332BD32FAFFEEAB0415967B6C4067D0A9E7485D6794C80377ADF39055259F7F41B4643A4D28585D2C371F3756234BA2C8A7F1E8FEEED34D011C796CD523DBA33D6DD4DDE0B3B4A4B9FC2262FFAB5161C723577CA3C5DE6CAE1268B1A36765C01DB741425FEEDB5A0880FDD78CA2D1F079730012D7279FA46D6132AA8B9A6AB83491DE5F2EFDDE4018E180A8F6353168562A90E193ACCB566A6C26B7407E42BE1763EB46DD8F644E173621F3BC4BEA05356256C5109F7AAABCABF76FD6D9BF39DDBBF3D66BC0C56AAAF9848953A4BDFA75850D93875A95BEA430C02FF99EBE86C4D705B29659CDDAA5DCCAF0131EC0CEBD28DE8EA9C7BE66EF727660C1A48D76E42E33FDE213E7BE10D70FB63AAA86C1A54B45C257AC9A2C98B16A6BB2C7E175E054D586E121D01EE12100DC6327F18FFFCF4FACD6E91E83649BE1A48698BC2964D1A12B26917C10A90D6FA792248BFBA7B69F870C7FA7A37D8D80DD2764F57FF90B7E391D2DDEFC260B7673ADDFEAA9CF0D48B7F7222CEC69F97B6F8AF8AA010A8D9FB18C6B6B55C523C89B6192A73010A0F03B31260F27A2F81DBA36EFF263097F58BDD8957B6AD3DB3AF2BC5B77602F0A5D62B9A86142A72F6E3338C5D094B13DFBB8C7413524B0203010001A38202523082024E300C0603551D13040530030101FF300B0603551D0F0404030201AE301D0603551D0E041604144E0BEF1AA4405BA517698730CA346843D041AEF230640603551D1F045D305B302CA02AA0288626687474703A2F2F636572742E7374617274636F6D2E6F72672F73667363612D63726C2E63726C302BA029A0278625687474703A2F2F63726C2E7374617274636F6D2E6F72672F73667363612D63726C2E63726C3082015D0603551D2004820154308201503082014C060B2B0601040181B5370101013082013B302F06082B060105050702011623687474703A2F2F636572742E7374617274636F6D2E6F72672F706F6C6963792E706466303506082B060105050702011629687474703A2F2F636572742E7374617274636F6D2E6F72672F696E7465726D6564696174652E7064663081D006082B060105050702023081C330271620537461727420436F6D6D65726369616C20285374617274436F6D29204C74642E30030201011A81974C696D69746564204C696162696C6974792C2072656164207468652073656374696F6E202A4C6567616C204C696D69746174696F6E732A206F6620746865205374617274436F6D2043657274696669636174696F6E20417574686F7269747920506F6C69637920617661696C61626C6520617420687474703A2F2F636572742E7374617274636F6D2E6F72672F706F6C6963792E706466301106096086480186F8420101040403020007303806096086480186F842010D042B16295374617274436F6D20467265652053534C2043657274696669636174696F6E20417574686F72697479300D06092A864886F70D01010505000382020100166C99F4660C34F5D0855E7D0AECDA104E381C5EDFA625054B9132C1E83BF13DDD44095B07498A29CB6602B7B19AF72598093C8E1BE1DD36872B4BBB68D339663DA026C7F239911D51AB827B7ED5CE5AE4E2035770699708F95E58A60ADF8C069A451616380A5E57F662C77A0205E6BC1EB5F29EF4A92983F8B214E36E288744C3901ADE38A93CAC434D6445CEDD28A95CF2737B04F817E8ABB1F32E5C646E73313A12B8BCB311E47D8F81519A3B8D89F44D93667B3C03EDD39A1D9AF36550F5A0D0759F2FAFF0EA824398F8699C8979C4438E4672E3643612AFF7251E388990777EC36B6AB9C3CB444BAC78908BE7C72C1E4B1144C8345227CD0A5D9F85C189D51A78F295105332DD80846675D9B56828FB612EBE84A838C0991286A51E6764AD062E2FA97085C7960F7C8965F58E43540EABDDA580399460C034C996702CA312F51F487BBD1C7E6BB79D90F4223BAEF8FC2ACAFA8252A0EFAF4B5593EBC1B5F0228BAC344E262204A1872C754AB7E57D13D7B80C64C036D2C92F86128C2309C11B823B7349A36A578794E5D678C5994363E34DE0772DE165997269041A4709E60F015624FB1FBF0E79A9582EB9C409017E95BA6D00063EB2EA4A1039D8D02BF5BFEC75BF9702C5091B08DC5537E281FB3784436220CAE7564B65EAFE6CC1249324A134EB05FF9A22AE9B7D3FF165510AA6306AB3F4881C800DFC728AE8835E");
+            var der2 = Hex.toDer("308202FB308201E302021223300D06092A864886F70D01010505003043310F300D06035504030C06636F6D6D6F6E310B3009060355040B0C026F75310A3008060355040A0C016F310A300806035504070C016C310B300906035504080C027374301E170D3134303931363035343430315A170D3135303931363035343430315A3043310F300D06035504030C06636F6D6D6F6E310B3009060355040B0C026F75310A3008060355040A0C016F310A300806035504070C016C310B300906035504080C02737430820122300D06092A864886F70D01010105000382010F003082010A0282010100AD256C7ABA585A6A463EF5E39C78FA44E3EF813DA0FED5B7919584248CA595ED09EEA9DBF3E16FB0F4DA8FD5C148B8537C236B7EBC2D07C61CDA6C8977F7D1E0BB1B28F96F4DE92B4F2B48EDC3B9F689BC26FCF8903221A6922E5BE6927CE00BAB0FBC3DED24C8DE06D0B4F191A62F3A4FB510693CEDCE746BF93B621504F0A7447AC616859FBDCACF08350B3DD33EC57150BE4E7EBCE527936EE2FF95A1AA960667E27D99812167F09A92B2E549660091CEC2293C8CF6A0ACB8471959F5B4919B3A02C1835972A1AFF38D0B0237396651BDEE83952733BFF1E8BCB9B33B3EEF5837086DC1A9ED8EC4A0E28BDB59096745A74A36DB958E5B0CA501CE753D439D0203010001300D06092A864886F70D010105050003820101005D0D626291DC8DF6BB152FBCA1F682A54B51624F4F32573D79924423D97256400D59BAB132EDD92134A0A6C01DBA384229DE155F71C78BF913D23D33F0956E401B76B45E70622ADE9AB15D0E101D70C15F1BEA7175EEBB32BA37F8972C55A13BBAA1D23838AF337976BC65BA58F0321491367E68029428D2ECF3CA721B87208C503DF8BC4AA550528B19A78BAC3916B5DD38220566AAB577F2381D66F9B64660F0CB24A035B78D8DB667C34669C472AF1B62443378AE2AE8180F62E7065F22EE50B6759AF98E8BDA399F40E8963605FA865011E531B48B8A327D8A046A7139A21852233079600076FA475D5C489F14B87C23C0982908025979D832163AF07DCD");
+            var cert1 = new trusted.PKI.Certificate(der1);
+            var cert2 = new trusted.PKI.Certificate(der2);
+            var i = 1;
+            function $(name) {
+                return document.getElementById(name);
+            }
+
+            //ВЕРИФИКАЦИЯ СЕРТИФИКАТОВ
+            //Самоподписанный сертификат
+            cert1.verify(cert1).then(
+                    function (v) {
+                        var testName = "Верификация сертификатов";
+                        var testCase = "Самоподписанный сертификат";
+                        if (!v)
+                            print(testName, "Верификация не пройдена!", "fail", testCase);
+                    },
+                    function (err) {
+                        var testName = "Верификация сертификатов";
+                        var testCase = "Разные сертификаты";
+                        print(testName, "В процессе тестирования произошла ошибка: " + err, "error", testCase);
+                    }
+            );
+            //Другой сертификат
+            cert1.verify(cert2).then(
+                    function (v) {
+                        var testName = "Верификация сертификатов";
+                        var testCase = "Разные сертификаты";
+                        if (v)
+                            print(testName, "Верификация прошла успешно!", "fail", testCase);
+                    },
+                    function (err) {
+                        var testName = "Верификация сертификатов";
+                        var testCase = "Разные сертификаты";
+                        print(testName, "В процессе тестирования произошла ошибка: " + err, "error", testCase);
+                    }
+
+            );
+
+            cert1.getHash().then(function (result) {
+                var testName = "Проверка хэша";
+                var testCase = "Хэш проверяемого файла";
+                var str = Hex.toDer("3e2bf7f2031b96f38ce6c4d8a85d3e2d58476a0f");
+                if (result !== str)
+                    print(testName, "Хэш не совпадает!", "fail", testCase);
+            }, function (error) {
+                var testName = "Проверка хэша";
+                var testCase = "Хэш проверяемого файла";
+                print(testName, "Что-то пошло не так: " + error, "error", testCase);
+            });
+            cert2.getHash().then(function (result) {
+                var testName = "Проверка хэша";
+                var testCase = "Хэш другого файла";
+                var str = Hex.toDer("3e2bf7f2031b96f38ce6c4d8a85d3e2d58476a0f");
+                if (result === str)
+                    print(testName, "Хэш совпадает!", "fail", testCase);
+            }, function (error) {
+                var testName = "Проверка хэша";
+                var testCase = "Хэш проверяемого файла";
+                print(testName, "Что-то пошло не так: " + error, "error", testCase);
+            });
+            
+            display($('resultMessage'));
+            //Проверка хэша
+
+            /**
+             * Печатает ряд
+             * @param {type} testName 
+             * имя теста
+             * @param {type} result
+             * Результат теста
+             * @param {type} param
+             * Цвет текста
+             * @param {type} comment
+             * 
+             * @returns {undefined}
+             */
+            function print(testName, result, param, comment) {
+                hide($('resultMessage'));
+                var tbody = $("table").tBodies[0];
+                var tr = document.createElement("tr");
+                var str = "";
+                str += "<td>" + testName + "</td>";
+                str += "<td>" + comment + "</td>";
+                if (param === "info")
+                    str += "<td class='green'>";
+                if (param === "fail")
+                    str += "<td class='red'>";
+                if (param === "error")
+                    str += "<td class='yellow'>";
+                str += (result + "</td>");
+                str += "";
+                tr.innerHTML = str;
+                tbody.appendChild(tr);
+            }
+            ;
+            function display(elem){
+                elem.style['visibility'] = 'visible';
+            }
+            function hide(elem){
+                elem.style['visibility'] = 'hidden';
+            }
+        </script>
+        
+    </body>
+</html>

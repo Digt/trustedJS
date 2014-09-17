@@ -25,7 +25,6 @@ DistributionPointNameTest.prototype.setUp = function() {
                 fullName: [{dNSName:"My value"}]
             };
             var des = new trusted.PKI.DistributionPointName(obj);
-            console.log(des);
             assertEquals("My value",des.fullName);
         };
        
