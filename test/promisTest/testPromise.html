@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Test PROMISE</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+
+        <script src="../../trustedJS.js"></script>
+        <script src="../../trustedJS.js"></script>
+        <script src="../../asn/asn.js"></script>
+
+        <!-- PKI module -->
+        <script src="../../pki/src/schemas/rfc5280.js"></script>
+        <script src="../../pki/src/schemas/pkcs7.js"></script>
+        <script src="../../pki/src/schemas/pkcs9.js"></script>
+        <script src="../../pki/src/schemas/pkcs10.js"></script>
+        <script src="../../pki/src/schemas/ctl.js"></script>
+        <script src="../../pki/src/common.js"></script>
+        <script src="../../pki/src/oids.js"></script>
+        <script src="../../pki/src/crypto.js"></script>
+        <script src="../../pki/src/certificate.js"></script>
+        <script src="../../pki/src/extension.js"></script>
+        <script src="../../pki/src/algorithm.js"></script>
+        <script src="../../pki/src/key.js"></script>
+        <script src="../../pki/src/oid.js"></script>
+        <script src="../../pki/src/generalName.js"></script>
+        <script src="../../pki/src/ctl.js"></script>
+        <script src="../../pki/src/crypto.js"></script>
+        <script src="../../pki/src/algorithm.js"></script>
+        <script src="../../pki/src/pkcs7.js"></script>
+        <script src="../../pki/src/extensions/extendedKeyUsage.js"></script>
+        <script src="../../pki/src/extensions/keyUsage.js"></script>
+        <script src="../../pki/src/extensions/basicConstraints.js"></script>
+        <script src="../../pki/src/extensions/issuerAlternativeName.js"></script>
+        <script src="../../pki/src/extensions/subjectAlternativeName.js"></script>
+        <script src="../../pki/src/extensions/subjectKeyIdentifier.js"></script>
+        <script src="../../pki/src/extensions/crlDistributionPoints.js"></script>
+        <script src="../../pki/src/extensions/authorityKeyIdentifier.js"></script>
+        <script src="../../pki/src/extensions/issuerSignTool.js"></script>
+        <script src="../../pki/src/extensions/subjectSignTool.js"></script>
+        <script src="../../pki/src/extensions/certPolicy.js"></script>
+        <script src="../../pki/src/extensions/infoAccess.js"></script>
+        <script src="../../pki/src/extensions/privateKeyUsagePeriod.js"></script>
+
+
+        <script src="../../cms/src/common.js"></script>
+        <script src="../../cms/src/signedData.js"></script>
+        <script src="../../cms/src/signer.js"></script>
+        <script src="../../cms/src/signerAttribute.js"></script>
+        <style type="text/css">
+            #verify{
+                width: 300px;
+                height: 40px;
+                -moz-border-radius: 5px; 
+                -webkit-border-radius: 5px; 
+                border-radius: 5px;
+                font: 700 13px monospace;
+            }
+            #table{
+                margin: auto;
+            }
+            #table th{
+                width: 450px;
+                background-color:  #cccccc;
+            } 
+            #table td{
+                padding: 0 10px;
+                border-bottom-style: dotted;
+                border-bottom-color: #333;
+                border-bottom-width: 1px;
+            }
+            .green{
+                color: #009933;
+                text-align: center;
+                font: bold 100% serif;
+            }
+            .red{ 
+                color: #990000;
+                text-align: center;
+                font: bold 100% serif;
+            }
+            .yellow{
+                color: #999900;
+                text-align: center;
+                font: bold 100% serif;
+            }
+            .testName{
+                color: #0400d2;
+                font: 700 100% serif;
+            }
+            #resultMessage{
+                visibility: hidden;
+            }
+        </style>
+    </head>
+    <body>
+        <h1 align="center">Promise TEST</h1>
+        <hr />
+        <div id="resultDiv"></div>
+        <table id='table'>
+            <tr>
+                <th>Тест</th>
+                <th>Условие</th>
+                <th>Результат</th>
+            </tr>
+        </table>
+        <p id="resultMessage" class="green" align="center">Все тесты завершились успешно!</p>
+        
+        <script src="scripts/constants.js"></script>
+        <script src="scripts/verify.js"></script>
+        <script src="scripts/getHash.js"></script>
+        <script src="scripts/getTrustedCertificate.js"></script>
+        <script src="scripts/hasCertificate.js"></script>
+        <script src="scripts/hasCertificate.js"></script>
+        <script>
+            display($("resultMessage")); //Показывает надпись все тесты завершились успешно!
+        </script>
+    </body>
+</html>
