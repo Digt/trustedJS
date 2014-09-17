@@ -60,20 +60,96 @@ function SignedData() {
         },
         get content() {
             if (cache.content === undefined) {
-                cache.content = obj.contentInfo.content;
+                cache.content = null;
+                try {
+                    // if content is array
+                    var asn = new trusted.ASN(obj.contentInfo.content);
+                    cache.content = asn.toObject("SignedDataContent").join("");
+                }
+                catch (e) {
+                    cache.content = obj.contentInfo.content;
+                }
             }
             return cache.content;
         }
     };
 
-    this.__proto__.getHash = function(algorithm) {
+    this.__proto__.getHash = function(algorithm, content) {
         if (algorithm === undefined)
             algorithm = {name: "SHA-1"};
+        var _this = this;
         var sequence = new Promise(function(resolve, reject) {
-            null;
+            if (!(algorithm.name in trusted.RegisteredAlgorithms.getAlgorithms("digest")))
+                reject("SignedData.getHash: Using of Unknown algorithm. " + algorithm.name);
+            if (_this.content === null)
+                reject("SignedData.getHash: The conetent of Signed Data is null.");
+
+            trusted.Crypto.digest(algorithm, Der.toUint8Array(_this.content)).then(
+                    function(digest) {
+                        resolve(String.fromCharCode.apply(null, new Uint8Array(digest)));
+                    },
+                    function(error) {
+                        reject("SignedData.getHash: " + error);
+                    }
+            );
         });
         return sequence;
+    };
 
+    this.__proto__.verify = function(content, certs) {
+        if (content === undefined)
+            content = this.content;
+        if (certs === undefined)
+            certs = [];
+        if (!trusted.isArray(certs))
+            certs = [certs];
+
+        var _this = this;
+
+        var sequence = new Promise(function(resolve, reject) {
+            // get certificates of Signers
+            var signers = [];
+            for (var i = 0; i < _this.signers.length; i++) {
+                if (_this.signers[i].certificate !== null)
+                    signers.push(_this.signers[i]); // get certificates from SignedData
+                else
+                    for (var j = 0; j < certs.length; j++)
+                        if (certs[j].equals(_this.signer[i].certificateID))
+                            signers.push(new Signer(obj.signerInfos[i], certs[j])); // get imported certificates
+                        else
+                            break;
+            }
+            if (signers.length !== _this.signers.length)
+                reject("SignedData.verify: Указаны не все сертификаты подписчиков.");
+            //-----
+
+            // verifign signature for each signer
+            var result = {status: true, signerInfos: []}; // init SignedData VerifyStatus
+            var promises = [];
+            for (var i = 0; i < signers.length; i++) {
+                var signer = signers[i];
+                promises.push(
+                        signer.verify(content).then(
+                        function(verify) {
+                            if (!verify.status) {
+                                result.status = false;
+                            }
+                            result.signerInfos.push(verify);
+                        },
+                        function(error) {
+                            result.signerInfos.push(error);
+                            result.status = false;
+                        }
+                ));
+            }
+            Promise.all(promises).then(
+                    function() {
+                        resolve(result);
+                    }
+            );
+
+        });
+        return sequence;
     };
 
     this.__proto__.getCertificate = function(cert) {
@@ -103,6 +179,7 @@ function SignedData() {
                     v = asn.toObject("SignedData");
                 }
                 obj = v;
+                console.log("SignedData:", obj);
         }
     }
 

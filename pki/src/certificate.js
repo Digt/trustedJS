@@ -4,7 +4,7 @@
         var cache;
 
         this.__proto__ = {
-            get type(){
+            get type() {
                 return "Certificate";
             },
             set version(v) {
@@ -38,6 +38,15 @@
             },
             set subjectName(v) {
             },
+            get subjectFriendlyName() {
+                if (cache.sfn === undefined) {
+                    cache.sfn = null;
+                    var attrs = this.subjectName.getAttributes("2.5.4.3");
+                    if (attrs.length > 0)
+                        cache.sfn = attrs[0].text;
+                }
+                return cache.sfn;
+            },
             get subjectName() {
                 if (cache.sn === undefined) { //cache
                     cache.sn = new trusted.PKI.Name(obj.tbsCertificate.subject);
@@ -51,6 +60,15 @@
                     cache.isn = new trusted.PKI.Name(obj.tbsCertificate.issuer);
                 }
                 return cache.isn;
+            },
+            get issuerFriendlyName() {
+                if (cache.ifn === undefined) {
+                    cache.ifn = null;
+                    var attrs = this.issuerName.getAttributes("2.5.4.3");
+                    if (attrs.length > 0)
+                        cache.ifn = attrs[0].text;
+                }
+                return cache.ifn;
             },
             set signatureAlgorithm(v) {
             },
@@ -287,7 +305,7 @@
                 }
                 var asn = new trusted.ASN(der);
                 cert = asn.toObject("Certificate");
-                
+
                 cache.tbs = asn.structure.sub[0].encode();
                 cache.encoded = asn.encode();
             }

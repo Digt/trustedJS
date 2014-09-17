@@ -174,6 +174,14 @@ if (window.trusted.schemas === undefined)
             revocationDate: {type: "UTC_TIME", index: 1}
         }
     };
-
+    
+    // SigneDataContent
+    namespace.SignedDataContent = {
+                type: "OCTET_STRING",
+                maxOccurs: MAX,
+                value: {
+                    v: {type: "OCTET_STRING"}
+                }
+            };
 
 })(window.trusted.schemas);

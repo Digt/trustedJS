@@ -111,16 +111,52 @@
                 var sd = new SignedData(der);
                 console.timeEnd("ASN decode");
                 console.log(sd);
-                
+
                 console.log(Der.toHex(sd.content));
 
-                info.print("Проверка подписи");
-                sd.verify(sd.certificates[0].publicKey).then(
+                sd.getHash().then(
                         function(v) {
-                            info.print("Подпись:", (v) ? "Верна" : "Не верна");
+                            info.print("Хэш файла:", Der.toHex(v));
+                        },
+                        function(error) {
+                            info.print("Хэш файла:", "Ошибка: " + error);
+                            console.error(error);
+                        }
+                );
+                /*
+                 sd.signers[0].verify().then(
+                 function(v) {
+                 console.log(v);
+                 info.print("Подпись атрибутов:", v?"Верна":"Неверна");
+                 },
+                 function(error) {
+                 info.print("Подпись атрибутов:", "Ошибка: " + error);
+                 console.error(error);
+                 }
+                 );
+                 */
+                info.print("Проверка подписи");
+                var result;
+                sd.verify().then(
+                        function(v) {
+                            console.log("Verification result:", v);
+                            info.print("Подпись:", (v.status) ? "Действительна" : "Недействительна");
+                            result = v;
                         },
                         function(err) {
                             console.error(err);
+                        }
+                ).then(
+                        function() {
+                            //Печать информации о подписи
+                            info.print();
+                            info.print("Подписи");
+                            console.log(result);
+                            for (var i = 0; i < result.signerInfos.length; i++) {
+                                info.print("#", i + 1);
+                                info.print("Подпись", result.signerInfos[i].status?"Действиетльна":"Недействительна");
+                                info.print("Сертификат", result.signerInfos[i].signer.certificate.subjectFriendlyName);
+                            }
                         }
                 );
 
@@ -136,6 +172,8 @@
                 var asn = new trusted.ASN(v.content);
                 v = asn.toObject("SignedData");
                 console.log(v);
+
+
             };
 
             var der = Hex.toDer("3082017502010130743066311E301C06092A864886F70D010901160F696E666F40747275737465642E7275310B3009060355040613025255311C301A060355040A1313436966726F766965205465686E6F6C6F676969311930170603550403131043542052534120546573742043412032020A470550C300000000002D300906052B0E03021A0500A05D301806092A864886F70D010903310B06092A864886F70D010701301C06092A864886F70D010905310F170D3134303930383034353133355A302306092A864886F70D01090431160414B61F43AAE0132C461226ED62A9DB1FF3AD30D723300D06092A864886F70D01010105000481800984071A7FE1167613F436D15DAD0DF6E700A87114DB9AC839A036DCDB2BF0D87C146B1C08723C66BBEABF3975BE47664B0F881613403E7383C1BB239D9EA1BB19DDBC26E1DD76199D0B59F24A2C5FBD5DA68393BF2EB3FC7E9D6DCDADE69A2B0A96315EA8AEF57113130EBC3697DBBB2F22ED6898D3190BC113B9B7436A38CA");
@@ -144,7 +182,8 @@
             console.log(s.toObject());
             //var certDer = Hex.toDer("308203D6308202BEA003020102020101300D06092A864886F70D01010405003050310B3009060355040613025553310D300B060355040A13044D53465431323030060355040313294D6963726F736F66742041757468656E7469636F646528746D2920526F6F7420417574686F72697479301E170D3935303130313038303030315A170D3939313233313233353935395A3050310B3009060355040613025553310D300B060355040A13044D53465431323030060355040313294D6963726F736F66742041757468656E7469636F646528746D2920526F6F7420417574686F7269747930820122300D06092A864886F70D01010105000382010F003082010A0282010100DF08BAE33F6E649BF589AF28964A078F1B2E8B3E1DFCB88069A3A1CEDBDFB08E6C8976294FCA603539AD7232E00BAE293D4C16D94B3C9DDAC5D3D109C92C6FA6C2605345DD4BD155CD031CD2595624F3E578D807CCD8B31F903FC01A71501D2DA712086D7CB0866CC7BA853207E1616FAF03C56DE5D6A18F36F6C10BD13E69974872C97FA4C8C24A4C7EA1D194A6D7DCEB05462EB818B4571D8649DB694A2C21F55E0F542D5A43A97A7E6A8E504D2557A1BF1B1505437B2C058DBD3D038C93227D63EA0A5705060ADB6198652D4749A8E7E656755CB8640863A9304066B2F9B6E334E86730E1430B87FFC9BE72105E23F09BA74865BF09887BCD72BC2E799B7B0203010001A381BA3081B7300D0603551D0A040630040302078030320603550403042B13294D6963726F736F66742041757468656E7469636F646528746D2920526F6F7420417574686F7269747930720603551D01046B306980101A1BE75B9FFD8C2AC339AE0C622E5332A1523050310B3009060355040613025553310D300B060355040A13044D53465431323030060355040313294D6963726F736F66742041757468656E7469636F646528746D2920526F6F7420417574686F72697479820101300D06092A864886F70D010104050003820101002DC9E2F6129E5D5667FAFA4B9A7EDC29565C80140228856E26F3CD58DA5080C5F819B3A67CE29D6B5F3B8F2274E61804FC4740D87A3F3066F012A4D1EB1DE7B6F498AB5322865158EE230976E41D455C4BFF4CE302500113CC41A45297D486D5C4FE8383657DEABEA2683BC1B12998BFA2A5FC9DD384EE701750F30BFA3CEFA9278B91B448C845A0E101424B4476041CC219A28E6B2098C4DD02ACB4D2A20E8D5DB9368E4A1B5D6C1AE2CB007F10F4B295EFE3E8FFA17358A9752CA2499585FECCDA448AC21244D244C8A5A21FA95A8E56C2C37BCF4260DC821FFBCE74067ED6F1AC196A4F745CC51566316CC16271910F595B7D2A821ADFB1B4D81D37DE0D0F");
             //s.certificate = new trusted.PKI.Certificate(certDer);
-            
+
+
         </script>
     </body>
 </html>

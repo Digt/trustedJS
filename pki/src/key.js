@@ -16,15 +16,14 @@
             get key() {
                 return obj.subjectPublicKey;
             },
-            get type(){
+            get type() {
                 return "PublicKey";
             }
         };
-        
-        this.__proto__.encode=function(){
+
+        this.__proto__.encode = function() {
             var key = this.toObject();
-            //console.log(key);
-            return trusted.ASN.fromObject(key,"SubjectPublicKeyInfo").encode();
+            return trusted.ASN.fromObject(key, "SubjectPublicKeyInfo").encode();
         };
 
         this.__proto__.toString = function() {
@@ -56,6 +55,12 @@
             return o;
         };
 
+        this.__proto__.equals = function(publicKey) {
+            if (publicKey === undefined || publicKey.type !== "PublicKey")
+                throw "PublicKey.equals: Параметр должен быть PublicKey"
+            return this.toString()===publicKey.toString();
+        };
+
         function init(v) {
             // Проверка аргумента
             if (v === undefined)
@@ -71,7 +76,6 @@
 
         init.call(this, arguments[0]);
     }
-    ;
 
     trusted.PKI.PublicKey = PublicKey;
 
