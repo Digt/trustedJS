@@ -20,9 +20,9 @@ trusted.objEach = function(obj, call) {
     }
 };
 
-function ASNDeepCount(asn){
-    if (asn.sub!==null)
-        return 1+ASNDeepCount(asn.sub[0]);
+function ASNDeepCount(asn) {
+    if (asn.sub !== null)
+        return 1 + ASNDeepCount(asn.sub[0]);
     return 0;
 }
 
@@ -58,30 +58,58 @@ trusted.objToArray = function(obj) {
     return arr;
 };
 
-trusted.isArray=function(obj){
-    if (obj instanceof Array)
-        return true;
-    return false;
+trusted.isArray = function(obj) {
+    return obj instanceof Array;
 };
 
-trusted.isNumber=function(obj){
-    if (typeof(obj)==="number")
-        return true;
-    return false;
+trusted.isNumber = function(obj) {
+    return typeof (obj) === "number"
 };
 
-trusted.isString=function(obj){
-    if (typeof(obj)==="string")
-        return true;
-    return false;
+trusted.isString = function(obj) {
+    return typeof (obj) === "string"
 };
-trusted.isBoolean=function(obj){
-    if (typeof(obj)==="boolean")
-        return true;
-    return false;
+trusted.isBoolean = function(obj) {
+    return typeof (obj) === "boolean";
 };
-trusted.isObject=function(obj){
-    if (typeof(obj)==="object")
-        return true;
-    return false;
+trusted.isObject = function(obj) {
+    return typeof (obj) === "object";
+};
+
+//Utf8
+trusted.Utf8 = {
+    toDer: function(string) {
+        var der = string;
+        // encode DER
+        var result = "";
+        for (var i = 0; i < der.length; i++) {
+            var char = der.charCodeAt(i);
+            if (char < 256) {
+                result += String.fromCharCode(char);
+            }
+            else if (char < (256 * 256)) {
+                result += String.fromCharCode((char >> 6) | 192); // 1 byte
+                result += String.fromCharCode((char & 63) | 128); // 2 byte
+            } else if (char < (256 * 256 * 256)) {
+                result += String.fromCharCode((char >> 12) | 224); // 1 byte
+                result += String.fromCharCode(((char >> 6) & 63) | 128); // 2 byte
+                result += String.fromCharCode((char & 63) | 128); // 3 byte
+            } else
+                throw "Символ состоит более чем из трех байтов. Преобразование еще не реализовано."
+        }
+        return result;
+    },
+    fromDer: function(der) {
+        var s = "";
+        for (var i = 0; i < der.length; ) {
+            var c = der.charCodeAt(i++);
+            if (c < 128)
+                s += String.fromCharCode(c);
+            else if ((c > 191) && (c < 224))
+                s += String.fromCharCode(((c & 0x1F) << 6) | (der.charCodeAt(i++) & 0x3F));
+            else
+                s += String.fromCharCode(((c & 0x0F) << 12) | ((der.charCodeAt(i++) & 0x3F) << 6) | (der.charCodeAt(i++) & 0x3F));
+        }
+        return s;
+    }
 };
