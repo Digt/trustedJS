@@ -1,0 +1,9 @@
+body{
+    color: coral;
+}
+.coloredBlock{
+    width: 10px;
+    height: 10px;
+    display: block;
+    border: 1px solid black;
+}
