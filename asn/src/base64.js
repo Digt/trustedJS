@@ -116,6 +116,11 @@
 
 
 
+    Base64.fromDer = function(str) {
+        var hex = Der.toHex(str);
+        return Base64.fromHex(hex);
+    };
+    
     Base64.fromHex = function(str) {
         return btoa(String.fromCharCode.apply(null,
                 str.replace(/\r|\n/g, "").replace(/([\da-fA-F]{2}) ?/g, "0x$1 ").replace(/ +$/, "").split(" "))

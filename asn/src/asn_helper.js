@@ -117,13 +117,13 @@ function atoo(a, s) {
         o = validateMaxOccurs(a, s);
         return o;
     }
-    
-    if (s.isAny){
+
+    if (s.isAny) {
         o = a.encode();
         return o;
     }
 
-    if (!isTagEquals(a, s))
+    if (!s.implicit && !isTagEquals(a, s))
         throw svt + " Теги не равны.";
 
     if (s.tag.constructed) {
@@ -142,7 +142,7 @@ function atoo(a, s) {
             } catch (e) {
                 step++;
                 if (!("optional"in value || "default" in value))
-                    throw svt + " Элемент ASN не соответсвует схеме "+value.name+" ("+value.type+")";
+                    throw svt + " Элемент ASN не соответсвует схеме " + value.name + " (" + value.type + ")";
                 if ("default" in value)
                     _a = value.default;
                 else {
@@ -197,10 +197,15 @@ function validateMaxOccurs(a, s) {
 }
 
 function isTagEquals(a, s) {
+    // don't check cunstructed for OCTET_STRING (it may be constructed or not constructed)
+    var constructed = true;
+    if (!(s.tag.class === 0 && s.tag.number === 4))
+        constructed = a.tag.constructed === s.tag.constructed;
     return ((a.tag.class === s.tag.class &&
             a.tag.number === s.tag.number &&
-            a.tag.constructed === s.tag.constructed) ||
-            ("context"in s && a.tag.constructed === s.tag.constructed)); // для CONTENT-SPECIFIC проверить только constructed
+            constructed));
+    //||
+    //("context"in s && a.tag.constructed === s.tag.constructed)); // для CONTENT-SPECIFIC проверить только constructed
 }
 // </editor-fold>
 
@@ -214,8 +219,8 @@ function ObjectToASN(o, s) {
 }
 
 function otoa(o, s) {
-    if (s.name === "bool")
-        "";
+    if (s.name === "certificates")
+        console.log("Here!!!");
     //console.log(schema.name);
 
     if (s.isChoice) {
@@ -226,12 +231,16 @@ function otoa(o, s) {
             throw ovt + "Значение объект не соответствует схеме CHOICE.";
         var a = otoa(o[keys[0]], s.value[keys[0]]);
         if ("context" in s)
-            a=encodeExplicit(s.context, a);
+            a = encodeExplicit(s.context, a);
         return a;
     }
-    
-    if (s.isAny){
-        return encode(o,s);
+
+    if (s.isAny) {
+        var any = encode(o, s);
+        if ("context" in s) {
+            any = encodeExplicit(s.context, any);
+        }
+        return any;
     }
 
     if (s.tag.constructed) {
@@ -255,8 +264,8 @@ function otoa(o, s) {
                 //step++;
                 continue;
             }
-            
-            if (value===null) {
+
+            if (value === null) {
                 if (value.hasOwnProperty("optional"))
                     continue;
                 else
@@ -270,7 +279,7 @@ function otoa(o, s) {
                 }
             }
             var a = otoa(o[value.name], value);
-            
+
             sub = sub.concat(a);
         }
         return encode(sub, s);
@@ -290,12 +299,11 @@ function encodeExplicit(number, value) {
     return asn;
 }
 function encode(obj, schema) {
-    if (schema.name==="ch1")
-        "";
     var asn = [];
-    
+
     if (schema.isAny) { //encode ANY
-        if (obj===null) return [5,0];
+        if (obj === null)
+            return [5, 0];
         try { //Check for ASN
             new trusted.ASN(obj);
         } catch (e) {
@@ -305,7 +313,7 @@ function encode(obj, schema) {
             asn.push(obj.charCodeAt(i));
         return asn;
     }
-    
+
     switch (schema.tag.class) {
         case ASN1TagClass.UNIVERSAL:
             switch (schema.tag.number) {
@@ -366,20 +374,38 @@ function encode(obj, schema) {
                     obj = encodeStringBMP(obj);
                     break;
             }
-            if (schema.explicit) {
-                var ev = []; //explicit value
-                ev.push(encodeTag(schema.tag.class, schema.tag.constructed, schema.tag.number)); //tag
-                ev = ev.concat(encodeLength(obj.length)); // length
-                obj = ev.concat(obj); // value
-            }
-            if (!schema.implicit) {
-                if ("context" in schema)
-                    if (schema.explicit)
-                        asn.push(encodeTag(0x02, true, schema.context)); //tag
-                    else
-                        asn.push(encodeTag(0x02, schema.tag.constructed, schema.context)); //tag
-                else
-                    asn.push(encodeTag(schema.tag.class, schema.tag.constructed, schema.tag.number)); //tag
+//            if (schema.explicit) {
+//                var ev = []; //explicit value
+//                ev.push(encodeTag(schema.tag.class, schema.tag.constructed, schema.tag.number)); //tag
+//                ev = ev.concat(encodeLength(obj.length)); // length
+//                obj = ev.concat(obj); // value
+//            }
+//            if (!schema.implicit) {
+//                if ("context" in schema)
+//                    if (schema.explicit)
+//                        asn.push(encodeTag(0x02, true, schema.context)); //tag
+//                    else
+//                        asn.push(encodeTag(0x02, schema.tag.constructed, schema.context)); //tag
+//                else
+//                    asn.push(encodeTag(schema.tag.class, schema.tag.constructed, schema.tag.number)); //tag
+//                asn = asn.concat(encodeLength(obj.length)); // length
+//            }
+            if ("context" in schema) {
+                if (schema.explicit) { //explicit
+                    asn.push(encodeTag(0x02, true, schema.context)); //tag
+                    
+                    var content = [];
+                    content.push(encodeTag(schema.tag.class, schema.tag.constructed, schema.tag.number)); //tag
+                    content= content.concat(encodeLength(obj.length)); // length
+                    
+                    asn = asn.concat(encodeLength(content.length)); // length
+                    asn = asn.concat(content);
+                } else { //implicit
+                    asn.push(encodeTag(0x02, schema.tag.constructed, schema.context)); //tag
+                    asn = asn.concat(encodeLength(obj.length)); // length
+                }
+            } else{
+                asn.push(encodeTag(schema.tag.class, schema.tag.constructed, schema.tag.number)); //tag
                 asn = asn.concat(encodeLength(obj.length)); // length
             }
             asn = asn.concat(obj); // value
@@ -585,7 +611,7 @@ function encodeTime(val, utc) {
     if (utc)
         year = year.substring(2);
     fd += year;
-    fd += formatNum(val.getMonth()+1);
+    fd += formatNum(val.getMonth() + 1);
     fd += formatNum(val.getDate());
     fd += formatNum(val.getHours());
     fd += formatNum(val.getMinutes());

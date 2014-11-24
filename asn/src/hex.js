@@ -53,3 +53,14 @@ Hex.test = function(val) {
     var reHex = /^\s*(?:[0-9A-Fa-f][0-9A-Fa-f]\s*)+$/;
     return reHex.test(val);
 };
+
+Hex.toUint8Array = function(hex) {
+    if (!Hex.test(hex))
+        throw "Hex.toDer: param is not Hex.";
+    var der = Hex.toDer(hex);
+    return Der.toUint8Array(der);
+};
+Hex.fromUint8Array = function(buf) {
+    var der = Der.fromUint8Array(buf);
+    return Der.toHex(der);
+};

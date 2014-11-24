@@ -22,6 +22,9 @@ Der.fromNumArray = function(numArray) {
     }
     return der;
 };
+Der.fromUint8Array = function(buf){
+  return String.fromCharCode.apply(null, new Uint8Array(buf))  
+};
 
 Der.toUint8Array = function(der) {
     var buf = new ArrayBuffer(der.length);
