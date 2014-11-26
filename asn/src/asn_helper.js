@@ -1,32 +1,30 @@
-function ASN() {
-    this.structure;
-    this.__proto__.toObject = function(schema) {
-        if (this.structure === undefined)
-            throw "ASN.toObject: ASN structure is not initialized. Call import method first."
-        return ASNToObject(this.structure, schema);
-    };
-    this.__proto__.import = function(a) {
-        if (a !== undefined) {
-            if (typeof (a) !== "string")
-                throw "ASN.toObject: param must be String.";
-            this.structure = ASN1.decode(a);
-        }
-    };
-    this.import(arguments[0]);
-}
-
-ASN.prototype.encode = function() {
-    return this.structure.toString();
-};
-ASN.fromObject = function(obj, schema) {
-    var arr = ObjectToASN(obj, schema);
-    var der = '';
-    for (var i = 0; i < arr.length; i++) {
-        der += String.fromCharCode(arr[i]);
-    }
-    return new ASN(der);
-};
-
+/*function ASN() {
+ this.structure;
+ this.__proto__.toObject = function(schema) {
+ if (this.structure === undefined)
+ throw "ASN.toObject: ASN structure is not initialized. Call import method first."
+ return ASNToObject(this.structure, schema);
+ };
+ this.__proto__.import = function(a) {
+ if (a !== undefined) {
+ this.structure = new ASN(a);
+ }
+ };
+ this.import(arguments[0]);
+ }
+ 
+ ASN.prototype.encode = function() {
+ return this.structure.toString();
+ };
+ ASN.fromObject = function(obj, schema) {
+ var arr = ObjectToASN(obj, schema);
+ var der = '';
+ for (var i = 0; i < arr.length; i++) {
+ der += String.fromCharCode(arr[i]);
+ }
+ return new ASN(der);
+ };
+ */
 // <editor-fold defaultstate="collapsed" desc=" ASNToObject ">
 
 /*
@@ -96,7 +94,8 @@ function _ASNToObject(asn, schema) {
 
 function atoo(a, s) {
     var o = {};
-
+    //if (s.type === "Validity")
+    //    console.log("val");
     // CONTEXT-SPECIFIC
     if ("context" in s)
         if (a.tag.class === 2 && a.tag.number === s.context) {
@@ -119,11 +118,11 @@ function atoo(a, s) {
     }
 
     if (s.isAny) {
-        o = a.encode();
+        o = a.blob();
         return o;
     }
 
-    if (!s.implicit && !isTagEquals(a, s))
+    if (!(s.context && !s.explicit) && !isTagEquals(a, s))
         throw svt + " Теги не равны.";
 
     if (s.tag.constructed) {
@@ -141,6 +140,7 @@ function atoo(a, s) {
                 _a = _ASNToObject(asub, value);
             } catch (e) {
                 step++;
+                //console.warn(e);
                 if (!("optional"in value || "default" in value))
                     throw svt + " Элемент ASN не соответсвует схеме " + value.name + " (" + value.type + ")";
                 if ("default" in value)
@@ -154,7 +154,7 @@ function atoo(a, s) {
         }
     }
     else
-        o = ("context" in s) ? a.parseSimpleType(s.tag.number) : a.content();
+        o = ("context" in s) ? a.toValue(s.tag.number) : a.toValue();
 
     return o;
 }
@@ -175,6 +175,7 @@ function validateChoice(asn, schema) {
             hasChoice = true;
             break;
         } catch (e) {
+            "";
         }
     }
     if (!hasChoice)
@@ -219,8 +220,8 @@ function ObjectToASN(o, s) {
 }
 
 function otoa(o, s) {
-    if (s.name === "certificates")
-        console.log("Here!!!");
+    //if (s.name === "certificates")
+    //    console.log("Here!!!");
     //console.log(schema.name);
 
     if (s.isChoice) {
@@ -291,6 +292,7 @@ function otoa(o, s) {
 // </editor-fold>
 
 // <editor-fold defaultstate="collapsed" desc=" Encode ">
+
 function encodeExplicit(number, value) {
     var asn = [];
     asn.push(encodeTag(0x02, true, number)); //tag CONTEXT-SPECIFIC CONSTRUCTED [number]
@@ -299,18 +301,22 @@ function encodeExplicit(number, value) {
     return asn;
 }
 function encode(obj, schema) {
+    console.log(schema.type);
+    if (schema.type === "INTEGER")
+        "";
     var asn = [];
 
     if (schema.isAny) { //encode ANY
         if (obj === null)
             return [5, 0];
+        var any;
         try { //Check for ASN
-            new trusted.ASN(obj);
+            any = new trusted.ASN(obj);
         } catch (e) {
             throw("ASN.encode: ANY has wrong data. It must have ASN DER string.");
         }
         for (var i = 0; i < obj.length; i++) // convert DER to NumArray
-            asn.push(obj.charCodeAt(i));
+            asn.push(obj[i]);
         return asn;
     }
 
@@ -393,18 +399,18 @@ function encode(obj, schema) {
             if ("context" in schema) {
                 if (schema.explicit) { //explicit
                     asn.push(encodeTag(0x02, true, schema.context)); //tag
-                    
+
                     var content = [];
                     content.push(encodeTag(schema.tag.class, schema.tag.constructed, schema.tag.number)); //tag
-                    content= content.concat(encodeLength(obj.length)); // length
-                    
-                    asn = asn.concat(encodeLength(content.length)); // length
+                    content = content.concat(encodeLength(obj.length)); // length
+
+                    asn = asn.concat(encodeLength(content.length + obj.length)); // length
                     asn = asn.concat(content);
                 } else { //implicit
                     asn.push(encodeTag(0x02, schema.tag.constructed, schema.context)); //tag
                     asn = asn.concat(encodeLength(obj.length)); // length
                 }
-            } else{
+            } else {
                 asn.push(encodeTag(schema.tag.class, schema.tag.constructed, schema.tag.number)); //tag
                 asn = asn.concat(encodeLength(obj.length)); // length
             }

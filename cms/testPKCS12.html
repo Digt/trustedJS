@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>ASN decoder</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+        <style>
+            *{
+                font-family: Arial;
+            }
+            .caption{
+                font-weight: bold;
+                color:#999;
+                text-align: right;
+            }
+            .label{
+                font-weight: bold;
+                color:#333;
+                text-align: right;
+                width: 150px;
+            }
+            td{
+                padding:0px 5px;
+            }
+        </style>
+        <script src="../trustedJS.js"></script>
+        <script src="../test/js/fileReader.js"></script>
+
+        <script src="../asn/asn.js"></script>
+        <script src="../pki/pki.js"></script>
+
+        <!-- PKI module -->
+    </head>
+    <body>
+        <form style="display:none">
+            <input id="file" type="file"  />
+        </form>
+        <div>
+            <table id="info"></table>
+        </div>
+        <script>
+            function Info() {
+                var el;
+                this.__proto__.print = function(c, m) {
+                    if (c === undefined)
+                        c = '&nbsp;';
+                    var tr = document.createElement("tr");
+                    var tc = document.createElement("td");
+                    tc.innerHTML = c;
+                    if (m !== undefined) {
+                        tc.setAttribute("class", "label");
+                    }
+                    else {
+                        tc.setAttribute("class", "caption");
+                        m = "&nbsp;";
+                    }
+                    var td = document.createElement("td");
+                    td.innerHTML = m;
+                    tr.appendChild(tc);
+                    tr.appendChild(td);
+                    el.appendChild(tr);
+                };
+                this.__proto__.clear = function() {
+                    el.innerHTML = "";
+                };
+                function init() {
+                    el = document.getElementById('info');
+                }
+                init.call(this);
+            }
+
+            var info = new Info();
+            window.fileLoaded = function(der) {
+                info.clear(); // очистить список
+
+                //проверка входных данных
+                try { //try Base64
+                    if (Base64.re.test(der))
+                        der = Base64.unarmor(der);
+                    else
+                        der = Base64.toDer(der);
+                }
+                catch (e) { //try Hex
+                    try {
+                        der = Hex.toDer(der);
+                    }
+                    catch (e) {
+                    }
+                }
+
+                //контроль времени на декодирование
+                console.time("ASN decode");
+                var asn = new trusted.ASN(der);
+                var pfx = asn.toObject("PFX");
+                console.timeEnd("ASN decode");
+                console.log(pfx);
+
+                info.print("PFX");
+                info.print("mac", Der.toHex(pfx.macData.mac.digest));
+                console.log("PFX:", pfx);
+                window.pfx = pfx;
+            };
+
+            var salt = Hex.toDer("3FD475649B18567E78A1A7BA58F85C71FEE8B683");
+            var iterations = 2000;
+
+            function toBMPString(value) {
+                var der = "";
+                for (var i = 0; i < value.length; i++) {
+                    var char = value.charCodeAt(i);
+                    der += String.fromCharCode(char >> 8);
+                    der += String.fromCharCode(char & 255);
+                }
+                return der + Hex.toDer("00") + Hex.toDer("00");
+            }
+
+            var password = "1";
+
+            //var privateKey = new trusted.PKI.PrivateKey(Hex.toDer("3082025C02010002818100A232F40D1CCBA895B8AE77E2832F5FB69E4B27120DE50CD015FDE227BA113B24475817EAA3F6E7A0D132DBC797F679F8913917D34826AB557ADBA7F9D37B9EECC08F700077B442C6A372AF6432889F35CA97ACC2C861E6A59F7BEC910B02E243C2E56D3B0F0F3D41C3B492101197EAD62D1A70173696268524614EFF9677B26702030100010281804A58C0B521F5D81888C6AFFD0BD4B332A9EC18C495C9DFCDA1C6F5DAEFD6E61D02F6C63FAF58856399808E6D36A2ABD5DBFB27889911E087160189456242CFDD4AB7158E5626DFAEFDADF135DF6F6DAA7917F5C3C7CC276BCD16B7DD70025B28809F7DC15F684C307ED5BF4903B83CE43D53339BD9BAA36D8DC66D065926AD41024100CCDB37E5A40CEB7FFABA75C25921908FBBAF04A913F3B17FD6E2D7A642ED0CAECC93871AA4453108E4CD98373BC840B1E699D823CC021FE974C1E8C4617FC753024100CAB16BF0BB10E53C7485EBBE3470B1D861ED190928ABB5746B843EF236BC7F3F3BA79C1494285F5257B984CCBE134A2E2459DC9CA6B8DD6DA839CB28ADBBAA1D024100A17ABC191CB3C27F6358CFB29F27C2184ACDAF52C813747B5D1BFAF968100BCB4E1F8C8407B132F1DBC9E48EC56518FA22D86A73ED404F7F6B35DF11CDF9375902403AB1FA11F1F9C888232E0CC03DAB4CB4DE56AC634C95BCAC03DE7DE3E219DFB74DED11739C1BBCCEB97C8D8A44988D68A33A2A7A6A852A09F1271B3FA25FAFB902407BDEBD96E3DD01355E6B32089B65CA6AE3D3A63ECAA095ECE2C7BC995B1CD262FE72E815954405BEBC15B9AE077B7DB2738AE7AB6BDD9E07E51FD35EF5442E16"), "rsa");
+            //console.log(privateKey.export(trusted.ExportType.pem));
+
+            var _crypto = require('crypto');
+            var key = _crypto.pbkdf2Sync(
+                    new Buffer("1","utf8"),
+                    new Buffer("3FD475649B18567E78A1A7BA58F85C71FEE8B683", "hex"),
+                    2000,
+                    20);
+            console.log("Password:", Der.toHex(password));
+            console.log("Derived key:", key.toString("hex"));
+            var hash = _crypto.createHmac("sha1", key);
+            hash.update(new Buffer("30820bfd3082037606092a864886f70d010701a0820367048203633082035f3082035b060b2a864886f70d010c0a0102a08202b6308202b2301c060a2a864886f70d010c0103300e04085343835212293379020207d004820290babb026ed9cd1c3928563b5270ccec68a2806575d11a16ee1bac906f6d4957959f177392162bcdb59460cf6742f6a819a81939fd1adb217af4ca4fccb0c580afa6fbfc310958e342a059bb9ec50c38e386ee6b5d98178b451d7120c11bdfa073b4df18c3d45a77fea48c4cf76fd3cd02ad2fbce6d16a53df57bfb73c23e89d843390e1171744afd4f3a774ef02eed0a336fa639fb0b24d088193b31b811eb6d15e5014d6c798442e37b01f0ced1a637d0256a0f064f5f0f74e2366a9e430cbd90da0212cfe583cb2caba1e6f598157e5b23c7ea8da017e346e64118f4b6d8b4423400185f49f91072bd54bf8d4cfc6c1bbfee22dbea780aea8fc46581970eee55a61d8e74b49236ee15f9587ed355d421e731802f5dad5354e0aebb72f39a6750aa881090a036680aec3bcad4805f2621647d45d6cca784094b9479090df778217bdc35f8f0a6226c096e9fd89981d84000eb54ae57e8979831f76c13c071de8db9ce0d3681939d610f5356845286fd97c9d15678795e53505d2d2ad4f281336cdfe8c338aeb2a4155218f0a2fc754f61a31bca19fd936490b8699c89a18861a6322a161cff8bdcff1d386ffbfb80674d659e275e16fd0d4bb7adf09eddd84e86d95545c92a76ab33a1b0cce2aa44ded8171f46878009d05fe5677f5f20817eddb9946356ba4840ca98314499b028aab748a9003e163046d416e8bde1da234337e71cd752ba6c5b844eb89e6f03208fa71fbe3e6c0104b23098ed57ef830c798693319ae8e1c139c1622c855cc44f94773ceeba2b5fbc57c4d958be16d57e4d62ecdb79c411cf1b9093643a049c85407a708458e6cfca6c4646d6ea9ee9f487d961d0cd0cccf9bbe443476fb4439bf1c8e61cb536181a5fbdc9e7da9c4241bd2992a996c1fc1d1bfdb425804f5ee7be1318191301306092a864886f70d0109153106040401000000301b06092a864886f70d010914310e1e0c007400650073007400300034305d06092b060104018237110131501e4e004d006900630072006f0073006f006600740020005300740072006f006e0067002000430072007900700074006f0067007200610070006800690063002000500072006f007600690064006500723082087f06092a864886f70d010706a08208703082086c0201003082086506092a864886f70d010701301c060a2a864886f70d010c0106300e040839b078f34e7ecd36020207d08082083827b3fca11748fca0b39b087416ae7723b99e45057eb9d0fa376b1debd38138277c202cf25f688ebbe58af96dc872cb2e743b97a7ec8c621f04e6e66b39e4c2560fb3c80eef3278f8388da7389cebc452e1ddc9001071d0e8d0720c4a733e172086a629a684a9db7b134cdfb820b3ccc84ce3e48bb094de5d4a7200d142604cdec3469e507973fbc7deb6f6d0bfa30589f0e4393d2c6b37a335f67978b30cee7192d78a1976e9533478a93af65888c0ec6612fb8c041868385602fe9965e0849613be308da7b272d16a2124d5594c7559c876bbaea12adc8dc2acfad6d7f5ba03f3ca0f5ffe4bfc6f5c71e78313f26eb7aa3e642e38c41928f54bf0a457ebe44b72d0db717765ce5e96ed5272a7749c86626ed3496ad940e5758d70f7bea5f20ed008ca77451005fbf5b97b363dd61c984f75d26254d491ee044516d1d528616250f401391a1fb2b2387695bdfd19c966eb3e35c966a6c2d2f0e18f5792084f249b49b1d68b96060dac4b199f95a115c844a3b367e02e425f0f3bc870faa0e36bc090df0891afe45598abb7eefab6c6248459852b836a9a612e1da4b46149cff6b119b6964b983680e4f6849e981896a05eb4fe750acfef7df39f5cc59b0839a556827d1a7e63606a271ae820e698262ca5cd25c6291420e3ae8586a959dcb4488924de3121602e8129259b299f1767c38164cdb8565ecb5b7c4bbcd11058bb76ce1dfb19f87c4ee77218706c70d078ae680b769f474951ea36c0aca074a4a893eaef2c9b4dfe7673854d8f1c7a61408021c25fe732c10e0aa3434c81a293737e20754d7879074200492057dd49ea109d40bf74e526ec5f3b49e577571af58e7f940868c49179924c1521fb34ef762e5a827550a71cbc39fb35ae059d32c7d28be82d935c5bba7556c51048d55819cd61a7ff404745636cfced19a1df199b9fce4852049adfffa12eab816e11773f118aa0d670b56689499c09ff824db715de99d8b9efd0f17e42f868c80503c2fe7ab81d0d67ce4dbf4b6b5b51bb548afe3c19ca17e1d6e47ef6f3fd359ddccb5c25f1e9f76553171063e7949863ea9a25c3bd977cd5b60aec04c727c29b6907bb9d8cd316deda89ce569d340c83356064e9d8378b0256d3734e304e0b052cb88c3468e0e0ae922e6d212a0e8dcc3e1d54d11b789756de8b628099054e11d11beb1244419bc62d1e167bd13f46c75324f702efd711a38766271c661139a4842fc9b1527d8c78cc0e68664af55931fb62b259796c0fa7bd40e2401cb561b9f86333e3eb42a2714d4d4502adaeb6829a5ba1298dc5622d4be30d47cc351f4802deb4929bf673c3c8d2214f0135c1f84dcb8006a53fe30def1db4705b5578313f0543cc2eb134ce9344d8c463de6338c5d51d76e095c549ab7e07b5ecb50de6f1621a6610e56d661565de3579126c22ef6387b830fe87b079739a63c69866b046d33a5b3c621653a63d91fa066be6b4b606842ca84b0ff1421ed77328cf28ab32d038164488b629535fbd09f16085526214482eb880df182bd79924942c08f6d926e45f220abb274d9d2bd2ec19596d407883f8c945412b7c046e9b6b47778e30e71ff5e6173739c256d48153a109d3e5c7d3631c8f012a18123cc481aa633324d2227efb778d2efecdabcd12ec9b7322202c301603fb34379fa8b9cf1e86f85c41194f82efdc5405a9317625b863706886038cb03190915abbbde7113bfb0b99a24c4e24aab108099f756a3dce480fc1765f69da50257e93e4486c8e78728387840bbe29c49d6bcde59136a64b191cc9fda31f181d8bb0f0d2cd3b7f08118b3387333e2af9d819aa18de8e65448bdb38bb0dbdc41eea9e6d1650b50094dc08c9269e47a5bc7c3617359c66f0a6455bbb0240095e98649d2cb0c9c3cf5684750b4b079fbe20cf5cc52d254d05fe9929b42d8288f85aae417480387a639035aa01eb50a0a4b943bcb813bff3e4f4fdfcd6ab17ac39144d71f59ed93ccbc4637b5272baf943ec17b83f6ac87f8daf35e5116086b069bc04862fe4eb40edbf54992bf6c939b69a5cf973dc43734b232e8a20add3a9fff1db7584c074ae1b40b3445da3e59c1f7f97c646e8fe14e6db8e3772f1720cb70da70fb2cb9804cae074aa5bfbf961353d0002a12a914651bd898792db0c6ed46b8588336a8e10ef3f6ef5f86d5199b3c56f008a0e43113153223b91b4f8b6959543a0cc7c05e1ad5f3d0152d2d0a501f0b03b1a6b9c5f3a0c6bce3ba85e6c50e48e30b696a05220737507b20be661f9344d09825825450c36c5f1749d26ce5bd10ccbb54331702a672cb8f63d6df055309a4a0281d73814a1f51bd9750891111af978cddfd833e8dfecec4399e6e294821d1b85b6b15bdc7b091982f2fe8ca4b114237be2efa9aeb73c8088386ff3d98a1661cb33525bf0e7f53ffcd3b8602e8007c4cfa4e90f2710522dd992a40a0acd8ed2262e1e15946ad0a56754830e6b8942a6a4bb8477aef8f5a8af6d600b12be6712d4779fd0708b7c8d79709e389d4105b287a25c3810f46f39954f8b083b7a68818d026109c23f36b81dae736652ba79578706530cd8584f097e6089cfe7395deb512f7a28ffd66e6a1566022ee78027d240fba0f3b9f865cbce59b6a01f0770d254539ef17fafdac3ab745aa2d98969162d0237caedacb58f855f2a00587dc2980db9f66c7ae798a13d38d850f240d714a13856b3de70844db8609581166454929cbdcc340ce6232bb2bce6619df7fc2c4890d40da6d0143241d347da4004371fdd0ea10ae3b2c206f3dcd1dfeabdd1ee56bcf52731a6e7ab1a2feeacc60b158d3aad4e7a0f6c5dcb781cc7669c7210e2bcabbdc0f66068dc2827632075c82966cd2e25b13e7c09ceb2754ff07d08d9a7728936ac78ad9f578fee0b42e84e16e4dcf665f5465866bef924505e2771f15c3e81e2fada947bcc16b1f7c200dc8af4b8993618f8", "hex"));
+            console.log("Hmac:", hash.digest("hex"));
+
+        </script>
+    </body>
+</html>

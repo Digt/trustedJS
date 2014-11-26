@@ -84,8 +84,7 @@
         function init(v) {
             if (v === undefined)
                 throw "PolicyInformation.new: parameter can not be undefined."
-            if (trusted.isString(v))
-                v = (new trusted.ASN(v)).toObject("PolicyInformation");
+            v = objFromBuffer(v, "PolicyInformation");
             if (!(trusted.isObject(v)) && ("policyIdentifier" in v))
                 throw "PolicyInformation.new: parameter is not valid."
             obj = v;
@@ -204,8 +203,7 @@
         function init(v) {
             if (v === undefined)
                 throw "QualifierInfo.new: parameter can not be undefined."
-            if (trusted.isString(v))
-                v = (new trusted.ASN(v)).toObject("PolicyQualifierInfo");
+            v = objFromBuffer(v, "PolicyQualifierInfo");
             if (!(trusted.isObject(v) && (("policyQualifierId" in v) && ("qualifier" in v))))
                 throw "QualifierInfo.new: parameter is not valid."
             obj = v;

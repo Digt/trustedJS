@@ -35,9 +35,11 @@
         <script src="../pki/src/schemas/pkcs9.js"></script>
         <script src="../pki/src/schemas/pkcs10.js"></script>
         <script src="../pki/src/schemas/pkcs7.js"></script>
+        <script src="../pki/src/schemas/pkcs8.js"></script>
         <script src="../pki/src/oids.js"></script>
 
         <script src="../pki/src/algorithm.js"></script>
+        <script src="../pki/src/algorithms.js"></script>
         <script src="../pki/src/key.js"></script>
         <script src="../pki/src/oid.js"></script>
         <script src="../pki/src/generalName.js"></script>
@@ -53,11 +55,41 @@
         <form style="display:none">
             <input id="file" type="file"  />
         </form>
+        <div id="signForm">
+            <table>
+                <tr>
+                    <td>
+                        <h4>Сертификат подписчика</h4>
+                        <textarea cols="40" rows="6" id="certPEM"></textarea>
+                        <h4>Закрытый ключ подписчика</h4>
+                        <textarea cols="40" rows="6" id="keyPEM"></textarea>
+                    </td>
+                    <td>
+                        <h4>Сертификат ифно:</h4>
+                        <div id="certInfo"></div>
+                    </td>
+                </tr>
+            </table>
+            <h4>Данные для подписи</h4>
+            <div>
+                <textarea rows="6" cols="120" id="tbs">30040302020C</textarea>
+            </div>
+            <input type="button" value="Подписать" onclick="sign()"/>
+            <div>
+                <h4>PKCS7</h4>
+                <textarea rows="6" cols="120" id="signedData"></textarea>
+            </div>
+        </div>
         <div>
             <table id="info"></table>
         </div>
+        <!-- File drop -->
         <script>
-            function Info() {
+            function $(name) {
+                return document.getElementById(name);
+            }
+
+            function Info(name) {
                 var el;
                 this.__proto__.print = function(c, m) {
                     if (c === undefined)
@@ -82,12 +114,12 @@
                     el.innerHTML = "";
                 };
                 function init() {
-                    el = document.getElementById('info');
+                    el = document.getElementById(name);
                 }
                 init.call(this);
             }
 
-            var info = new Info();
+            var info = new Info("info");
             window.fileLoaded = function(der) {
                 info.clear(); // очистить список
 
@@ -137,9 +169,10 @@
                  */
                 info.print("Проверка подписи");
                 var result;
+                var certHex = "308203F7308202DFA003020102020A470550C300000000002D300D06092A864886F70D01010505003066311E301C06092A864886F70D010901160F696E666F40747275737465642E7275310B3009060355040613025255311C301A060355040A1313436966726F766965205465686E6F6C6F676969311930170603550403131043542052534120546573742043412032301E170D3134303531323035333232355A170D3135303531323035343232355A301E310B3009060355040613025255310F300D0603550403130674657374303430819F300D06092A864886F70D010101050003818D0030818902818100A232F40D1CCBA895B8AE77E2832F5FB69E4B27120DE50CD015FDE227BA113B24475817EAA3F6E7A0D132DBC797F679F8913917D34826AB557ADBA7F9D37B9EECC08F700077B442C6A372AF6432889F35CA97ACC2C861E6A59F7BEC910B02E243C2E56D3B0F0F3D41C3B492101197EAD62D1A70173696268524614EFF9677B2670203010001A38201713082016D300E0603551D0F0101FF0404030203D8301D0603551D250416301406082B0601050507030206082B06010505070304301D0603551D0E04160414528842E4B23A4B6837519A665B91CB22A5F4E507301F0603551D23041830168014AF7F9323DA99CB130FF14005EB7D448E87EE5EB73081910603551D1F048189308186308183A08180A07E8641687474703A2F2F766D2D627374382E646967742E6C6F63616C2F43657274456E726F6C6C2F4354253230525341253230546573742532304341253230322E63726C863966696C653A2F2F564D2D425354382E646967742E6C6F63616C2F43657274456E726F6C6C2F435420525341205465737420434120322E63726C306806082B06010505070101045C305A305806082B06010505073002864C66696C653A2F2F564D2D425354382E646967742E6C6F63616C2F43657274456E726F6C6C2F564D2D425354382E646967742E6C6F63616C5F435420525341205465737420434120322E637274300D06092A864886F70D01010505000382010100340F5AC2E5A2D2CA190031E8EF7BB9F49578DA05B3A88A15A2D542B1A82CA2D7195DA12A171D616F510C08FAAC0BBCB848AC0FC0835A866BF97ADF77D9549C00CDC71D893CFD5E278836389E3CC0F31EE5042F220B669E33147ED6884CA10EE1918835695A9F28F7C47CAF6DA41B5C07506643FBF2642640F477B2FC2B1D51D1072287326BD4776F0DC3919FF607F960E9304F65584B70F6C39C35E7D9678F754CFD1F74D9C393A43E5A5EAE39E3FE27D48FF175CC4A8E25A82A3D046089B6F33E124C6501CA93F03EF186FB0C1BB249ED6A8185EC2385DC97030BB4C7EDCE68E51A8A0233CB8010762E65E69138298243108AEBEFF8BA8C22A8E25093A4D2E2";
+                var cert=new trusted.PKI.Certificate(Hex.toDer(certHex));
                 sd.verify().then(
                         function(v) {
-                            console.log("Verification result:", v);
                             info.print("Подпись:", (v.status) ? "Действительна" : "Недействительна");
                             result = v;
                         },
@@ -150,30 +183,19 @@
                         function() {
                             //Печать информации о подписи
                             info.print();
-                            info.print("Подписи");
-                            console.log(result);
+                            info.print("Подписчики");
+                            console.log("Sign result:",result);
                             for (var i = 0; i < result.signerInfos.length; i++) {
                                 info.print("#", i + 1);
-                                info.print("Подпись", result.signerInfos[i].status?"Действиетльна":"Недействительна");
+                                info.print("Подпись", result.signerInfos[i].status ? "Действиетльна" : "Недействительна");
                                 info.print("Сертификат", result.signerInfos[i].signer.certificate.subjectFriendlyName);
                             }
                         }
                 );
 
-                var v = der;
-                try {
-                    v = new PKCS7(v);
-                }
-                catch (e) {
-                    throw "SignedData.new: ASN пакет не соответствует структуре ASN PKCS7.";
-                }
-                if (v.OID.value !== "1.2.840.113549.1.7.2")
-                    throw "SignedData.new: Тип PKCS7 не является SignedData.";
-                var asn = new trusted.ASN(v.content);
-                v = asn.toObject("SignedData");
-                console.log(v);
-
-
+                console.log(sd.toObject());
+                var asn = trusted.ASN.fromObject(sd.toObject(),"SignedData");
+                console.log(Der.toHex(asn.encode()));
             };
 
             var der = Hex.toDer("3082017502010130743066311E301C06092A864886F70D010901160F696E666F40747275737465642E7275310B3009060355040613025255311C301A060355040A1313436966726F766965205465686E6F6C6F676969311930170603550403131043542052534120546573742043412032020A470550C300000000002D300906052B0E03021A0500A05D301806092A864886F70D010903310B06092A864886F70D010701301C06092A864886F70D010905310F170D3134303930383034353133355A302306092A864886F70D01090431160414B61F43AAE0132C461226ED62A9DB1FF3AD30D723300D06092A864886F70D01010105000481800984071A7FE1167613F436D15DAD0DF6E700A87114DB9AC839A036DCDB2BF0D87C146B1C08723C66BBEABF3975BE47664B0F881613403E7383C1BB239D9EA1BB19DDBC26E1DD76199D0B59F24A2C5FBD5DA68393BF2EB3FC7E9D6DCDADE69A2B0A96315EA8AEF57113130EBC3697DBBB2F22ED6898D3190BC113B9B7436A38CA");
@@ -184,6 +206,42 @@
             //s.certificate = new trusted.PKI.Certificate(certDer);
 
 
+        </script>
+        <!-- Data sign -->
+        <script>
+            var certHex = "308203F7308202DFA003020102020A470550C300000000002D300D06092A864886F70D01010505003066311E301C06092A864886F70D010901160F696E666F40747275737465642E7275310B3009060355040613025255311C301A060355040A1313436966726F766965205465686E6F6C6F676969311930170603550403131043542052534120546573742043412032301E170D3134303531323035333232355A170D3135303531323035343232355A301E310B3009060355040613025255310F300D0603550403130674657374303430819F300D06092A864886F70D010101050003818D0030818902818100A232F40D1CCBA895B8AE77E2832F5FB69E4B27120DE50CD015FDE227BA113B24475817EAA3F6E7A0D132DBC797F679F8913917D34826AB557ADBA7F9D37B9EECC08F700077B442C6A372AF6432889F35CA97ACC2C861E6A59F7BEC910B02E243C2E56D3B0F0F3D41C3B492101197EAD62D1A70173696268524614EFF9677B2670203010001A38201713082016D300E0603551D0F0101FF0404030203D8301D0603551D250416301406082B0601050507030206082B06010505070304301D0603551D0E04160414528842E4B23A4B6837519A665B91CB22A5F4E507301F0603551D23041830168014AF7F9323DA99CB130FF14005EB7D448E87EE5EB73081910603551D1F048189308186308183A08180A07E8641687474703A2F2F766D2D627374382E646967742E6C6F63616C2F43657274456E726F6C6C2F4354253230525341253230546573742532304341253230322E63726C863966696C653A2F2F564D2D425354382E646967742E6C6F63616C2F43657274456E726F6C6C2F435420525341205465737420434120322E63726C306806082B06010505070101045C305A305806082B06010505073002864C66696C653A2F2F564D2D425354382E646967742E6C6F63616C2F43657274456E726F6C6C2F564D2D425354382E646967742E6C6F63616C5F435420525341205465737420434120322E637274300D06092A864886F70D01010505000382010100340F5AC2E5A2D2CA190031E8EF7BB9F49578DA05B3A88A15A2D542B1A82CA2D7195DA12A171D616F510C08FAAC0BBCB848AC0FC0835A866BF97ADF77D9549C00CDC71D893CFD5E278836389E3CC0F31EE5042F220B669E33147ED6884CA10EE1918835695A9F28F7C47CAF6DA41B5C07506643FBF2642640F477B2FC2B1D51D1072287326BD4776F0DC3919FF607F960E9304F65584B70F6C39C35E7D9678F754CFD1F74D9C393A43E5A5EAE39E3FE27D48FF175CC4A8E25A82A3D046089B6F33E124C6501CA93F03EF186FB0C1BB249ED6A8185EC2385DC97030BB4C7EDCE68E51A8A0233CB8010762E65E69138298243108AEBEFF8BA8C22A8E25093A4D2E2";
+            var certPKHex = "3082025C02010002818100A232F40D1CCBA895B8AE77E2832F5FB69E4B27120DE50CD015FDE227BA113B24475817EAA3F6E7A0D132DBC797F679F8913917D34826AB557ADBA7F9D37B9EECC08F700077B442C6A372AF6432889F35CA97ACC2C861E6A59F7BEC910B02E243C2E56D3B0F0F3D41C3B492101197EAD62D1A70173696268524614EFF9677B26702030100010281804A58C0B521F5D81888C6AFFD0BD4B332A9EC18C495C9DFCDA1C6F5DAEFD6E61D02F6C63FAF58856399808E6D36A2ABD5DBFB27889911E087160189456242CFDD4AB7158E5626DFAEFDADF135DF6F6DAA7917F5C3C7CC276BCD16B7DD70025B28809F7DC15F684C307ED5BF4903B83CE43D53339BD9BAA36D8DC66D065926AD41024100CCDB37E5A40CEB7FFABA75C25921908FBBAF04A913F3B17FD6E2D7A642ED0CAECC93871AA4453108E4CD98373BC840B1E699D823CC021FE974C1E8C4617FC753024100CAB16BF0BB10E53C7485EBBE3470B1D861ED190928ABB5746B843EF236BC7F3F3BA79C1494285F5257B984CCBE134A2E2459DC9CA6B8DD6DA839CB28ADBBAA1D024100A17ABC191CB3C27F6358CFB29F27C2184ACDAF52C813747B5D1BFAF968100BCB4E1F8C8407B132F1DBC9E48EC56518FA22D86A73ED404F7F6B35DF11CDF9375902403AB1FA11F1F9C888232E0CC03DAB4CB4DE56AC634C95BCAC03DE7DE3E219DFB74DED11739C1BBCCEB97C8D8A44988D68A33A2A7A6A852A09F1271B3FA25FAFB902407BDEBD96E3DD01355E6B32089B65CA6AE3D3A63ECAA095ECE2C7BC995B1CD262FE72E815954405BEBC15B9AE077B7DB2738AE7AB6BDD9E07E51FD35EF5442E16";
+
+            $("certPEM").value = Base64.format(Base64.fromHex(certHex), "certificate");
+            $("keyPEM").value = Base64.format(Base64.fromHex(certPKHex), "rsa private key");
+
+            var cert = new trusted.PKI.Certificate(Hex.toDer(certHex));
+            var pk = new trusted.PKI.PrivateKey(Hex.toDer(certPKHex), "rsa-sha1");
+
+            var certInfo = new Info("certInfo");
+            certInfo.print("Имя", cert.subjectFriendlyName);
+            certInfo.print("Издатель", cert.issuerFriendlyName);
+            certInfo.print("Действителен", cert.checkValidity() ? "Да" : "Нет");
+            certInfo.print("С", cert.notBefore);
+            certInfo.print("По", cert.notAfter);
+
+            function sign() {
+                $("signedData").value = "";
+                var content = $("tbs").value;
+                if (content === "" || content === undefined || content === null)
+                    $("signedData").value = "Ошибка: Подписываемое значение не может быть пустым.";
+
+                var sd = new trusted.CMS.SignedData();
+                sd.content = Hex.toDer(Der.toHex($("tbs").value));
+                console.log(Der.toHex(sd.content));
+                sd.sign(pk, cert).then(function(s){
+                    $("signedData").value=Base64.format(Base64.fromDer(s),"PKCS7 SIGNED");
+//                    $("signedData").value=Der.toHex(s);
+                }).catch(function(e){
+                    console.error(e);
+                });
+                console.log("SignedData object:", sd.toObject());
+            }
         </script>
     </body>
 </html>

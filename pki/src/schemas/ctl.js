@@ -2,7 +2,7 @@ trusted.schemas.CertificateTrustList = {
     type: "SEQUENCE",
     value: {
         version: {type: "Version", default: 1, index: 0},
-        subjectUsage: {type: "SEQUENCE", maxOccurs: MAX, value: {v: {type: "OBJECT_IDENTIFIER"}}, index:1},
+        subjectUsage: {type: "SEQUENCE", maxOccurs: trusted.MAX, value: {v: {type: "OBJECT_IDENTIFIER"}}, index:1},
         listIdentifier:{type:"OCTET_STRING",optional:true, index: 2},
         sequenceNumber:{type: "INTEGER", optional:true, index: 3},
         thisUpdate:{type:"Time", index: 4},
@@ -15,7 +15,7 @@ trusted.schemas.CertificateTrustList = {
 
 trusted.schemas.CTLSubjects= {
     type:"SEQUENCE",
-    maxOccurs: MAX,
+    maxOccurs: trusted.MAX,
     value:{
         v:{
             type:"SEQUENCE",

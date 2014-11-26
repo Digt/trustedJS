@@ -30,16 +30,14 @@
 
             if (f === undefined)
                 f = true;
-            if (trusted.isString(v) && f) {
-                var asn = new trusted.ASN(v);
-                v = asn.toObject("SubjectSignTool");
-            }
+            if (f)
+                v = objFromBuffer(v, "SubjectSignTool");
             if (!trusted.isString(v))
                 throw "SubjectSignTool.new: parameter is not valid."
             obj = v;
         }
 
-        init.call(this, arguments[0],arguments[1]);
+        init.call(this, arguments[0], arguments[1]);
     }
 
     trusted.PKI.SubjectSignTool = SubjectSignTool;

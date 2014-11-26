@@ -6,6 +6,9 @@
         var df_version = 1;
 
         this.__proto__ = {
+            get type() {
+                return "CRL";
+            },
             get version() {
                 if (obj.tbsCertList.version === null)
                     obj.tbsCertList.version = df_version;
@@ -47,10 +50,12 @@
             },
             get certificates() {
                 if (cache.certs === undefined) {
-                    var certs = obj.tbsCertList.revokedCertificates;
                     cache.certs = [];
-                    for (var i = 0; i < certs.length; i++)
-                        cache.certs.push(new RevokedCertificate(certs[i]));
+                    if (obj.tbsCertList.revokedCertificates !== null) {
+                        var certs = obj.tbsCertList.revokedCertificates;
+                        for (var i = 0; i < certs.length; i++)
+                            cache.certs.push(new RevokedCertificate(certs[i]));
+                    }
                 }
                 return cache.certs;
             },
@@ -118,8 +123,25 @@
             }
         };
 
-        this.__proto__.verify = function() {
-            //TODO: Провевить на равенство SignatureAlgorithm и tbsCertList.Signature
+        this.__proto__.verify = function(key) {
+            var err_t = "CRL.verify: ";
+            if (key === undefined) {
+                return Promise.reject(err_t + "Необходим открытый ключ сертификата издателя.");
+            } else {
+                switch (key.type) {
+                    case "Certificate":
+                        key = key.publicKey;
+                        break;
+                    case "PublicKey":
+                        break;
+                    default:
+                        return Promise.reject(err_t + "Параметр неизвестного типа");
+                }
+            }
+
+            var verifier = trusted.Crypto.createVerify(this.signatureAlgorithm);
+            verifier.update(this.TBSCertList);
+            return verifier.verify(key, this.signature.encoded);
         };
 
         // check if certificate is in CRL list of certificates.
@@ -127,7 +149,7 @@
             var certs = this.certificates;
             // check for extn(2.5.29.28).indirectCRL
             var extn = this.getExtension("2.5.29.28");
-            if (extn!==null)
+            if (extn !== null)
                 extn = new trusted.PKI.IssuingDistributionPoint(extn.value);
             var issuerName = null;
             if (extn === null || !extn.indirectCRL)
@@ -183,11 +205,11 @@
             var asn = null;
             cache = {};
             cache.tbs = null;
-            if (trusted.isString(v)) {
-                asn = new trusted.ASN(v);
-                v = asn.toObject("CertificateList");
-                cache.tbs = asn.structure.sub[0].encode();
-            }
+            if (trusted.isString(v))
+                v = new trusted.Buffer(v, "binary");
+            asn = new trusted.ASN(v);
+            v = asn.toObject("CertificateList");
+            cache.tbs = asn.sub[0].blob();
             if (!(trusted.isObject(v) || (true)))
                 throw "CRL.new: Задан неверный параметр.";
             obj = v;
@@ -291,10 +313,7 @@
         function init(v) {
             if (v === undefined)
                 throw "RevokedCertificate.new: Параметр не может быть Undefined";
-            if (trusted.isString(v)) {
-                var asn = new trusted.ASN(v);
-                v = asn.toObject("RevokedCertificate");
-            }
+            v = objFromBuffer(v, "RevokedCertificate");
             if (!(trusted.isObject(v) || ("userCertificate" in v && "revocationDate" in v)))
                 throw "RevokedCertificate.new: Задан неверный параметр.";
 

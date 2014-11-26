@@ -43,7 +43,7 @@ if (window.trusted.schemas === undefined)
 
     namespace.DigestAlgorithmIdentifiers = {
         type: "SET",
-        maxOccurs: MAX,
+        maxOccurs: trusted.MAX,
         value: {
             digestAlgorithmIdentifier: {type: "DigestAlgorithmIdentifier"}
         }
@@ -55,7 +55,7 @@ if (window.trusted.schemas === undefined)
 
     namespace.SignerInfos = {
         type: "SET",
-        maxOccurs: MAX,
+        maxOccurs: trusted.MAX,
         value: {
             signerInfo: {type: "SignerInfo"}
         }
@@ -92,7 +92,7 @@ if (window.trusted.schemas === undefined)
 
     namespace.ExtendedCertificatesAndCertificates = {
         type: "SET",
-        maxOccurs: MAX,
+        maxOccurs: trusted.MAX,
         value: {
             extendedCertificateOrCertificate: {type: "ExtendedCertificateOrCertificate"}
         }
@@ -142,7 +142,7 @@ if (window.trusted.schemas === undefined)
 
     namespace.CertificateRevocationLists = {
         type: "SET",
-        maxOccurs: MAX,
+        maxOccurs: trusted.MAX,
         value: {
             v: {type: "CertificateRevocationList"}
         }
@@ -157,7 +157,7 @@ if (window.trusted.schemas === undefined)
             nextUpdate: {type: "UTC_TIME", index: 3},
             revokedCertificates: {
                 type: "SEQUENCE",
-                maxOccurs: MAX,
+                maxOccurs: trusted.MAX,
                 optional: true,
                 index: 4,
                 value: {
@@ -174,14 +174,79 @@ if (window.trusted.schemas === undefined)
             revocationDate: {type: "UTC_TIME", index: 1}
         }
     };
-    
+
     // SigneDataContent
-    namespace.SignedDataContent = {
-                type: "OCTET_STRING",
-                maxOccurs: MAX,
-                value: {
-                    v: {type: "OCTET_STRING"}
-                }
-            };
+    namespace.DataContent = {
+        type: "OCTET_STRING",
+        maxOccurs: trusted.MAX,
+        value: {
+            v: {type: "OCTET_STRING"}
+        }
+    };
+
+    namespace.DigestInfo = {
+        type: "SEQUENCE",
+        value: {
+            digestAlgorithm: {type: "DigestAlgorithmIdentifier", index: 0},
+            digest: {type: "Digest", index: 1}
+        }
+    };
+
+    namespace.Digest = {type: "OCTET_STRING"};
+
+    //EncryptedData
+    namespace.EncryptedData = {
+        type: "SEQUENCE",
+        value: {
+            version: {type: "Version", index: 0},
+            encryptedContentInfo: {type: "EncryptedContentInfo", index: 1}
+        }
+    };
+
+    namespace.EncryptedContentInfo = {
+        type: "SEQUENCE",
+        value: {
+            contentType: {type: "ContentType", index: 0},
+            contentEncryptionAlgorithm: {type: "ContentEncryptionAlgorithmIdentifier", index: 1},
+            encryptedContent: {type: "EncryptedContent", context: 0, implicit: true, optional: true, index: 2}
+        }
+    };
+
+    namespace.EncryptedContent = {type: "OCTET_STRING"};
+
+    namespace.ContentEncryptionAlgorithmIdentifier = {type: "AlgorithmIdentifier"};
+
+    namespace.EnvelopedData = {
+        type: "SEQUENCE",
+        value: {
+            version: {type: "Version", index: 0},
+            recipientInfos: {type: "RecipientInfos", index: 1},
+            encryptedContentInfo: {type: "EncryptedContentInfo", index: 2}
+        }
+    };
+
+    namespace.RecipientInfos = {
+        type: "SET",
+        maxOccurs: trusted.MAX,
+        value: {
+            v: {type: "RecipientInfo"}}
+    };
+
+    namespace.RecipientInfo = {
+        type: "SEQUENCE",
+        value: {
+            version: {type: "Version", index: 0},
+            issuerAndSerialNumber: {type: "IssuerAndSerialNumber", index: 1},
+            keyEncryptionAlgorithm: {type: "KeyEncryptionAlgorithmIdentifier", index: 2},
+            encryptedKey: {type: "EncryptedKey", index: 3}
+        }
+    };
+
+    namespace.EncryptedKey = {type: "OCTET_STRING"};
+
+    namespace.KeyEncryptionAlgorithmIdentifier = {
+        type: "AlgorithmIdentifier"
+    };
+
 
 })(window.trusted.schemas);

@@ -47,10 +47,7 @@ function SignerAttribute() {
                     a = false;
                 else
                     a = args[1];
-                if (trusted.isString(args[0])) {
-                    var asn = new trusted.ASN(args[0]);
-                    args[0] = asn.toObject("Attribute");
-                }
+                v = objFromBuffer(args[0], "Attribute");
                 if (!(trusted.isObject(args[0]) && ("values" in args[0] && "type" in args[0])))
                     throw "SignerAttribute.new: Неверный параметр."
         }

@@ -31,8 +31,7 @@
         function init(v) {
             if (v === undefined)
                 throw "Extension.new: parameter can not be undefined."
-            if (typeof (v) === "string")
-                v = (new trusted.ASN(v)).toObject("Extension");
+            v = objFromBuffer(v, "Extension");
             if (!(trusted.isObject(v) &&
                     "critical" in v &&
                     "extnID" in v &&

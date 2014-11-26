@@ -48,10 +48,7 @@
             if (v === undefined) {
                 throw "IssuerSignTool.new: parameter can not be undefined."
             }
-            if (trusted.isString(v)) {
-                var asn = new trusted.ASN(v);
-                v = asn.toObject("IssuerSignTool");
-            }
+            v = objFromBuffer(v, "IssuerSignTool");
             if (!(trusted.isObject(v) && (("signTool" in v) || ("cATool" in v) ||
                     ("signToolCert" in v) || ("cAToolCert" in v))))
                 throw "IssuerSignTool.new: parameter is not valid."

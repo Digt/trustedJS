@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>ASN decoder</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+        <style>
+            *{
+                font-family: Arial;
+            }
+            .caption{
+                font-weight: bold;
+                color:#999;
+                text-align: right;
+            }
+            .label{
+                font-weight: bold;
+                color:#333;
+                text-align: right;
+                width: 150px;
+            }
+            td{
+                padding:0px 5px;
+            }
+        </style>
+        <script src="../trustedJS.js"></script>
+        <script src="../test/js/fileReader.js"></script>
+
+        <script src="../asn/asn.js"></script>
+
+        <!-- PKI module -->
+        <script src="../pki/src/common.js"></script>
+        <script src="../pki/src/crypto.js"></script>
+        <script src="../pki/src/schemas/rfc5280.js"></script>
+        <script src="../pki/src/schemas/pkcs9.js"></script>
+        <script src="../pki/src/schemas/pkcs10.js"></script>
+        <script src="../pki/src/schemas/pkcs7.js"></script>
+        <script src="../pki/src/oids.js"></script>
+
+        <script src="../pki/src/algorithm.js"></script>
+        <script src="../pki/src/algorithms.js"></script>
+        <script src="../pki/src/key.js"></script>
+        <script src="../pki/src/oid.js"></script>
+        <script src="../pki/src/generalName.js"></script>
+        <script src="../pki/src/certificate.js"></script>
+        <script src="../pki/src/pkcs7.js"></script>
+
+        <script src="src/common.js"></script>
+        <script src="src/signedData.js"></script>
+        <script src="src/signer.js"></script>
+        <script src="src/signerAttribute.js"></script>
+        <script src="src/envelopedData.js"></script>
+        <script src="src/recipient.js"></script>
+    </head>
+    <body>
+        <form style="display:none">
+            <input id="file" type="file"  />
+        </form>
+        <div>
+            <table id="info"></table>
+        </div>
+        <script>
+            var privateKeyPKCS8 = "30820276020100300D06092A864886F70D0101010500048202603082025C02010002818100A232F40D1CCBA895B8AE77E2832F5FB69E4B27120DE50CD015FDE227BA113B24475817EAA3F6E7A0D132DBC797F679F8913917D34826AB557ADBA7F9D37B9EECC08F700077B442C6A372AF6432889F35CA97ACC2C861E6A59F7BEC910B02E243C2E56D3B0F0F3D41C3B492101197EAD62D1A70173696268524614EFF9677B26702030100010281804A58C0B521F5D81888C6AFFD0BD4B332A9EC18C495C9DFCDA1C6F5DAEFD6E61D02F6C63FAF58856399808E6D36A2ABD5DBFB27889911E087160189456242CFDD4AB7158E5626DFAEFDADF135DF6F6DAA7917F5C3C7CC276BCD16B7DD70025B28809F7DC15F684C307ED5BF4903B83CE43D53339BD9BAA36D8DC66D065926AD41024100CCDB37E5A40CEB7FFABA75C25921908FBBAF04A913F3B17FD6E2D7A642ED0CAECC93871AA4453108E4CD98373BC840B1E699D823CC021FE974C1E8C4617FC753024100CAB16BF0BB10E53C7485EBBE3470B1D861ED190928ABB5746B843EF236BC7F3F3BA79C1494285F5257B984CCBE134A2E2459DC9CA6B8DD6DA839CB28ADBBAA1D024100A17ABC191CB3C27F6358CFB29F27C2184ACDAF52C813747B5D1BFAF968100BCB4E1F8C8407B132F1DBC9E48EC56518FA22D86A73ED404F7F6B35DF11CDF9375902403AB1FA11F1F9C888232E0CC03DAB4CB4DE56AC634C95BCAC03DE7DE3E219DFB74DED11739C1BBCCEB97C8D8A44988D68A33A2A7A6A852A09F1271B3FA25FAFB902407BDEBD96E3DD01355E6B32089B65CA6AE3D3A63ECAA095ECE2C7BC995B1CD262FE72E815954405BEBC15B9AE077B7DB2738AE7AB6BDD9E07E51FD35EF5442E16";
+
+            function Info() {
+                var el;
+                this.__proto__.print = function(c, m) {
+                    if (c === undefined)
+                        c = '&nbsp;';
+                    var tr = document.createElement("tr");
+                    var tc = document.createElement("td");
+                    tc.innerHTML = c;
+                    if (m !== undefined) {
+                        tc.setAttribute("class", "label");
+                    }
+                    else {
+                        tc.setAttribute("class", "caption");
+                        m = "&nbsp;";
+                    }
+                    var td = document.createElement("td");
+                    td.innerHTML = m;
+                    tr.appendChild(tc);
+                    tr.appendChild(td);
+                    el.appendChild(tr);
+                };
+                this.__proto__.clear = function() {
+                    el.innerHTML = "";
+                };
+                function init() {
+                    el = document.getElementById('info');
+                }
+                init.call(this);
+            }
+
+            var info = new Info();
+            window.fileLoaded = function(der) {
+                info.clear(); // очистить список
+
+                //проверка входных данных
+                try {
+                    if (Base64.re.test(der))
+                        der = Base64.unarmor(der);
+                    else
+                        der = Base64.toDer(der);
+                }
+                catch (e) {
+                    try {
+                        der = Hex.toDer(der);
+                    }
+                    catch (e) {
+                    }
+                }
+
+                //контроль времени на декодирование
+                console.time("ASN decode");
+                var ed = new EnvelopedData(der);
+                console.timeEnd("ASN decode");
+                console.log(ed);
+
+                info.print("Enveloped data");
+                info.print("Содержимое", Der.toHex(ed.content));
+
+                info.print();
+                info.print("Получатели");
+                for (var i = 0; i < ed.recipients.length; i++) {
+                    info.print("#", i + 1);
+                    info.print("Алгоритм шифрованного ключа", ed.recipients[i].algorithm);
+                    info.print("Шифрованный ключ", Der.toHex(ed.recipients[i].encryptedKey));
+                    info.print("Издатель сертификата:", ed.recipients[i].certificateID.issuerName);
+                    info.print("Серийный номер сертификата:", ed.recipients[i].certificateID.serialNumber);
+                    info.print();
+                }
+            };
+
+            var alg = "rc2";
+            var psw = "12345";
+            var data = "Теперь сюда можно заложить любое значение";
+            var cipher = trusted.Crypto.createCipher(alg, psw);
+            cipher.update(data);
+            cipher.final().then(function(v) {
+                console.log("------------ Promise -----------------");
+                console.log("Wrapping encrypt:",v);
+                var decipher = trusted.Crypto.createDecipher(alg, psw);
+                decipher.update(v);
+                return decipher.final();
+            }).then(function(v) {
+                console.log("Decipher.final:", v);
+            }).catch(function(error) {
+                console.error(error);
+            });
+
+            var _crypto = require('crypto');
+            var key = '12345';
+            var plaintext = 'Теперь сюда можно заложить любое значение';
+            var alg1 = 'aes128';
+            var cipher = _crypto.createCipher(alg1, key);
+            var decipher = _crypto.createDecipher(alg1, key);
+
+            plaintext = trusted.Utf8.toDer(plaintext);
+            var encryptedPassword = cipher.update(plaintext, 'binary', 'binary');
+            encryptedPassword += cipher.final('binary');
+
+            var decryptedPassword = decipher.update(encryptedPassword, 'binary','binary');
+            decryptedPassword += decipher.final('binary');
+
+            console.log('encrypted :', encryptedPassword);
+            console.log('decrypted :', trusted.Utf8.fromDer(decryptedPassword));
+
+
+        </script>
+    </body>
+</html>

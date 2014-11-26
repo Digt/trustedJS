@@ -54,8 +54,7 @@ trusted.PKI.KeyUsageFlags = {
                 obj = new BitString(v);
                 return;
             }
-            if (typeof (v) === "string")
-                v = (new trusted.ASN(v)).toObject("KeyUsage");
+            v = objFromBuffer(v, "KeyUsage");
             if (!(trusted.isObject(v) &&
                     v.__proto__.hasOwnProperty("unusedBit") &&
                     v.__proto__.hasOwnProperty("encoded")))

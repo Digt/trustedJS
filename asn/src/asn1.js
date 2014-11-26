@@ -1,78 +1,443 @@
+//check for nodejs
+if (window.module !== undefined) {
+    var fs = require("fs");
+} else
+    console.warn("Module nodejs is not found");
+var messages = {
+};
+var reTime = /^((?:1[89]|2\d)?\d\d)(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])([01]\d|2[0-3])(?:([0-5]\d)(?:([0-5]\d)(?:[.,](\d{1,3}))?)?)?(Z|[-+](?:[0]\d|1[0-2])([0-5]\d)?)?$/,
+        reOID = /^[0-2](\.\d+)+$/g;
 
+function Stream() {
+    var BUFFER_SIZE = 1024;
+    var _this = this;
+    var _buf = new trusted.Buffer(BUFFER_SIZE);
+    var _fd = null;
+    var _pos, _curBufS, _curBufP, _curBufE;
+    this.length = 0;
+    this.filePointer = function() {
+        return _fd;
+    };
+    this.print = function() {
+        var str = "";
+        this.get(0);
+        while (!this.EOS())
+            str += String.fromCharCode(this.get());
+        return str;
+    };
+    function fileRead(start) {
+        _curBufS = 0;
+        _curBufP = 0;
+        _buf = new Buffer(BUFFER_SIZE);
+        _curBufE = fs.readSync(_fd, _buf, 0, BUFFER_SIZE, start);
+        // converts nodejs Buffer to trusted.Buffer
+        _buf = new trusted.Buffer(_buf);
+    }
 
-var        ellipsis = "\u2026",
-        reTime = /^((?:1[89]|2\d)?\d\d)(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])([01]\d|2[0-3])(?:([0-5]\d)(?:([0-5]\d)(?:[.,](\d{1,3}))?)?)?(Z|[-+](?:[0]\d|1[0-2])([0-5]\d)?)?$/;
-function stringCut(str, len) {
-    if (str.length > len)
-        str = str.substring(0, len) + ellipsis;
-    return str;
+    this.load = function(obj, type, start, end) {
+        switch (type) {
+            case "file":
+                _fd = fs.openSync(obj, "rs");
+                this.length = fs.fstatSync(_fd).size;
+                _pos = 0;
+                fileRead(0);
+                break;
+            default: // binary;
+                _buf = new trusted.Buffer(obj, "binary");
+                this.length = _curBufE = _buf.length;
+                _pos = _curBufS = _curBufP = 0;
+        }
+    };
+    this.EOS = function() {
+        return _pos === this.length;
+    };
+    this.position = function(v) {
+        if (v !== undefined) {
+            this.get(v);
+        }
+        return _pos;
+    };
+    this.get = function(v) {
+        var _c;
+        if (v !== undefined) {
+            var l = _pos - _curBufP;
+            var r = (_pos - _curBufP) + _curBufE - 1;
+            if ((v < l || v > r) && !isStreamFromFile()) {
+                fileRead(v);
+            }
+            else {
+                _curBufP += v - _pos;
+            }
+            _pos = v;
+            return _buf[_curBufP];
+        }
+        else {
+            _c = _buf[_curBufP];
+            //console.log(_curBufP+1, _c);
+            if (++_curBufP >= _curBufE && !isStreamFromFile()) {
+                fileRead(_pos + 1);
+            }
+            ++_pos;
+        }
+        return _c;
+    };
+    function isStreamFromFile() {
+        return _this.length === (_curBufE - _curBufS);
+    }
+
+    function init(args) {
+        if (args.length > 0)
+            this.load(args[0], args[1], args[2], args[3]);
+    }
+
+    init.call(this, arguments);
 }
 
+function ASN1() {
+    this.tag;
+    this.length;
+    this.sub = [];
+    this.stream;
+    var _this = this;
+    this.__proto__.posStart = function() {
+        return this.position;
+    };
+    this.__proto__.posContent = function() {
+        return (this.position + this.header);
+    };
+    this.__proto__.posEnd = function() {
+        return (this.position + this.header + this.length - 1);
+    };
+    this.__proto__.isNull = function() {
+        return (this.tag.class === 0 && this.tag.number === 0 && this.length === 0);
+    };
+    this.__proto__.blob = function() {
+        var buf = new trusted.Buffer(this.posEnd() + 1 - this.posStart());
+        this.stream.position(this.posStart());
+        var i = 0;
+        while (this.stream.position() <= this.posEnd()) {
+            buf[i++] = this.stream.get();
+        }
+        return buf;
+    };
+    this.__proto__.content = function() {
+        var buf = new trusted.Buffer(this.posEnd() - this.posContent() + 1);
+        this.stream.position(this.posContent());
+        var j = 0;
+        for (var i = this.posContent(); i <= this.posEnd(); i++)
+            buf[j++] = this.stream.get();
+        return buf;
+    };
+    this.__proto__.toValue = function(type) {
+        if (type === undefined)
+            type = this.tag.type;
+        if (trusted.isNumber(type))
+            for (var key in ASN1TagType)
+                if (ASN1TagType[key] === type) {
+                    type = key;
+                    break;
+                }
+        return ASNType[type].decode(this.content());
+    };
+    function decode() {
+        this.tag = ASNTag.fromByte(this.stream.get());
+        this.length = decodeLength(this.stream);
+        this.header = this.stream.position() - this.posStart();
+        if (this.tag.constructed) {
+            var _end = this.posEnd() + 1;
+            while ((this.stream.position() < _end || this.length === null)) {
+                var asn = new ASN1(this.stream, this.stream.position());
+                if (asn.isNull())
+                    break;
+                this.sub.push(asn);
+            }
+        }
+        else {
+            this.stream.position(this.posEnd() + 1);
+        }
+    }
 
-// <editor-fold defaultstate="collapsed" desc=" Stream ">
-function Stream(enc, pos) {
-    if (enc instanceof Stream) {
-        this.enc = enc.enc;
-        this.pos = enc.pos;
-    } else {
-        this.enc = enc;
-        this.pos = pos;
+    function decodeLength(stream) {
+        var buf = stream.get(),
+                len = buf & 0x7F;
+        if (len === buf)
+            return len;
+        if (len > 6) // no reason to use Int10, as it would be a huge buffer anyrnys
+            throw "Length over 48 bits not supported at position " + (stream.pos - 1);
+        if (len === 0)
+            return null; // undefined
+        buf = 0;
+        for (var i = 0; i < len; ++i)
+            buf = (buf * 256) + stream.get();
+        return buf;
     }
+
+    this.toObject = function(schema) {
+        return ASNToObject(this, schema);
+    };
+
+
+    function init(args) {
+//console.log("Position(Old/new): %d - %d", _pos, args[0]);
+        if (args[0] instanceof trusted.Stream)
+            this.stream = args[0];
+        else {
+            this.stream = new trusted.Stream();
+            this.stream.load(new trusted.Buffer(args[0], "binary"));
+        }
+        this.position = 0;
+        if (args[1] !== undefined)
+            this.position = args[1];
+        decode.call(this);
+    }
+
+    init.call(this, arguments);
 }
-Stream.prototype.get = function(pos) {
-    if (pos === undefined)
-        pos = this.pos++;
-    if (pos >= this.enc.length)
-        throw 'Requesting byte offset ' + pos + ' on a stream of length ' + this.enc.length;
-    return this.enc.charCodeAt(pos);
-    //return this.enc[pos];
-};
-Stream.prototype.derDump = function(start, end) {
-    return this.enc.substring(start, end);
-};
-Stream.prototype.hexDigits = "0123456789ABCDEF";
-Stream.prototype.hexByte = function(b) {
-    return this.hexDigits.charAt((b >> 4) & 0xF) + this.hexDigits.charAt(b & 0xF);
-};
-Stream.prototype.isASCII = function(start, end) {
-    for (var i = start; i < end; ++i) {
-        var c = this.get(i);
-        if (c < 32 || c > 176)
-            return false;
+
+ASN1.fromObject = function(obj, schema) {
+    var arr = ObjectToASN(obj, schema);
+    var der = '';
+    for (var i = 0; i < arr.length; i++) {
+        der += String.fromCharCode(arr[i]);
     }
-    return true;
+    return new ASN1(der);
 };
-// <editor-fold defaultstate="collapsed" desc=" Parse ">
-Stream.prototype.parseStringISO = function(start, end) {
-    var s = "";
-    for (var i = start; i < end; ++i)
-        s += String.fromCharCode(this.get(i));
-    return s;
+
+function ASNTag() {
+    this.class;
+    this.constructed;
+    this.number;
+    // return name of tag universal type
+    this.__defineGetter__("type", function() {
+        if (this.class === ASN1TagClass.UNIVERSAL) {
+            for (var key in ASN1TagType) {
+                if (ASN1TagType[key] === this.number)
+                    return key;
+            }
+        }
+        return null;
+    });
+    this.__proto__.isUniversal = function() {
+        return this.class === ASN1TagClass.UNIVERSAL;
+    };
+}
+
+ASNTag.fromByte = function(b) {
+    if (!trusted.isNumber(b))
+        throw "Parameter is not byte.";
+    var tag = new ASNTag();
+    tag.class = b >> 6;
+    tag.constructed = ((b & 0x20) !== 0);
+    tag.number = b & 0x1F;
+    if (tag.number === 0x1F)
+        throw "Long tag is not used";
+    return tag;
 };
-Stream.prototype.parseStringUTF = function(start, end) {
-    var s = "";
-    for (var i = start; i < end; ) {
-        var c = this.get(i++);
-        if (c < 128)
-            s += String.fromCharCode(c);
-        else if ((c > 191) && (c < 224))
-            s += String.fromCharCode(((c & 0x1F) << 6) | (this.get(i++) & 0x3F));
-        else
-            s += String.fromCharCode(((c & 0x0F) << 12) | ((this.get(i++) & 0x3F) << 6) | (this.get(i++) & 0x3F));
+
+var ASNType = {
+    BOOLEAN: {
+        decode: function(v) {
+            return (v[0] === 0) ? false : true;
+        },
+        encode: function(v) {
+            var buf = new trusted.Buffer(1);
+            buf[0] = v ? 1 : 0;
+            return buf;
+        }
+    },
+    INTEGER: {
+        decode: function(val) {
+            var v = val[0],
+                    neg = (v > 127),
+                    pad = neg ? 255 : 0,
+                    len,
+                    s = '';
+            // skip unuseful bits (not allowed in DER)
+            //while (v == pad && ++start < end)
+            //    v = this.get(start);
+            len = val.length;
+            if (len === 0)
+                return neg ? -1 : 0;
+            // show bit length of huge integers
+            //if (len > 4) {
+            //    s = v;
+            //    len <<= 3;
+            //    while (((s ^ pad) & 0x80) == 0) {
+            //        s <<= 1;
+            //       --len;
+            //   }
+            //   s = "(" + len + " bit)\n";
+            //}
+            // decode the integer
+            if (neg)
+                v = v - 256;
+            var n = new BigInt(v);
+            for (var i = 1; i < len; ++i)
+                n.mulAdd(256, val[i]);
+            return n;
+        },
+        encode: function(v) {
+        }
+    },
+    BIT_STRING: {
+        decode: function(v) {
+            return new BitString(v.slice(1).toString("binary"), v[0]);
+        },
+        encode: function(v) {
+            var bs = v;
+            if (trusted.isString(v))
+                bs = BitString.fromString(v);
+            var buf = new trusted.Buffer(bs.encoded.length + 1);
+            buf[0] = bs.unusedBit;
+            for (var i = 0; i < bs.encoded.length; i++)
+                buf[i + 1] = bs.encoded.charCodeAt(i);
+            return buf;
+        }
+    },
+    OCTET_STRING: {
+        decode: function(v) {
+            return v;
+        },
+        encode: function(v) {
+            return new Buffer(v, "binary");
+        }
+    },
+    OBJECT_IDENTIFIER: {
+        decode: function(val) {
+            val = new trusted.Buffer(val, "binary");
+            var s = '',
+                    n = new BigInt(),
+                    bits = 0;
+            for (var i = 0; i < val.length; ++i) {
+                var v = val[i];
+                n.mulAdd(128, v & 0x7F);
+                bits += 7;
+                if (!(v & 0x80)) { // finished
+                    if (s === '') {
+                        n = n.simplify();
+                        var m = n < 80 ? n < 40 ? 0 : 1 : 2;
+                        s = m + "." + (n - m * 40);
+                    } else
+                        s += "." + n.toString();
+                    //if (s.length > maxLength)
+                    //    return stringCut(s, maxLength);
+                    n = new BigInt();
+                    bits = 0;
+                }
+            }
+            if (bits > 0)
+                s += ".incomplete";
+            return s;
+        },
+        encode: function(v) {
+
+            if (!reOID.test(v))
+                throw "'" + v + "' is wrong value.";
+            var buf = new trusted.Buffer(1);
+            v = v.split(".");
+            for (var i = 0; i < v.length; i++) {
+                v[i] = parseInt(v[i]);
+            }
+            buf[0] = v[1] + (v[0] * 40);
+            for (var i = 2; i < v.length; i++) {
+                var arr = encodeSID(v[i]);
+                buf = buf.concat(arr);
+            }
+            return buf;
+        }
+    },
+    SET: {decode: function() {
+            return null;
+        }, encode: function() {
+            return null;
+        }},
+    SEQUENCE: {decode: function() {
+            return null;
+        }, encode: function() {
+            return null;
+        }},
+    UTF8_STRING: {
+        decode: function(v) {
+            return v.toString();
+        },
+        encode: function(v) {
+            var b = new trusted.Buffer(v);
+            return b;
+        }
+    },
+    NUMERIC_STRING: {
+        decode: function(v) {
+            return v.toString("binary");
+        },
+        encode: function(v) {
+            var b = new trusted.Buffer(v, "binary");
+            return b;
+        }
+    },
+    BMP_STRING: {
+        decode: function(v) {
+            return v.toString("ucs2");
+        },
+        encode: function(v) {
+            var b = new trusted.Buffer(v, "ucs2");
+            return b;
+        }
+    },
+    UTC_TIME: {
+        decode: function(v) {
+            return TimeParser(v, true);
+        },
+        encode: function(v) {
+            return TimeEncoder(v, true);
+        }
+    },
+    GENERALIZED_TIME: {
+        decode: function(v) {
+            return TimeParser(v, false);
+        },
+        encode: function(v) {
+            return TimeEncoder(v, false);
+        }
     }
-    return s;
 };
-Stream.prototype.parseStringBMP = function(start, end) {
-    var str = "", hi, lo;
-    for (var i = start; i < end; ) {
-        hi = this.get(i++);
-        lo = this.get(i++);
-        str += String.fromCharCode((hi << 8) | lo);
+ASNType.PRINTABLE_STRING = ASNType.NUMERIC_STRING;
+ASNType.TELETEX_STRING = ASNType.NUMERIC_STRING;
+ASNType.VIDEOTEX_STRING = ASNType.NUMERIC_STRING;
+ASNType.IA5_STRING = ASNType.NUMERIC_STRING;
+//case 0x19: // GraphicString
+ASNType.VISIBLE_STRING = ASNType.NUMERIC_STRING;
+//case 0x1B: // GeneralString
+//case 0x1C: // UniversalString
+
+function encodeSID(val) {
+    var asn = [];
+    var num = val;
+    if (val === 0)
+        return [0];
+    for (var i = 5; i >= 0; i--) {
+        var h;
+        var n = Math.pow(128, i);
+        if (n <= num) {
+            h = Math.floor(num / n);
+            num -= Math.pow(128, i) * h;
+            if (i > 0) {
+                asn.push(h | 0x80);
+                if (num === 0) {
+                    for (var j = i - 1; j > 0; j--)
+                        asn.push(0 | 0x80);
+                    asn.push(0);
+                    break;
+                }
+            }
+            else
+                asn.push(h);
+        }
     }
-    return str;
-};
-Stream.prototype.parseTime = function(start, end, shortYear) {
-    var s = this.parseStringISO(start, end),
+    return new trusted.Buffer(asn);
+}
+
+function TimeParser(buf, shortYear) {
+    var s = buf.toString("binary"),
             m = reTime.exec(s);
     if (!m)
         return "Unrecognized time: " + s;
@@ -100,328 +465,171 @@ Stream.prototype.parseTime = function(start, end, shortYear) {
         }
     }
     return new Date(s);
-};
-Stream.prototype.parseInteger = function(start, end) {
-    var v = this.get(start),
-            neg = (v > 127),
-            pad = neg ? 255 : 0,
-            len,
-            s = '';
-    // skip unuseful bits (not allowed in DER)
-    //while (v == pad && start < end)
-    //    v = this.get(++start);
-    len = end - start;
-    if (len === 0)
-        return neg ? -1 : 0;
-    if (len > 8) {
-        for (var i = start; i < end; i++) {
-            var b = this.get(i).toString(16);
-            if (b.length % 2 > 0)
-                b = "0" + b;
-            s += b;
+}
+
+function TimeEncoder(v, shortYear) {
+    if (shortYear === undefined)
+        shortYear = true;
+    if (!v instanceof Date)
+        throw "encodeTime: param must be instance of Date."
+    function formatNum(val) {
+        var str = "";
+        str = val.toString();
+        if (str.length === 1)
+            str = "0" + str;
+        return str;
+    }
+
+    var fd = "";
+    var year = v.getFullYear().toString();
+    if (shortYear)
+        year = year.substring(2);
+    fd += year;
+    fd += formatNum(v.getMonth() + 1);
+    fd += formatNum(v.getDate());
+    fd += formatNum(v.getHours());
+    fd += formatNum(v.getMinutes());
+    fd += formatNum(v.getSeconds());
+    fd += "Z";
+    return new trusted.Buffer(fd, "binary");
+}
+
+var max = 10000000000000; // biggest integer that can still fit 2^53 when multiplied by 256
+
+function BigInt(value) {
+    //init
+    this.buf = [];
+    this.buf[0] = +value || 0;
+}
+
+BigInt.prototype.mulAdd = function(m, c) {     // assert(m <= 256)
+    var b = this.buf,
+            l = b.length,
+            i, t;
+    for (i = 0; i < l; ++i) {
+        t = b[i] * m + c;
+        if (t < max)
+            c = 0;
+        else {
+            c = 0 | (t / max);
+            t -= c * max;
         }
-        return s;
+        b[i] = t;
     }
-    // decode the integer
-    if (neg)
-        v = v - 256;
-    v = v * Math.pow(256, (end - start) - 1);
-    for (var i = start + 1; i < end; i++) {
-        v += this.get(i) * Math.pow(256, (end - i) - 1);
-    }
+    if (c > 0)
+        b[i] = c;
+};
+BigInt.prototype.toString = function(base) {
+    if ((base || 10) != 10)
+        throw 'only base 10 is supported';
+    var b = this.buf,
+            s = b[b.length - 1].toString();
+    for (var i = b.length - 2; i >= 0; --i)
+        s += (max + b[i]).toString().substring(1);
+    return s;
+};
+BigInt.prototype.toNumber = function() {
+    return this.valueOf();
+};
+BigInt.prototype.valueOf = function() {
+    var b = this.buf,
+            v = 0;
+    for (var i = b.length - 1; i >= 0; --i)
+        v = v * max + b[i];
     return v;
 };
-Stream.prototype.parseBitString = function(start, end, maxLength) {
-    var obj = new BitString(this.enc.substring(start + 1, end), this.get(start));
-    return obj;
-    // not use
-    var unusedBit = this.get(start),
-            lenBit = ((end - start - 1) << 3) - unusedBit,
-            intro = "(" + lenBit + " bit)\n",
-            s = "",
-            skip = unusedBit;
-    for (var i = end - 1; i > start; --i) {
-        var b = this.get(i);
-        for (var j = skip; j < 8; ++j)
-            s += (b >> j) & 1 ? "1" : "0";
-        skip = 0;
-        if (s.length > maxLength)
-            return intro + stringCut(s, maxLength);
-    }
-    return intro + s;
+BigInt.prototype.simplify = function() {
+    var b = this.buf;
+    return (b.length === 1) ? b[0] : this;
 };
-Stream.prototype.parseOctetString = function(start, end, maxLength) {
-    return this.enc.substring(start, end);
-    if (this.isASCII(start, end))
-        return stringCut(this.parseStringISO(start, end), maxLength);
-    var len = end - start,
-            s = "(" + len + " byte)\n";
-    maxLength /= 2; // we work in bytes
-    if (len > maxLength)
-        end = start + maxLength;
-    for (var i = start; i < end; ++i)
-        s += this.hexByte(this.get(i));
-    if (len > maxLength)
-        s += ellipsis;
-    return s;
-};
-Stream.prototype.parseOID = function(start, end, maxLength) {
-    var s = '',
-            n = new Int10(),
-            bits = 0;
-    for (var i = start; i < end; ++i) {
-        var v = this.get(i);
-        n.mulAdd(128, v & 0x7F);
-        bits += 7;
-        if (!(v & 0x80)) { // finished
-            if (s === '') {
-                n = n.simplify();
-                var m = n < 80 ? n < 40 ? 0 : 1 : 2;
-                s = m + "." + (n - m * 40);
-            } else
-                s += "." + n.toString();
-            if (s.length > maxLength)
-                return stringCut(s, maxLength);
-            n = new Int10();
-            bits = 0;
+function BitString() {
+    var e;
+    var ub = 0;
+    this.unusedBit = null;
+    this.encoded = null;
+    this.__proto__ = {
+        get unusedBit() {
+            return ub;
+        },
+        set unusedBit(v) {
+            v = parseInt(v);
+            if (isNaN(v) || (v < 0 && v > 7))
+                throw "BitString.unusedBit: Wrang value. Value must be from 0 to 7."
+            ub = v;
+        },
+        get encoded() {
+            return e;
+        },
+        set encoded(v) {
+            if (!trusted.isString(v) && v === '')
+                throw "BitString.encoded: Wrang value. Value must be string and must has length more then 0."
+            e = v;
         }
+    };
+    this.__proto__.toString = function() {
+        var res = '';
+        if (this.encoded !== undefined) {
+            res += "(" + ((this.encoded.length * 8) - this.unusedBit) + ") ";
+            res += Der.toHex(this.encoded);
+        }
+        return res;
+    };
+    function numberToBitString(num) {
+        var bit = num.toString(2); // to Der
+        var l = bit.length % 8;
+        if (l > 0) {
+            for (var i = 0; i < (8 - l); i++)
+                bit = '0' + bit;
+        }
+        //console.log(bit);
+        return BitString.fromString(bit);
     }
-    if (bits > 0)
-        s += ".incomplete";
-    return s;
-};
-// </editor-fold>
-// </editor-fold>
 
-// <editor-fold defaultstate="collapsed" desc=" ASN1 ">
-function ASN1(stream, header, length, tag, sub) {
-    if (!(tag instanceof ASN1Tag))
-        throw 'Invalid tag value.';
-    this.stream = stream;
-    this.header = header;
-    this.length = length;
-    this.tag = tag;
-    this.sub = sub;
+    this.__proto__.toNumber = function() {
+        var n = 0;
+        for (var i = 0; i < this.encoded.length; i++)
+            n |= this.encoded.charCodeAt(i) << ((this.encoded.length - 1 - i) * 8);
+        n = n >> this.unusedBit;
+        return n;
+    };
+    function init(arg) {
+        switch (arg.length) {
+            case 0:
+                throw "BitString.new: It must have 1 or more parameters.";
+                break;
+            case 1:
+                if (!trusted.isNumber(arg[0]))
+                    throw "BitString.new: Parameter must be Number."
+                var bs = numberToBitString(arg[0]);
+                this.encoded = bs.encoded;
+                this.unusedBit = bs.unusedBit;
+                break;
+            default:
+                this.encoded = arg[0];
+                this.unusedBit = (arg[1] === undefined ? 0 : arg[1]);
+        }
+
+    }
+
+    init.call(this, arguments);
 }
 
-ASN1.prototype.encode = function() {
-    return this.stream.enc.substring(this.posStart(), this.posEnd());
-};
+BitString.fromString = function(val) {
+    if (!trusted.isString(val))
+        throw "BitString.fromString: Wrang value. Value must be String."
+    var reg = /^[01]+$/;
+    if (!reg.test(val))
+        throw "BitString.fromString: Wrang value. Value must be String of Bits (01100110)."
 
-ASN1.prototype.toString = function() {
-    return this.stream.enc.substring(this.posStart(), this.posEnd());
-};
-
-ASN1.prototype.className = function() {
-    var asn = this;
-    var result;
-    trusted.objEach(ASN1TagClass, function(v, n) {
-        if (asn.tag.class === v)
-            result = n;
-    });
-    if (result === undefined)
-        result = "Unknown tag class";
-    return result;
-};
-ASN1.prototype.typeName = function() {
-    var asn = this;
-    var result;
-    if (asn.tag.class === ASN1TagClass.UNIVERSAL)
-        trusted.objEach(ASN1TagType, function(v, n) {
-            if (asn.tag.number === v)
-                result = n;
-        });
-    if (result === undefined)
-        result = "Unknown tag type";
-    return result;
-};
-ASN1.prototype.parseSimpleType = function(number, maxLength) {
-    if (number === undefined)
-        return null;
-    if (maxLength === undefined)
-        maxLength = Infinity;
-    var content = this.posContent(),
-            len = Math.abs(this.length);
-    switch (number) {
-        case 0x01: // BOOLEAN
-            return (this.stream.get(content) === 0) ? false : true;
-        case 0x0A: // ENUM
-        case 0x02: // INTEGER
-            return this.stream.parseInteger(content, content + len);
-        case 0x03: // BIT_STRING
-            return this.stream.parseBitString(content, content + len, maxLength);
-        case 0x04: // OCTET_STRING
-            return this.toString().substring(this.header);
-            //case 0x05: // NULL
-        case 0x06: // OBJECT_IDENTIFIER
-            return this.stream.parseOID(content, content + len, maxLength);
-            //case 0x07: // ObjectDescriptor
-            //case 0x08: // EXTERNAL
-            //case 0x09: // REAL
-            //case 0x0A: // ENUMERATED
-            //case 0x0B: // EMBEDDED_PDV
-        case 0x10: // SEQUENCE
-        case 0x11: // SET
-            return this.toString().substring(this.header);
-        case 0x0C: // UTF8String
-            return stringCut(this.stream.parseStringUTF(content, content + len), maxLength);
-        case 0x12: // NumericString
-        case 0x13: // PrintableString
-        case 0x14: // TeletexString
-        case 0x15: // VideotexString
-        case 0x16: // IA5String
-            //case 0x19: // GraphicString
-        case 0x1A: // VisibleString
-            //case 0x1B: // GeneralString
-            //case 0x1C: // UniversalString
-            return stringCut(this.stream.parseStringISO(content, content + len), maxLength);
-        case 0x1E: // BMPString
-            return stringCut(this.stream.parseStringBMP(content, content + len), maxLength);
-        case 0x17: // UTCTime
-        case 0x18: // GeneralizedTime
-            return this.stream.parseTime(content, content + len, (number === 0x17));
+    var ub = 8 - (val.length % 8);
+    ub = (ub === 8) ? 0 : ub;
+    if (ub > 0)
+        for (var i = 0; i < ub; i++) // Add unused bits
+            val += "1";
+    var der = '';
+    for (var i = 0; i < (val.length / 8); i++) { // val to DER
+        var b = val.substring(i * 8, 8 + (i * 8));
+        der += String.fromCharCode(parseInt(b, 2));
     }
-    return null;
+    return new BitString(der, ub);
 };
-
-ASN1.prototype.content = function(maxLength) { // a preview of the content (intended for humans)
-    if (this.tag === undefined)
-        return null;
-    if (maxLength === undefined)
-        maxLength = Infinity;
-    var content = this.posContent(),
-            len = Math.abs(this.length);
-    if (!this.tag.isUniversal()) {
-        return this.stream.parseOctetString(content, content + len, maxLength);
-    }
-    return this.parseSimpleType(this.tag.number, maxLength);
-};
-//ASN1.prototype.toString = function() {
-//    return this.typeName() + "@" + this.stream.pos + "[header:" + this.header + ",length:" + this.length + ",sub:" + ((this.sub === null) ? 'null' : this.sub.length) + "]";
-//};
-ASN1.prototype.toPrettyString = function(indent) {
-    if (indent === undefined)
-        indent = '';
-    var s = indent + this.typeName() + " @" + this.stream.pos;
-    if (this.length >= 0)
-        s += "+";
-    s += this.length;
-    if (this.tag.constructed)
-        s += " (constructed)";
-    else if ((this.tag.isUniversal() && ((this.tag.number == 0x03) || (this.tag.number == 0x04))) && (this.sub !== null))
-        s += " (encapsulates)";
-    s += "\n";
-    if (this.sub !== null) {
-        indent += '  ';
-        for (var i = 0, max = this.sub.length; i < max; ++i)
-            s += this.sub[i].toPrettyString(indent);
-    }
-    return s;
-};
-ASN1.prototype.posStart = function() {
-    return this.stream.pos;
-};
-ASN1.prototype.posContent = function() {
-    return this.stream.pos + this.header;
-};
-ASN1.prototype.posEnd = function() {
-    return this.stream.pos + this.header + Math.abs(this.length);
-};
-ASN1.decodeLength = function(stream) {
-    var buf = stream.get(),
-            len = buf & 0x7F;
-    if (len === buf)
-        return len;
-    if (len > 6) // no reason to use Int10, as it would be a huge buffer anyways
-        throw "Length over 48 bits not supported at position " + (stream.pos - 1);
-    if (len === 0)
-        return null; // undefined
-    buf = 0;
-    for (var i = 0; i < len; ++i)
-        buf = (buf * 256) + stream.get();
-    return buf;
-};
-
-ASN1.decode = function(stream) {
-    if (!(stream instanceof Stream))
-        stream = new Stream(stream, 0);
-    var streamStart = new Stream(stream),
-            tag = new ASN1Tag(stream),
-            len = ASN1.decodeLength(stream),
-            start = stream.pos,
-            header = start - streamStart.pos,
-            sub = null,
-            getSub = function() {
-                sub = [];
-                if (len !== null) {
-                    // definite length
-                    var end = start + len;
-                    while (stream.pos < end)
-                        sub[sub.length] = ASN1.decode(stream);
-                    if (stream.pos !== end)
-                        throw "Content size is not correct for container starting at offset " + start;
-                } else {
-                    // undefined length
-                    try {
-                        for (; ; ) {
-                            var s = ASN1.decode(stream);
-                            if (s.tag.isEOC())
-                                break;
-                            sub[sub.length] = s;
-                        }
-                        len = start - stream.pos; // undefined lengths are represented as negative values
-                    } catch (e) {
-                        throw "Exception while decoding undefined length content: " + e;
-                    }
-                }
-            };
-    if (tag.constructed) {
-        // must have valid content
-        getSub();
-    } else if (tag.isUniversal() && ((tag.number == 0x03) || (tag.number == 0x04))) {
-        if (tag.number === 0x03)
-            stream.get(); // skip BitString unused bits, must be in [0, 7]
-        // sometimes BitString and OctetString do contain ASN.1
-        try {
-            getSub();
-            for (var i = 0; i < sub.length; ++i)
-                if (sub[i].tag.isEOC())
-                    throw 'EOC is not supposed to be actual content.';
-        } catch (e) {
-            // but silently ignore when they don't
-            sub = null;
-        }
-    }
-    if (sub === null) {
-        if (len === null)
-            throw "We can't skip over an invalid tag with undefined length at offset " + start;
-        stream.pos = start + Math.abs(len);
-    }
-    return new ASN1(streamStart, header, len, tag, sub);
-};
-// </editor-fold>
-
-// <editor-fold defaultstate="collapsed" desc=" ASN1Tag ">
-function ASN1Tag(stream) {
-    var buf = stream.get();
-    this.class = buf >> 6;
-    this.constructed = ((buf & 0x20) !== 0);
-    this.number = buf & 0x1F;
-    if (this.number === 0x1F) { // long tag
-        var n = new Int10();
-        do {
-            buf = stream.get();
-            n.mulAdd(128, buf & 0x7F);
-        } while (buf & 0x80);
-        this.number = n.simplify();
-    }
-}
-;
-ASN1Tag.prototype.isUniversal = function() {
-    return this.class === ASN1TagClass.UNIVERSAL;
-};
-ASN1Tag.prototype.isEOC = function() {
-    return this.class === 0x00 && this.number === 0x00;
-};
-// </editor-fold>
-

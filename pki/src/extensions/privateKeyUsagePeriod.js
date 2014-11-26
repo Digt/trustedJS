@@ -41,8 +41,7 @@
         function init(v) {
             if (v === undefined)
                 throw "PrivateKeyUsagePeriod.new: parameter can not be undefined."
-            if (trusted.isString(v))
-                v = (new trusted.ASN(v)).toObject("PrivateKeyUsagePeriod");
+            v = objFromBuffer(v, "PrivateKeyUsagePeriod");
             if (!trusted.isObject(v) && !("notBefore" in v && "notAfter" in v))
                 throw "PrivateKeyUsagePeriod.new: parameter is not valid."
             obj = v;

@@ -2,6 +2,9 @@ function CTL() {
     var sd, obj, cache;
 
     this.__proto__ = {
+        get type() {
+            return "CTL";
+        },
         get version() {
             return obj.version;
         },
@@ -97,11 +100,8 @@ function CTL() {
                 throw "CTL.new: Параметр не может быть Undefined.";
             case 1:
                 var v = args[0];
-                if (trusted.isString(v)) {
-                    sd = new SignedData(v);
-                    var asn = new trusted.ASN(sd.content);
-                    obj = asn.toObject("CertificateTrustList");
-                }
+                sd = new SignedData(v);
+                obj = objFromBuffer(v, "CertificateTrustList");
                 break;
             default:
                 throw "CTL.new: Параметр задан неверно.";

@@ -42,10 +42,7 @@ trusted.PKI.ReasonFlags = {
         function init(v) {
             if (v === undefined)
                 throw "CRLDistributionPoints.new: parameter can not be undefined."
-            if (trusted.isString(v)) {
-                var asn = new trusted.ASN(v);
-                v = asn.toObject("CRLDistributionPoints");
-            }
+            v = objFromBuffer(v, "CRLDistributionPoints");
             if (!trusted.isObject(v) && !trusted.isArray(v))
                 throw "CRLDistributionPoints.new: parameter is not valid."
             obj = v;
@@ -99,10 +96,7 @@ trusted.PKI.ReasonFlags = {
         function init(v) {
             if (v === undefined)
                 throw "DistributionPointName.new: parameter can not be undefined."
-            if (trusted.isString(v)) {
-                var asn = new trusted.ASN(v);
-                v = asn.toObject("DistributionPointName");
-            }
+            v = objFromBuffer(v, "DistributionPointName");
             if (!(trusted.isObject(v) && ("fullName" in v || "nameRelativeToCRLIssuer" in v)))
                 throw "DistributionPointName.new: parameter is not valid."
 
@@ -195,10 +189,7 @@ trusted.PKI.ReasonFlags = {
         function init(v) {
             if (v === undefined)
                 throw "DistributionPointName.new: parameter can not be undefined."
-            if (trusted.isString(v)) {
-                var asn = new trusted.ASN(v);
-                v = asn.toObject("DistributionPoint");
-            }
+            v = objFromBuffer(v, "DistributionPoint");
             if (!trusted.isObject(v) && !("cRLIssuer" in v || "distributionPoint" in v || "reasons" in v))
                 throw "DistributionPointName.new: parameter is not valid.";
             obj = v;

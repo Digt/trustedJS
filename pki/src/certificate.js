@@ -10,7 +10,7 @@
             set version(v) {
             },
             get version() {
-                return obj.tbsCertificate.version;
+                return obj.tbsCertificate.version.toNumber();
             },
             set serialNumber(v) {
             },
@@ -34,7 +34,7 @@
             set TBSCertificate(v) {
             },
             get TBSCertificate() {
-                return cache.tbs;
+                return cache.asn.sub[0].blob();
             },
             set subjectName(v) {
             },
@@ -129,8 +129,7 @@
                 if (cache.bc === undefined) { // cache
                     cache.bc = this.getExtension("2.5.29.19");
                     if (cache.bc) {
-                        var asn = new trusted.ASN(cache.bc.extnValue);
-                        cache.bc = new trusted.PKI.BasicConstraints(asn.toObject("BasicConstraints"));
+                        cache.bc = new trusted.PKI.BasicConstraints(cache.bc.value);
                     }
                 }
                 return cache.bc;
@@ -138,20 +137,16 @@
             get keyUsage() {
                 if (cache.ku === undefined) { // cache
                     cache.ku = this.getExtension("2.5.29.15");
-                    if (cache.ku) {
-                        var asn = new trusted.ASN(cache.ku.extnValue);
-                        cache.ku = new trusted.PKI.KeyUsage(asn.toObject("KeyUsage"));
-                    }
+                    if (cache.ku) 
+                        cache.ku = new trusted.PKI.KeyUsage(cache.ku.value);
                 }
                 return cache.ku;
             },
             get extendedKeyUsage() {
                 if (cache.eku === undefined) { // cache
                     cache.eku = this.getExtension("2.5.29.37");
-                    if (cache.eku) {
-                        var asn = new trusted.ASN(cache.eku.extnValue);
-                        cache.eku = new trusted.PKI.ExtendedKeyUsage(asn.toObject("ExtKeyUsageSyntax"));
-                    }
+                    if (cache.eku) 
+                        cache.eku = new trusted.PKI.ExtendedKeyUsage(cache.eku.value);
                 }
 
                 return cache.eku;
@@ -159,10 +154,8 @@
             get issuerAlternativeName() {
                 if (cache.ian === undefined) { // cache
                     cache.ian = this.getExtension("2.5.29.18");
-                    if (cache.ian) {
-                        var asn = new trusted.ASN(cache.ian.extnValue);
-                        cache.ian = new trusted.PKI.IssuerAlternativeName(asn.toObject("IssuerAlternativeName2"));
-                    }
+                    if (cache.ian) 
+                        cache.ian = new trusted.PKI.IssuerAlternativeName(cache.ian.value);
                 }
                 return cache.ian;
             },
@@ -170,8 +163,7 @@
                 if (cache.san === undefined) { // cache
                     cache.san = this.getExtension("2.5.29.17");
                     if (cache.san) {
-                        var asn = new trusted.ASN(cache.san.extnValue);
-                        cache.san = new trusted.PKI.SubjectAlternativeName(asn.toObject("SubjectAlternativeName"));
+                        cache.san = new trusted.PKI.SubjectAlternativeName(cache.san.value);
                     }
                 }
                 return cache.san;
@@ -183,63 +175,44 @@
         };
 
         this.__proto__.verify = function(issuerCert) {
+            var err_t = "Certificate.verify: ";
             var key = null;
-            var _this = this;
-            if (issuerCert === undefined && !this.isSelfSigned())
-                return Promise.reject("Certificate.verify: Параметр не может быть Undefined.");
+            var key;
+            if (issuerCert === undefined) {
+                if (!this.isSelfSigned())
+                    return Promise.reject(err_t + "Необходим открытый ключ сертификата издателя.");
+                else
+                    key = this.publicKey;
+            } else {
+                switch (issuerCert.type) {
+                    case "Certificate":
+                        key = issuerCert.publicKey;
+                        break;
+                    case "PublicKey":
+                        key = issuerCert;
+                        break;
+                    default:
+                        return Promise.reject(err_t + "Параметр не известного типа");
+                }
+            }
 
-            var keyData = Der.toUint8Array(issuerCert.publicKey.encode());
-            var usages = ['verify'];
-            var extractable = false;
-
-            // (1) Import the key
-            return crypto.subtle.importKey('spki', keyData, this.publicKey.algorithm.crypto, extractable, usages).then(
-                    function(result) {
-                        key = result;
-                        return Promise.resolve();
-                    },
-                    function(err) {
-                        return Promise.reject("ImportKey: " + err);
-                    }
-            // (2) Verify certificate signature
-            ).then(
-                    function(res) {
-                        return trusted.Crypto.verify(
-                                _this.signatureAlgorithm.crypto,
-                                key,
-                                Der.toUint8Array(_this.signature.encoded),
-                                Der.toUint8Array(_this.TBSCertificate)
-                                );
-                    },
-                    function(err) {
-                        return Promise.reject(err);
-                    }
-            );
+            var verifier = trusted.Crypto.createVerify(this.signatureAlgorithm);
+            verifier.update(this.TBSCertificate);
+            return verifier.verify(this.publicKey, this.signature.encoded);
         };
 
         this.__proto__.getHash = function(alg) {
-            if (alg === undefined)
-                alg = {name: "SHA-1"};
-            if (trusted.isString(alg))
-                alg = {name: alg};
-            cache.hash = undefined;
-            return trusted.Crypto.digest(alg, Der.toUint8Array(this.encode())).then(
-                    function(digest) {
-                        return new Promise(
-                                function(resolve, reject) {
-                                    resolve(String.fromCharCode.apply(null, new Uint8Array(digest)));
-                                }
-                        );
-                    },
-                    function(error) {
-                        return Promise.reject("Unable to get hash of certificate by '" + alg.name + "' algorithm.");
-                    }
-            );
+            if (alg === undefined) {
+                alg = "sha1";
+            }
+            var hash = new trusted.Crypto.createHash(alg);
+            hash.update(this.encode());
+            return hash.digest();
         };
 
         this.__proto__.encode = function() {
-            if (cache.encoded !== undefined) {
-                return cache.encoded;
+            if (cache.asn !== undefined) {
+                return cache.asn.blob();
             }
             return null;
         };
@@ -336,6 +309,17 @@
             cache = {};
             var cert = args[0];
             if (cert !== undefined) {
+                if (trusted.isString(cert))
+                    buf = new trusted.Buffer(buf, "binary");
+                if (cert.type === "Buffer") {
+                    var asn = new trusted.ASN(cert);
+                    obj = asn.toObject("Certificate");
+
+                    cache.asn = asn;
+                    return;
+                }
+
+                //
                 this.import(cert);
             }
         }

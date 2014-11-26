@@ -1,0 +1,7 @@
+(function(){
+
+if (window.trusted===undefined)
+    throw "Для работы модуля PKI необходим модуль trusted.js";
+
+if (trusted.ASN===undefined)
+    throw "Для работы модуля PKI необходим модуль ASN";

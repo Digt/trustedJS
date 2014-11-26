@@ -88,8 +88,7 @@
             }
             if (v === undefined)
                 throw "AuthorityKeyIdentifier.new: parameter can not be undefined."
-            if (trusted.isString(v))
-                v = (new trusted.ASN(v)).toObject(schema);
+            v = objFromBuffer(v, schema);
             if (!(trusted.isObject(v)) && (("keyIdentifier" in v) || ("authorityCertIssuer" in v) || ("authorityCertSerialNumber" in v)))
                 throw "AuthorityKeyIdentifier.new: parameter is not valid."
 

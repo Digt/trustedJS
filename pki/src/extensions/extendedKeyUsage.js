@@ -33,8 +33,7 @@
         function init(v) {
             if (v === undefined)
                 throw "ExtendedKeyUsage.new: parameter can not be undefined."
-            if (trusted.isString(v))
-                v = (new trusted.ASN(v)).toObject("ExtKeyUsageSyntax");
+            v = objFromBuffer(v, "ExtKeyUsageSyntax");
             if (!(trusted.isObject(v)) && trusted.isArray(v))
                 throw "ExtendedKeyUsage.new: parameter is not valid."
             obj = [];

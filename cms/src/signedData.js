@@ -12,12 +12,13 @@ function SignedData() {
         get digestAlgorithms() {
             if (cache.algs === undefined) {
                 cache.algs = [];
-                if (obj !== undefined)
+                if (obj !== undefined) {
                     var algs = {};
-                for (var i = 0; i < obj.digestAlgorithms.length; i++) {
-                    if (!(obj.digestAlgorithms[i].algorithm in algs)) {
-                        algs[obj.digestAlgorithms[i].algorithm] = null;
-                        cache.algs.push(new trusted.PKI.Algorithm(obj.digestAlgorithms[i]));
+                    for (var i = 0; i < obj.digestAlgorithms.length; i++) {
+                        if (!(obj.digestAlgorithms[i].algorithm in algs)) {
+                            algs[obj.digestAlgorithms[i].algorithm] = null;
+                            cache.algs.push(new trusted.PKI.Algorithm(obj.digestAlgorithms[i]));
+                        }
                     }
                 }
             }
@@ -64,10 +65,11 @@ function SignedData() {
                 try {
                     // if content is array
                     var asn = new trusted.ASN(obj.contentInfo.content);
-                    cache.content = asn.toObject("SignedDataContent").join("");
+                    cache.content = asn.toObject("DataContent").join("");
                 }
                 catch (e) {
-                    cache.content = obj.contentInfo.content;
+                    var asn = new trusted.ASN(obj.contentInfo.content);
+                    cache.content = asn.toObject("OCTET_STRING");
                 }
             }
             return cache.content;
@@ -76,24 +78,12 @@ function SignedData() {
 
     this.__proto__.getHash = function(algorithm, content) {
         if (algorithm === undefined)
-            algorithm = {name: "SHA-1"};
-        var _this = this;
-        var sequence = new Promise(function(resolve, reject) {
-            if (!(algorithm.name in trusted.RegisteredAlgorithms.getAlgorithms("digest")))
-                reject("SignedData.getHash: Using of Unknown algorithm. " + algorithm.name);
-            if (_this.content === null)
-                reject("SignedData.getHash: The conetent of Signed Data is null.");
-
-            trusted.Crypto.digest(algorithm, Der.toUint8Array(_this.content)).then(
-                    function(digest) {
-                        resolve(String.fromCharCode.apply(null, new Uint8Array(digest)));
-                    },
-                    function(error) {
-                        reject("SignedData.getHash: " + error);
-                    }
-            );
-        });
-        return sequence;
+            algorithm = trusted.PKI.Algorithm.fromName("sha1");
+        if (content === undefined)
+            content = this.content;
+        var hash = trusted.Crypto.createHash(algorithm);
+        hash.update(content);
+        return hash.digest();
     };
 
     this.__proto__.verify = function(content, certs) {
@@ -152,11 +142,82 @@ function SignedData() {
         return sequence;
     };
 
+    this.__proto__.sign = function(privateKey, certificate, content, certificates) {
+        var err_t = "SignedData.sign: ";
+        var _this = this;
+        return new Promise(function(resolve, reject) {
+            if (content===undefined){
+                content = _this.content;
+            }
+            if (content===null){
+                return reject(err_t+"Parameter 'content' can't be null");
+            }
+
+            var signer = new trusted.Crypto.createSign(privateKey.algorithm);
+            console.log("Content:",content);
+            signer.update(content);
+            var signature;
+            // (0) sign content
+            signer.sign(privateKey).then(
+                    function(v) {
+                        signature = v;
+                    }
+            ).then(function(){
+                // (1) create signerInfo
+                var signer = {
+                    version:1,
+                    issuerAndSerialNumber:{
+                        issuer: certificate.issuerName.toObject(),
+                        serialNumber: certificate.serialNumber 
+                    },
+                    digestAlgorithm: trusted.PKI.Algorithm.fromName("rsa").toObject(),
+                    digestEncryptionAlgorithm: trusted.PKI.Algorithm.fromName("sha1").toObject(),
+                    encryptedDigest: signature
+                };
+                console.log(signer);
+                _this.signers.push(new trusted.CMS.Signer(signer,certificate));
+                _this.certificates.push(certificate);
+                _this.digestAlgorithms.push(trusted.PKI.Algorithm.fromName("sha1"));
+                console.log(Der.toHex(signature));
+                var pkcs7= new trusted.PKI.PKCS7("signedData").toObject();
+                var asn = trusted.ASN.fromObject(_this.toObject(),"SignedData");
+                console.log(_this.toObject());
+                pkcs7.content = asn.encode();
+                asn = trusted.ASN.fromObject(pkcs7,"ContentInfo");
+                resolve(asn.encode());
+            }).catch(function(e){
+                reject(e);
+            });
+
+        });
+    };
+
+    this.__proto__.toObject = function() {
+        var o = {
+            version: 0,
+            digestAlgorithms: [],
+            contentInfo: new trusted.PKI.PKCS7("data").toObject(),
+            signerInfos: []
+        };
+        o.contentInfo.content=trusted.ASN.fromObject(this.content,"OCTET_STRING").encode();
+        for (var i = 0; i < this.digestAlgorithms.length; i++)
+            o.digestAlgorithms.push(this.digestAlgorithms[i].toObject());
+        for (var i = 0; i < this.signers.length; i++)
+            o.signerInfos.push(this.signers[i].toObject());
+        if (this.certificates.length > 0) {
+            o.certificates = [];
+            for (var i = 0; i < this.certificates.length; i++)
+                o.certificates.push({certificate: this.certificates[i].encode()});
+        }
+        return o;
+    };
+
     this.__proto__.getCertificate = function(cert) {
         for (var i = 0; i < this.certificates.length; i++) {
             if (this.certificates[i].compare(cert))
                 return this.certificates[i];
         }
+        return null;
     };
 
     function init(args) {
@@ -175,8 +236,7 @@ function SignedData() {
                     }
                     if (v.OID.value !== "1.2.840.113549.1.7.2")
                         throw "SignedData.new: Тип PKCS7 не является SignedData.";
-                    var asn = new trusted.ASN(v.content);
-                    v = asn.toObject("SignedData");
+                    v = objFromBuffer(v.content, "SignedData");
                 }
                 obj = v;
                 console.log("SignedData:", obj);
@@ -190,3 +250,6 @@ function SignedData() {
 
     init.call(this, arguments);
 }
+
+//export
+trusted.CMS.SignedData = SignedData;

@@ -1,10 +1,10 @@
 function BitString() {
     var e;
     var ub = 0;
-    
-    this.unusedBit=null;
-    this.encoded=null;
-    
+
+    this.unusedBit = null;
+    this.encoded = null;
+
     this.__proto__ = {
         get unusedBit() {
             return ub;
@@ -66,7 +66,7 @@ function BitString() {
                 this.unusedBit = bs.unusedBit;
                 break;
             default:
-                this.encoded = arg[0];
+                this.encoded = new trusted.Buffer(arg[0], "binary");
                 this.unusedBit = (arg[1] === undefined ? 0 : arg[1]);
         }
 

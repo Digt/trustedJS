@@ -4,14 +4,17 @@ trusted.schemas = schemas;
 
 trusted.PKI = {};
 
-trusted.ASN = ASN;
+//trusted.ASN = ASN;
+trusted.ASN = ASN1;
 trusted.Schema= Schema;
+trusted.Stream= Stream;
 
-window.Der = Der;
-window.Hex = Hex;
-window.Base64 = Base64;
-window.BitString = BitString;
+//window.Der = Der;
+//window.Hex = Hex;
+//window.Base64 = Base64;
+trusted.BigInt = BigInt;
+trusted.BitString = BitString;
 
-window.MAX = Number.MAX_VALUE;
+trusted.MAX = Number.MAX_VALUE;
 
 })();

@@ -32,10 +32,7 @@ trusted.PKI.CRLReason = {
         function init(v) {
             if (v === undefined)
                 throw "CRLNumber.new: parameter can not be undefined."
-            if (trusted.isString(v) && !Hex.test(v)) {
-                var asn = new trusted.ASN(v);
-                v = asn.toObject("CRLNumber");
-            }
+            v = objFromBuffer(v, "CRLNumber");
             if (!(trusted.isNumber(v) || trusted.isString(v)))
                 throw "CRLNumber.new: parameter is not valid."
             obj = v;

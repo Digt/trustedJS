@@ -69,8 +69,7 @@
         function init(v) {
             if (v === undefined)
                 throw "InfoAccess.new: parameter can not be undefined."
-            if (trusted.isString(v))
-                v = (new trusted.ASN(v)).toObject("AuthorityInfoAccessSyntax");
+            v = objFromBuffer(v, "AuthorityInfoAccessSyntax");
             if (!trusted.isArray(v))
                 throw "AuthorityInfoAccess.new: parameter is not valid."
 

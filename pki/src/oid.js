@@ -23,6 +23,9 @@
             },
             get value() {
                 return _value;
+            },
+            get type(){
+                return "OID";
             }
         };
 

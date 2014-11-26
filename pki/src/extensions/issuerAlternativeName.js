@@ -55,10 +55,7 @@
             // Проверка аргумента
             if (v === undefined)
                 throw "IssuerName.new: parameter can not be undefined."
-            if (trusted.isString(v)) {
-                var asn = new trusted.ASN(v);
-                v = asn.toObject(schema);
-            }
+            v = objFromBuffer(v, schema);
             if (!trusted.isObject(v) && !trusted.isArray(v))
                 throw "IssuerAlternativeName.new: parameter is not valid."
             obj = v;

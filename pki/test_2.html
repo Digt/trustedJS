@@ -1,0 +1,24 @@
+<html>
+    <head>
+        <title>Test 2</title>
+        <script>
+            window.addEventListener('load', ready, false);
+            function ready(){
+                var body = document.getElementsByTagName("body")[0];
+                init_elements(body);
+            }
+            
+            function init_elements(element){
+                for (var i=0; i< element.children.length;i++){
+                    //find data-class attribute
+                    if (element.children[i].getAttribute("data-class")!==undefined)
+                        console.log("Wow");
+                    init_elements(element.children[i]);
+                }
+            }
+        </script>
+    </head>
+    <body>  
+        <span data-class="button"></span>
+    </body>
+</html>

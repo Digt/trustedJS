@@ -58,7 +58,7 @@ if (window.trusted.schemas === undefined)
     namespace.Extensions = {
         type: "SEQUENCE",
         minOccurs: 0,
-        maxOccurs: MAX,
+        maxOccurs: trusted.MAX,
         value: {
             extension: {type: "Extension"}
         }
@@ -87,7 +87,7 @@ if (window.trusted.schemas === undefined)
     };
     namespace.RDNSequence = {
         type: "SEQUENCE",
-        maxOccurs: MAX,
+        maxOccurs: trusted.MAX,
         value: {
             rdn: {type: "RelativeDistinguishedName"}
         }
@@ -95,7 +95,7 @@ if (window.trusted.schemas === undefined)
     namespace.RelativeDistinguishedName = {
         type: "SET",
         minOccurs: 0,
-        maxOccurs: MAX,
+        maxOccurs: trusted.MAX,
         value: {
             attribute: {type: "AttributeTypeAndValue"}
         }
@@ -116,18 +116,18 @@ if (window.trusted.schemas === undefined)
     namespace.DirectoryString = {
         type: "CHOICE",
         value: {
-            teletexString: {type: "T61_STRING"}, // SIZE (1..MAX)
-            printableString: {type: "PRINTABLE_STRING"}, // SIZE (1..MAX)
-            universalString: {type: "UNIVERSAL_STRING"}, // SIZE (1..MAX)
-            utf8String: {type: "UTF8_STRING"}, // SIZE (1..MAX)
-            bmpString: {type: "BMP_STRING"} // SIZE (1..MAX)
+            teletexString: {type: "T61_STRING"}, // SIZE (1..trusted.MAX)
+            printableString: {type: "PRINTABLE_STRING"}, // SIZE (1..trusted.MAX)
+            universalString: {type: "UNIVERSAL_STRING"}, // SIZE (1..trusted.MAX)
+            utf8String: {type: "UTF8_STRING"}, // SIZE (1..trusted.MAX)
+            bmpString: {type: "BMP_STRING"} // SIZE (1..trusted.MAX)
         }
     };
 
     namespace.GeneralNames = {
         type: "SEQUENCE",
         minOccurs: 1,
-        maxOccurs: MAX,
+        maxOccurs: trusted.MAX,
         value: {
             generalName: {type: "GeneralName"}
         }
@@ -196,7 +196,7 @@ if (window.trusted.schemas === undefined)
         type: "SEQUENCE",
         value: {
             cA: {type: "BOOLEAN", default: false},
-            pathLenConstraint: {type: "INTEGER", optional: true} // (0..MAX)
+            pathLenConstraint: {type: "INTEGER", optional: true} // (0..trusted.MAX)
         }
     };
 
@@ -232,7 +232,7 @@ if (window.trusted.schemas === undefined)
     namespace.CRLDistributionPoints = {
         type: "SEQUENCE",
         minOccurs: 1,
-        maxOccurs: MAX,
+        maxOccurs: trusted.MAX,
         value: {
             distributionPoint: {type: "DistributionPoint"}
         }
@@ -241,7 +241,7 @@ if (window.trusted.schemas === undefined)
     namespace.FreshestCRL = {
         type: "SEQUENCE",
         minOccurs: 1,
-        maxOccurs: MAX,
+        maxOccurs: trusted.MAX,
         value: {
             distributionPoint: {
                 type: "DistributionPoint"
@@ -273,7 +273,7 @@ if (window.trusted.schemas === undefined)
     namespace.ExtKeyUsageSyntax = {
         type: "SEQUENCE",
         minOccurs: 1,
-        maxOccurs: MAX,
+        maxOccurs: trusted.MAX,
         value: {
             keyPurposeId: {type: "KeyPurposeId"}
         }
@@ -287,7 +287,7 @@ if (window.trusted.schemas === undefined)
     namespace.CertificatePolicies = {
         type: "SEQUENCE",
         minOccurs: 1,
-        maxOccurs: MAX,
+        maxOccurs: trusted.MAX,
         value: {
             policyInformation: {type: "PolicyInformation"}
         }
@@ -304,7 +304,7 @@ if (window.trusted.schemas === undefined)
     namespace.PolicyQualifiers = {
         type: "SEQUENCE",
         minOccurs: 1,
-        maxOccurs: MAX,
+        maxOccurs: trusted.MAX,
         value: {
             policyQualifierInfo: {type: "PolicyQualifierInfo"}
         }
@@ -349,7 +349,7 @@ if (window.trusted.schemas === undefined)
     };
     namespace.NoticeNumbers = {
         type: "SEQUENCE",
-        maxOccurs: MAX,
+        maxOccurs: trusted.MAX,
         value: {
             val: {type: "INTEGER"}
         }
@@ -368,7 +368,7 @@ if (window.trusted.schemas === undefined)
     namespace.AuthorityInfoAccessSyntax = {
         type: "SEQUENCE",
         minOccurs: 1,
-        maxOccurs: MAX,
+        maxOccurs: trusted.MAX,
         value: {
             v: {type: "AccessDescription"}
         }
@@ -385,7 +385,7 @@ if (window.trusted.schemas === undefined)
     namespace.SubjectInfoAccessSyntax = {
         type: "SEQUENCE",
         minOccurs: 1,
-        maxOccurs: MAX,
+        maxOccurs: trusted.MAX,
         value: {
             v: {type: "AccessDescription"}
         }
@@ -424,7 +424,7 @@ if (window.trusted.schemas === undefined)
     };
     namespace.RevokedCertificates = {
         type: "SEQUENCE",
-        maxOccurs: MAX,
+        maxOccurs: trusted.MAX,
         value: {revokedCertificate: {type: "RevokedCertificate"}}
     };
 
@@ -440,7 +440,7 @@ if (window.trusted.schemas === undefined)
     // CRL Extensions
     // CRL Number 2.5.29.20
     namespace.CRLNumber = {
-        type: "INTEGER" // (0..MAX)
+        type: "INTEGER" // (0..trusted.MAX)
     };
 
     // Delta CRL Indicator 2.5.29.27    

@@ -65,31 +65,10 @@ trusted.PKI.GeneralNameType = {
 
         function valueToString(v, seporator) {
             var res = '';
-            var asn = new trusted.ASN(v).structure;
+            var asn = new trusted.ASN(v);
             if (asn.tag.isUniversal())
                 if (!asn.tag.constructed) // Определение простого типа
-                    switch (asn.tag.number) {
-                        case 0x02: // INTEGER
-                            res = asn.content().toString();
-                            break;
-                        case 0x0C: // UTF8String
-                        case 0x12: // NumericString
-                        case 0x13: // PrintableString
-                        case 0x14: // TeletexString
-                        case 0x15: // VideotexString
-                        case 0x16: // IA5String
-                            //case 0x19: // GraphicString
-                        case 0x1A: // VisibleString
-                            //case 0x1B: // GeneralString
-                            //case 0x1C: // UniversalString
-                        case 0x1E: // BMPString
-                        case 0x17: // UTCTime
-                        case 0x18: // GeneralizedTime
-                            res = asn.content();
-                            break;
-                        default:
-                            res = "trusted: Unknown type";
-                    }
+                    res = asn.toValue();
                 else {
                     for (var i = 0; i < asn.sub.length; i++) { // структуру выводим в виде массива через разделитель.
                         var content = asn.sub[i].content();
@@ -103,8 +82,7 @@ trusted.PKI.GeneralNameType = {
             // Проверка аргумента
             if (v === undefined)
                 throw "RDNAttribute.new: parameter can not be undefined."
-            if (typeof (v) === "string")
-                v = (new trusted.ASN(v)).toObject("AttributeTypeAndValue");
+            v = objFromBuffer(v, "AttributeTypeAndValue");
             if (typeof (v) !== "object" &&
                     !(v.hasOwnProperty("type") || v.hasOwnProperty("value")))
                 throw "RDNAttribute.new: parameter is not valid."
@@ -170,8 +148,7 @@ trusted.PKI.GeneralNameType = {
             // Проверка аргумента
             if (v === undefined)
                 throw "RDN.new: parameter can not be undefined."
-            if (trusted.isString(v))
-                v = (new trusted.ASN(v)).toObject("RelativeDistinguishedName");
+            v = objFromBuffer(v, "RelativeDistinguishedName");
             if (!trusted.isObject(v) && !trusted.isArray(v) ||
                     v.length === 0 ||
                     (v.length !== 0 &&
@@ -236,10 +213,7 @@ trusted.PKI.GeneralNameType = {
             // Проверка аргумента
             if (v === undefined)
                 throw "Name.new: parameter can not be undefined."
-            if (trusted.isString(v)) {
-                var asn = new trusted.ASN(v);
-                v = asn.toObject("Name");
-            }
+            v = objFromBuffer(v, "Name");
             if (!("rdnSequence" in v) && !trusted.isArray(v.rdnSequence) &&
                     v.length !== 0)
                 throw "Name.new: parameter is not valid."
@@ -343,10 +317,7 @@ trusted.PKI.GeneralNameType = {
             // Проверка аргумента
             if (v === undefined)
                 throw "GeneralName.new: parameter can not be undefined."
-            if (trusted.isString(v)) {
-                var asn = new trusted.ASN(v);
-                v = asn.toObject("GeneralName");
-            }
+            v = objFromBuffer(v, "GeneralName");
             if (!trusted.isObject(v) && !trusted.isArray(v) &&
                     v.length !== 0)
                 throw "GeneralName.new: parameter is not valid."
@@ -394,8 +365,9 @@ trusted.PKI.GeneralNameType = {
             get generalNames() {
                 return obj;
             },
-            set items(v){},
-            get items(){
+            set items(v) {
+            },
+            get items() {
                 return this.generalNames();
             }
         };
@@ -417,8 +389,7 @@ trusted.PKI.GeneralNameType = {
             // Проверка аргумента
             if (v === undefined)
                 throw "GeneralNames.new: parameter can not be undefined."
-            if (trusted.isString(v))
-                v = (new trusted.ASN(v)).toObject("GeneralNames");
+            v = objFromBuffer(v, "GeneralNames");
             if (!(trusted.isArray(v) && v.length !== 0))
                 throw "GeneralNames.new: parameter is not valid."
             obj = [];
@@ -467,10 +438,7 @@ trusted.PKI.GeneralNameType = {
             // Проверка аргумента
             if (v === undefined)
                 throw "OtherName.new: parameter can not be undefined."
-            if (trusted.isString(v)) {
-                var asn = new trusted.ASN(v);
-                v = asn.toObject("OtherName");
-            }
+            v = objFromBuffer(v, "OtherName");
             if (!(trusted.isObject(v) && ("typeId" in v) && ("value" in v)))
                 throw "OtherName.new: parameter is not valid."
             obj = v;

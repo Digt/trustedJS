@@ -121,10 +121,7 @@
             if (v === undefined)
                 throw "Request.new: Параметр не может быть Undefined";
             var asn = null;
-            if (trusted.isString(v)) {
-                asn = new trusted.ASN(v);
-                v = asn.toObject("CertificationRequest");
-            }
+            v = objFromBuffer(v, "CertificationRequest");
             if (!(trusted.isObject(v) && ("certificationRequestInfo" in v && "signatureAlgorithm" in v && "signature" in v)))
                 throw "RevokedCertificate.new: Задан неверный параметр.";
 
@@ -173,10 +170,7 @@
         function init(v) {
             if (v === undefined)
                 throw "RequestAttribute.new: Параметр не может быть Undefined";
-            if (trusted.isString(v)) {
-                var asn = new trusted.ASN(v);
-                v = asn.toObject("Attribute");
-            }
+            v = objFromBuffer(v, "Attribute");
             if (!(trusted.isObject(v) && ("type" in v && "values" in v)))
                 throw "RequestAttribute.new: Задан неверный параметр.";
 

@@ -28,10 +28,7 @@
             // Проверка аргумента
             if (v === undefined)
                 throw "BasicConstraints.new: parameter can not be undefined."
-            if (trusted.isString(v)) {
-                var asn = new trusted.ASN(v);
-                v = asn.toObject("BasicConstraints");
-            }
+            v = objFromBuffer(v, "BasicConstraints");
             if (!trusted.isObject(v) && !("cA" in v))
                 throw "BasicConstraints.new: parameter is not valid."
             obj = v;

@@ -14,8 +14,7 @@
         function init(v) {
             if (v === undefined)
                 throw "SubjectKeyIdentifier.new: parameter can not be undefined."
-            if (trusted.isString(v))
-                v = (new trusted.ASN(v)).toObject("SubjectKeyIdentifier");
+            v = objFromBuffer(v, "SubjectKeyIdentifier");
 
             obj = Der.toHex(v);
         }

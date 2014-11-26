@@ -2,13 +2,14 @@ function Signer() {
     var obj, cache;
     this.__proto__ = {
         get digestAlgorithm() {
-            if (cache.cert !== null)
-                return this.certificate.publicKey.algorithm;
-            else {
-                if (cache.alg === undefined)
+            if (cache.alg === undefined) {
+                cache.alg = null;
+                if (obj.digestAlgorithm !== undefined)
                     cache.alg = new trusted.PKI.Algorithm(obj.digestAlgorithm);
-                return cache.alg;
+                else
+                    cache.alg = this.certificate.publicKey.algorithm;
             }
+            return cache.alg;
         },
         get certificateID() {
             if (obj.issuerAndSerialNumber !== null) {
@@ -67,6 +68,29 @@ function Signer() {
             return cache.cert;
         }
     };
+    
+    this.__proto__.toObject = function(){
+        var o ={
+            version: 1,
+            issuerAndSerialNumber: this.certificateID.toObject(),
+            digestAlgorithm: this.signatureAlgorithm.toObject(),
+            digestEncryptionAlgorithm: this.digestAlgorithm.toObject(),
+            encryptedDigest: this.signature.encoded
+        };
+        var attrs = getAttrs(this.attributes,true);
+        if (attrs.length>0){
+            o.authenticatedAttributes =[];
+            for (var i=0; i<attrs.length; i++)
+                o.authenticatedAttributes.push(attrs[i]);
+        }
+        var attrs = getAttrs(this.attributes,false);
+        if (attrs.length>0){
+            o.unauthenticatedAttributes =[];
+            for (var i=0; i<attrs.length; i++)
+                o.unauthenticatedAttributes.push(attrs[i]);
+        }
+        return o;
+    };
 
     // return attributes signed | not signed
     function getAttrs(attrs, auth) {
@@ -94,95 +118,57 @@ function Signer() {
     }
 
     this.__proto__.verify = function(content, key) {
-        var _this = this;
-        var publicKey = null;
         var data = null;
-        var sequence = new Promise(function(resolve, reject) {
-            // get content
-
+        var _this = this;
+        if (key === undefined) {
+            key = this.certificate.publicKey;
+        }
+        return new Promise(function(resolve, reject) {
             if (_this.hasSignedAttributes())
                 data = getSignedAttributesDer.call(_this); // get signed attributes
-            else if (content !== undefined)
-                data = content; // get content
             else
-                reject("Signer.verify: Отсутствует содержимое для проверки.");
-
-            //-----
-            if (_this.certificate !== null)
-                key = _this.certificate.publicKey;
-            if (key === undefined)
-                reject("Signer.verify: Параметр не может быть Undefined.");
-            switch (key.type) {
-                case "PublicKey":
-                    publicKey = key;
-                    break;
-                case "Certificate":
-                    publicKey = key.publicKey;
-                    break;
-                default:
-                    throw "Signer.verify: Параметр несоответствующего класса.";
-            }
-
-            var keyData = Der.toUint8Array(publicKey.encode());
-            var usages = ['verify'];
-            var extractable = false;
-
-            // (1) Import the key
-            var promise = trusted.Crypto.importKey('spki', keyData, publicKey.algorithm.crypto, extractable, usages).then(
-                    function(result) {
-                        key = result;
-                        return Promise.resolve();
-                    },
-                    function(err) {
-                        reject(err);
-                    }
-            );
-
+                data = content;
+            var promise = Promise.resolve();
+            // [0] get hash of content
             if (content !== data) {
-                //get hash for content
-                promise = promise.then(
-                        function() {
-                            return trusted.Crypto.digest(key.algorithm.hash, Der.toUint8Array(content)).then(
-                                    function(digest) {
-                                        var hash = String.fromCharCode.apply(null, new Uint8Array(digest));
-                                        var asn = new trusted.ASN(_this.getAttribute("1.2.840.113549.1.9.4").value);
-                                        var attr_hex = asn.toObject("OCTET_STRING");
-                                        if (hash===attr_hex)
-                                            return Promise.resolve();
-                                        else
-                                            reject("Signer.verify: Hash of content is not equals signed hash.");
-                                    },
-                                    function(error) {
-                                        reject("Signer.getHash: " + error);
-                                    }
-                            );
-                        }
-                );
+                var digest = null;
+                promise = promise.then(function() {
+                    var hash = trusted.Crypto.createHash(_this.digestAlgorithm);
+                    hash.update(content);
+                    return hash.digest();
+                }).then(function(v) {
+                    digest = v;
+                    // get attribute content hash
+                    var attr = _this.getAttribute("1.2.840.113549.1.9.4");
+                    var hash = new trusted.ASN(attr.value);
+                    hash = hash.toObject("OCTET_STRING");
+                    if (digest!==hash)
+                        return reject(err_t+"Hash of content differs from signed hash");
+                    return Promise.resolve();
+                }).catch(function(e) {
+                    return Promise.reject(e);
+                });
             }
-
-            // (2) Verify certificate signature
+            // (1) verify data
+            var algorithm=_this.signatureAlgorithm;
+            if (algorithm.hash===null){
+                switch(algorithm.OID.value){
+                    case "1.2.840.113549.1.1.1": //rsaEncryption
+                        algorithm=trusted.PKI.Algorithm.fromName("rsa-"+_this.digestAlgorithm.name);
+                }
+            }
+            var verifier = trusted.Crypto.createVerify(algorithm);
+            verifier.update(data);
             promise = promise.then(
                     function() {
-                        return trusted.Crypto.verify(
-                                _this.signatureAlgorithm.crypto,
-                                key,
-                                Der.toUint8Array(_this.signature.encoded),
-                                Der.toUint8Array(data)
-                                );
-                    },
-                    function(err) {
-                        reject(err);
-                    }
-            ).then(
+                        return verifier.verify(key, _this.signature.encoded);
+                    }).then(
                     function(v) {
                         resolve({signer: _this, status: v});
-                    },
-                    function(err) {
-                        reject({signer: _this, status: false, error: err});
-                    }
-            );
+                    }).catch(function(err) {
+                reject({signer: _this, status: false, error: err});
+            });
         });
-        return sequence;
     };
 
     this.__proto__.getAttribute = function(oid) {
@@ -196,6 +182,8 @@ function Signer() {
     };
     function getAttributes(attrs, signed) {
         var r = [];
+        if (attrs===undefined)
+            attrs=[];
         if (attrs !== null) {
             for (var i = 0; i < attrs.length; i++) {
                 r.push(new SignerAttribute(attrs[i], signed));
@@ -204,18 +192,6 @@ function Signer() {
         return r;
     }
 
-    this.__proto__.toObject = function() {
-        var o = {
-            version: this.version,
-            issuerAndSerialNumber: this.certificateID.toObject(),
-            digestAlgorithm: this.digestAlgorithm.toObject(),
-            digestEncryptionAlgorithm: this.signatureAlgorithm.toObject(),
-            encryptedDigest: this.signature.encoded,
-            authenticatedAttributes: getAttrs(this.attributes, true),
-            unauthenticatedAttributes: getAttrs(this.attributes, false)
-        };
-        return o;
-    };
     function refreshVars() {
         obj = {};
         cache = {cert: null, certID: null};
@@ -223,14 +199,14 @@ function Signer() {
 
     function init(args) {
         refreshVars.call(this);
-        if (trusted.isString(args[0])) {
-            var asn = new trusted.ASN(args[0]);
-            args[0] = asn.toObject("SignerInfo");
-        }
+        v = objFromBuffer(v, "SignerInfo");
         if (!(trusted.isObject(args[0])))
             throw "Signer.new: Параметр имеет неверный формат.";
-        if (trusted.isObject(args[1]))
+        if (args[1] !== null && trusted.isObject(args[1])) {
+            if (args[1].type !== "Certificate")
+                throw "Signer.new: Параметр certificate должен быть Certificate.";
             cache.cert = args[1];
+        }
         obj = args[0];
     }
 
@@ -248,6 +224,7 @@ function CertID() {
         };
         return o;
     };
+    
     function init(args) {
         switch (args.length) {
             case 0:
@@ -267,3 +244,5 @@ function CertID() {
     init.call(this, arguments);
 }
 
+//export
+trusted.CMS.Signer = Signer;

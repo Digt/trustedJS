@@ -19,7 +19,7 @@ trusted.schemas.CertificationRequestInfo = {
 
 trusted.schemas.Attributes = {
     type: "SET",
-    maxOccurs: MAX,
+    maxOccurs: trusted.MAX,
     value: {
         v: {type: "Attribute"}
     }
@@ -32,7 +32,7 @@ trusted.schemas.Attribute = {
         values: {
             type: "SET",
             minOccurs: 1,
-            maxOccurs: MAX,
+            maxOccurs: trusted.MAX,
             value: {
                 v: {type: "ANY"}
             }
