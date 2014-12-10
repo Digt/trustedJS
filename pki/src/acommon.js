@@ -18,7 +18,7 @@ trusted.ExportType = {
 function objFromBuffer(buf, schemaName){
     if (trusted.isString(buf))
         buf = new trusted.Buffer(buf, "binary");
-    if (buf.type!=="Buffer")
+    if (buf.type!=="Buffer" && !buf.__proto__.hasOwnProperty("toArrayBuffer"))
         return buf;
     var asn = new trusted.ASN(buf);
     var obj = asn.toObject(schemaName);

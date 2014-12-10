@@ -111,13 +111,15 @@ function ASN1() {
     this.__proto__.isNull = function() {
         return (this.tag.class === 0 && this.tag.number === 0 && this.length === 0);
     };
-    this.__proto__.blob = function() {
+    this.__proto__.blob = function(enc) {
         var buf = new trusted.Buffer(this.posEnd() + 1 - this.posStart());
         this.stream.position(this.posStart());
         var i = 0;
         while (this.stream.position() <= this.posEnd()) {
             buf[i++] = this.stream.get();
         }
+        if (enc !== undefined)
+            return buf.toString(enc);
         return buf;
     };
     this.__proto__.content = function() {
@@ -196,11 +198,7 @@ function ASN1() {
 
 ASN1.fromObject = function(obj, schema) {
     var arr = ObjectToASN(obj, schema);
-    var der = '';
-    for (var i = 0; i < arr.length; i++) {
-        der += String.fromCharCode(arr[i]);
-    }
-    return new ASN1(der);
+    return new ASN1(arr);
 };
 
 function ASNTag() {

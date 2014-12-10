@@ -94,8 +94,9 @@ function _ASNToObject(asn, schema) {
 
 function atoo(a, s) {
     var o = {};
-    //if (s.type === "Validity")
-    //    console.log("val");
+    //console.log("Schema name:", s.name);
+    if (s.name === "bagAttributes")
+        console.log("atoo: ", s.type);
     // CONTEXT-SPECIFIC
     if ("context" in s)
         if (a.tag.class === 2 && a.tag.number === s.context) {
@@ -122,7 +123,7 @@ function atoo(a, s) {
         return o;
     }
 
-    if (!(s.context && !s.explicit) && !isTagEquals(a, s))
+    if (!(s.hasOwnProperty("context") && !s.hasOwnProperty("explicit")) && !isTagEquals(a, s))
         throw svt + " Теги не равны.";
 
     if (s.tag.constructed) {
@@ -301,7 +302,7 @@ function encodeExplicit(number, value) {
     return asn;
 }
 function encode(obj, schema) {
-    console.log(schema.type);
+    //console.log(schema.type);
     if (schema.type === "INTEGER")
         "";
     var asn = [];
@@ -456,6 +457,8 @@ function encodeLength(length) {
 
 function encodeInteger(num) {
     var asn = [];
+    if (num.toNumber!== undefined)
+        num = num.toNumber();
     if (typeof (num) === "number") {
         // number to der
         var der = [];
@@ -507,7 +510,7 @@ function encodeBitString(val) {
         val = BitString.fromString(val);
     asn.push(val.unusedBit);
     for (var i = 0; i < val.encoded.length; i++)
-        asn.push(val.encoded.charCodeAt(i));
+        asn.push(val.encoded[i]);
     return asn;
 }
 
@@ -534,7 +537,7 @@ function encodeStringUTF(val) {
 function encodeStringOCTET(val) {
     var res = [];
     for (var i = 0; i < val.length; i++)
-        res.push(val.charCodeAt(i));
+        res.push(val[i]);
     return res;
 }
 
@@ -592,7 +595,7 @@ function encodeStringISO(val) {
 function encodeStringBMP(val) {
     var asn = [];
     for (var i = 0; i < val.length; i++) {
-        var char = val.charCodeAt(i);
+        var char = val[i];
         asn.push(char >> 8);
         asn.push(char & 255);
     }

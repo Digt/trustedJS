@@ -18,6 +18,22 @@ function PKCS7() {
             if (obj === undefined)
                 return null;
             return obj.content;
+        },
+        get type(){
+            if (obj === undefined)
+                return null;
+            for (var k in trusted.PKI.PKCS7Types)
+                if (trusted.PKI.PKCS7Types[k]===obj.contentType)
+                    return k;
+            return "Unknown type";
+        },
+        get value(){
+            if (obj === undefined)
+                return null;
+            if (this.type === "Unknown type")
+                throw "Unknown type";
+            var s = this.type.charAt(0).toUpperCase()+this.type.substring(1); // get schema name
+            return (new trusted.ASN(this.content)).toObject(s);
         }
     };
 
@@ -33,14 +49,7 @@ function PKCS7() {
     function init(v) {
         if (v === undefined)
             return;
-        if (trusted.isString(v)) {
-            if (v in trusted.PKI.PKCS7Types) {
-                oid = new trusted.PKI.OID(trusted.PKI.PKCS7Types[v]);
-                return;
-            } else {
-                v = objFromBuffer(v, "ContentInfo");
-            }
-        }
+        v = objFromBuffer(v, "ContentInfo");
         if (!(trusted.isObject(v) && ("contentType" in v && "content" in v)))
             "PKCS7.new: Параметр имеет не верный формат.";
         obj = v;
@@ -49,6 +58,30 @@ function PKCS7() {
     init.call(this, arguments[0]);
 
 }
+
+PKCS7.create = function(type, data){
+    var oid = null;
+    if (trusted.PKI.OID.test(type))
+        for (var i in trusted.PKI.PKCS7Types)
+            if (trusted.PKI.PKCS7Types[i]===type){
+                type = i;
+                break;
+            }
+    if (!(type in trusted.PKI.PKCS7Types))
+        throw ("PKCS7.create: Unknown PKCS7 type");
+    
+    var pkcs7 = {
+        contentType: trusted.PKI.PKCS7Types[type],
+        content: data
+    };
+    return trusted.ASN.fromObject(pkcs7, "ContentInfo").blob();
+};
+
+PKCS7.createData = function(data){
+    data = trusted.ASN.fromObject(data, "OCTET_STRING").blob();
+    return PKCS7.create("data", data);
+};
+
 trusted.PKI.PKCS7 = PKCS7;
 
 trusted.PKI.PKCS7Types = {

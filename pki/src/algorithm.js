@@ -26,7 +26,7 @@
                 return cache.hash;
             },
             get params() {
-                if (this.hasParams() && obj.parameters !== Hex.toDer("0500"))
+                if (this.hasParams())
                     return obj.parameters;
                 return null;
             },
@@ -34,9 +34,15 @@
                 return "Algorithm";
             }
         };
+        
+        this.encode = function(){
+            var o = this.toObject();
+            var asn = trusted.ASN.fromObject(o, "AlgorithmIdentifier");
+            return asn.blob();
+        };
 
         this.__proto__.hasParams = function() {
-            return obj.parameters !== undefined;
+            return !(obj.parameters === null || obj.parameters.toString("hex") === "0500");
         };
 
         this.__proto__.toString = function() {
@@ -46,7 +52,7 @@
         this.__proto__.toObject = function() {
             var o = {
                 algorithm: this.OID.toObject(),
-                parameters: (Der.toHex(this.params) === "0500" ? Hex.toDer("0500") : this.params),
+                parameters: (this.params === null ? new trusted.Buffer("0500", "hex") : this.params)
                 //name: this.name,
                 //hash: {name: this.hash}
             };
@@ -71,7 +77,7 @@
             }
         };
 
-        function init(v) {
+        function init(v, params) {
             // Проверка аргумента
             if (v === undefined)
                 throw "Algorithm.new: parameter can not be undefined."
@@ -85,8 +91,9 @@
                     v = alg;
             } catch (e) {
                 console.error(e);
-
             }
+            if (params!==undefined)
+                obj.parameters = params;
             obj = v;
         }
 

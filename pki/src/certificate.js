@@ -137,7 +137,7 @@
             get keyUsage() {
                 if (cache.ku === undefined) { // cache
                     cache.ku = this.getExtension("2.5.29.15");
-                    if (cache.ku) 
+                    if (cache.ku)
                         cache.ku = new trusted.PKI.KeyUsage(cache.ku.value);
                 }
                 return cache.ku;
@@ -145,7 +145,7 @@
             get extendedKeyUsage() {
                 if (cache.eku === undefined) { // cache
                     cache.eku = this.getExtension("2.5.29.37");
-                    if (cache.eku) 
+                    if (cache.eku)
                         cache.eku = new trusted.PKI.ExtendedKeyUsage(cache.eku.value);
                 }
 
@@ -154,7 +154,7 @@
             get issuerAlternativeName() {
                 if (cache.ian === undefined) { // cache
                     cache.ian = this.getExtension("2.5.29.18");
-                    if (cache.ian) 
+                    if (cache.ian)
                         cache.ian = new trusted.PKI.IssuerAlternativeName(cache.ian.value);
                 }
                 return cache.ian;
@@ -167,7 +167,21 @@
                     }
                 }
                 return cache.san;
+            },
+            set privateKey(v){
+                if (v.type !== "PrivateKey")
+                    throw this.type+".privateKey SET: Parameter must be type of PrivateKey";
+                    cache.prk = v;
+            },
+            get privateKey(){
+                if (!this.hasPrivateKey())
+                    return null;
+                return cache.prk;
             }
+        };
+
+        this.__proto__.hasPrivateKey = function() {
+            return (cache.prk !== undefined);
         };
 
         this.__proto__.isSelfSigned = function() {
@@ -257,6 +271,9 @@
             return null;
         };
 
+        this.__proto__.export = function(enc){
+            return cache.asn.blob(enc);
+        };
         this.__proto__.import = function() {
             cache = {}; // clear cashe
             var cert = arguments[0];

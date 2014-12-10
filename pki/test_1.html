@@ -374,7 +374,7 @@
         .trust-tabPanel{
 
         }
-        /*TabBuuton*/
+        /*TabButton*/
         .trust-tabButton{
             display: inline-block;
             padding: 10px 20px;
@@ -945,15 +945,45 @@
                 var items = [];
                 var _thisItems = _this.items().items();
                 for (var i in _thisItems) {
-                    if (_thisItems[i].checkbox().checked())
+                    if (_thisItems[i].checkbox().checked() && _thisItems[i].visible())
                         items.push(_thisItems[i]);
                 }
                 return items;
             };
 
+            var _onItemsChecked = function() {
+            };
+            this.onItemsChecked = function(v) {
+                if (v !== undefined) {
+                    if (typeof (v) !== "function")
+                        throw "ListBox.onItemsChecked: Parameter must be Function";
+                    _onItemsChecked = v;
+                }
+                else
+                    return _onItemsChecked;
+            };
+
+            var _raiseOnItemChecked = true;
+            this.checkAll = function(v) {
+                if (!this.multiSelect())
+                    return;
+                if (v === undefined)
+                    v = true;
+                _raiseOnItemChecked = false;
+                for (var i = 0; i < this.items().count(); i++)
+                    this.items(i).checkbox().checked(v);
+                _raiseOnItemChecked = true;
+                _onItemsChecked.call(_this);
+            };
+
             function itemAdded(items) {
                 for (var index in items) {
                     var item = items[index];
+                    //
+                    item.checkbox().onStateChanged(function() {
+                        if (_raiseOnItemChecked)
+                            _onItemsChecked.call(_this);
+                    });
                     item.on("click", function(e) {
                         if (e.data !== _selectedItem) {
                             if (_selectedItem !== null) {
@@ -1075,8 +1105,10 @@
                 return _threeState;
             };
 
-            this.state = function(v) {
+            this.state = function(v, raiseEvent) {
                 if (v !== undefined) {
+                    if (raiseEvent === undefined)
+                        raiseEvent = true;
                     _state = v;
                     switch (v) {
                         case 0:
@@ -1092,7 +1124,8 @@
                             _this.element().addClass('checked');
                             break;
                     }
-                    this.onStateChanged()();
+                    if (raiseEvent)
+                        _handlerStateChanged.call(this);
                 }
                 return _state;
             };
@@ -1230,9 +1263,44 @@
             //
             this.checkState = function(v) {
                 if (v !== undefined) {
-                    _checkState = v;
+                    if (_checkState !== v) {
+                        _checkState = v;
+                        _onStateChanged.call(this, _checkState);
+                    }
                 }
                 return _checkState;
+            };
+
+            var _onStateChanged = function(state) {
+            };
+            this.onStateChanged = function(v) {
+                if (v !== undefined) {
+                    if (typeof (v) !== "function")
+                        throw "CertListBox.onStateChanged: parameter must be Function";
+                    _onStateChanged = v;
+                }
+                return _onStateChanged;
+            };
+
+            this.checkAll = function(v) {
+                if (v === undefined)
+                    v = true;
+                for (var i = 0; i < _elements.count(); i++)
+                    _elements.items(i).checkState((v) ? 2 : 0);
+                this.refreshState();
+            };
+
+            this.refreshState = function() {
+                var state = 0;
+                for (var i = 0; i < _elements.count(); i++) {
+                    if (state !== _elements.items(i).checkState()) {
+                        if (i === 0)
+                            state = _elements.items(i).checkState();
+                        else
+                            return this.checkState(1); //maybe
+                    }
+                }
+                return this.checkState(state);
             };
 
             //Match only simple attributes of objects
@@ -1254,8 +1322,8 @@
                 //перебераем структуру правил в обратном порядке
 
                 var _a = a.structure, _b = b.structure;
-                console.log("A:%o B:%o",_a.default.label, _b.default.label);
-                if (_a.default.label==="control2" && _b.default.label==="control1")
+                console.log("A:%o B:%o", _a.default.label, _b.default.label);
+                if (_a.default.label === "control2" && _b.default.label === "control1")
                     "";
                 for (var i = _groupBy.length - 1; i >= 0; i--) {
                     if (!_groupBy[i].enable)
@@ -1308,6 +1376,7 @@
             this.refresh = function() {
                 _preloader.show();
                 _this.clear();
+                this.refreshState();
                 var promise = Promise.resolve().then(function() {
                     var _items = prepareItems(_this.items().items(), _groupBy);
                     //sort items
@@ -1787,9 +1856,9 @@
                 return _groupType;
             };
 
-            this.checkState = function(v) {
+            this.checkState = function(v, raiseEvent) {
                 if (v !== undefined && v !== _checkbox.state()) {
-                    _checkbox.state(v);
+                    _checkbox.state(v, raiseEvent);
                 }
                 //console.log(_checkbox.state());
                 return _checkbox.state();
@@ -1806,7 +1875,7 @@
                 this.element().append(content);
                 //checkbox
                 _checkbox = new CheckBox();
-                _checkbox.on("click", checkbox_onClick);
+                _checkbox.onStateChanged(checkbox_onClick);
                 //_checkbox.threeState(true);
                 //_checkbox.onStateChanged = checkbox_StateChanged;
                 this.children().add(_checkbox, content);
@@ -1839,7 +1908,7 @@
                 for (var i = 0; i < element.items().count(); i++) {
                     if (element.items(i).checkState() !== state) {
                         element.items(i).checkState(state);
-                        childrenState(element.items(i), state);
+                        //childrenState(element.items(i), state);
                     }
                 }
             }
@@ -1849,9 +1918,12 @@
                 if (owner !== undefined && owner.type !== "CertListBox") {
                     var state = checkChildrenState(owner);
                     if (state !== owner.checkState()) {
-                        owner.checkState(state);
+                        owner.checkState(state, state !== 1);
                         parentState(owner);
                     }
+                } else {
+                    if (owner.type === "CertListBox")
+                        owner.refreshState();
                 }
             }
 
@@ -1876,7 +1948,7 @@
             function checkbox_onClick() {
                 var state = _checkbox.state();
                 if (state === 1) {
-                    _checkbox.state(2);
+                    _checkbox.state(2, false);
                     state = 2;
                 }
                 // set state for children
@@ -2399,6 +2471,12 @@
             listBox.items().add(new ListBoxItem("Item 5"));
 
             listBox.appendTo("#control2");
+            listBox.multiSelect(true);
+
+            listBox.onItemsChecked(function() {
+                console.log(this.checkedItems().length);
+                console.log("Item selected");
+            });
             listBox.width(200);
 
             var checkBox = new CheckBox();
@@ -2430,6 +2508,9 @@
             var cert15 = new trusted.PKI.Certificate(new trusted.Buffer("30820664308205CDA00302010202087863728008F3E825300D06092A864886F70D01010505003081F9311A301806082A85030381030101120C3030303030303030303030303116301406052A85036403120B32323232323232323239303118301606052A85036401120D30303030303030303030303030310A3008060355040B1301303121301F060355040A1E18004F004F004F002000220050007200690076006500740022310D300B06035504071304796F6C61310D300B060355040813046D617269310B300906035504061302525531233021060355042A1E1A041804320430043D0020041804320430043D043E0432043804473117301506035504041E0E041804320430043D043E006600663111300F06035504031308636F6E74726F6C32301E170D3134313031363035343831305A170D3135313031363035343831305A3081F9311A301806082A85030381030101120C3030303030303030303030303116301406052A85036403120B32323232323232323239303118301606052A85036401120D30303030303030303030303030310A3008060355040B1301303121301F060355040A1E18004F004F004F002000220050007200690076006500740022310D300B06035504071304796F6C61310D300B060355040813046D617269310B300906035504061302525531233021060355042A1E1A041804320430043D0020041804320430043D043E0432043804473117301506035504041E0E041804320430043D043E006600663111300F06035504031308636F6E74726F6C3230819F300D06092A864886F70D010101050003818D0030818902818100E86FD813A2ADD1B5E36C606FFF2C619932B0073C66D237ED92DCE4D8AFBE31ED0FB8A85A697336A8857396FE380C3BFD95560A3427544285F49BEF86586AEC9F4739FE870621E142187400B9A3BEFD4DF41FC4506A7547A87151B6D6915631D840108B05F0308F112A8D26019F4B9D47002CA7A4D37A373FB4F95DE0CB5075830203010001A38202F1308202ED300E0603551D0F0101FF0404030202DC301D0603551D250416301406082B0601050507030206082B0601050507030430160603551D200101FF040C300A300806062A8503647101306006052A8503646F04570C5522D09AD180D0B8D0BFD182D0BED090D0A0D09C222028D0B2D0B5D180D181D0B8D18F20342E37292C2022D09AD180D0B8D0BFD182D0BED09FD0A0D09E20435350222028D0B2D0B5D180D181D0B8D18F20332E3629223081E806052A850364700481DE3081DB0C2B22D09AD180D0B8D0BFD182D0BED09FD180D0BE20435350222028D0B2D0B5D180D181D0B8D18F20332E36290C27D0A1D0A42F3132312D3138353920D0BED18220313720D0B8D18ED0BDD18F203230313220D0B32E0C5AD09FD090D09A2022D0A3D0B4D0BED181D182D0BED0B2D0B5D180D18FD18ED189D0B8D0B920D186D0B5D0BDD182D1802022D09AD180D0B8D0BFD182D0BED09FD180D0BE20D0A3D0A62220D0B2D0B5D180D181D0B8D0B820312E350C27D0A1D0A42F3132382D3138323220D0BED18220303120D0B8D18ED0BDD18F203230313220D0B32E301D0603551D0E04160414568A9B6C960073EF518B2C85DBF144262EA50F68308201250603551D230482011C308201188014568A9B6C960073EF518B2C85DBF144262EA50F68A181FFA481FC3081F9311A301806082A85030381030101120C3030303030303030303030303116301406052A85036403120B32323232323232323239303118301606052A85036401120D30303030303030303030303030310A3008060355040B1301303121301F060355040A1E18004F004F004F002000220050007200690076006500740022310D300B06035504071304796F6C61310D300B060355040813046D617269310B300906035504061302525531233021060355042A1E1A041804320430043D0020041804320430043D043E0432043804473117301506035504041E0E041804320430043D043E006600663111300F06035504031308636F6E74726F6C32300F0603551D13040830060101FF020101300D06092A864886F70D010105050003818100509E7C8ADD9E45D671B3BFC7C1863B09A20D4E2562E7ED293E353C47C053A0B149054BFB00A9D1D1969D2865B017058D94AF962CDCECB73E7EE07CAED6DB83A0A3499EB750838013FAEC316E0FEE4D027DAA5A893A632F39DBCEE6ECC3773F0D46699EF3C28D5B3F9CBC91FE33F06D012F473E5C5D774BAD942820D4A084887A", "hex"));
 
             certBox.items().add([cert1, cert2, cert3, cert4, cert5, cert6, cert7, cert8, cert9, cert10, cert11, cert12, cert13, cert14, cert15]);
+            certBox.onStateChanged(function(state) {
+                console.log("CertBox state: %d", state);
+            });
 
             var toolBar = new ToolbarPanel();
             toolBar.items().add(new ToolbarPanelButton());

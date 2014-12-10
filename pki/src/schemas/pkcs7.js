@@ -25,6 +25,10 @@ if (window.trusted.schemas === undefined)
      encryptedData OBJECT IDENTIFIER :: = { pkcs - 7 6 }
      */
 
+    namespace.Data = {
+        type: "OCTET_STRING"
+    };
+
     namespace.SignedData = {
         type: "SEQUENCE",
         value: {

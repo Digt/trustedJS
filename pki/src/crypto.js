@@ -304,7 +304,7 @@ function Sign() {
                 case "webcrypto":
                     // (1) put PEM of private key to PKCS8
                     var key = Der.toUint8Array(privateKey.toPKCS8());
-                    console.log("Signer.sign(Attribute):",privateKey.algorithm.toCrypto());
+                    console.log("Signer.sign(Attribute):", privateKey.algorithm.toCrypto());
                     // (2) import key
                     trusted.Crypto.crypto.importKey("pkcs8", key, privateKey.algorithm.toCrypto(), false, ["sign"]).then(
                             function(v) {
@@ -599,4 +599,15 @@ function Decipher() {
 
     init.call(this, arguments);
 }
-trusted.Crypto = new Crypto();
+//trusted.Crypto = new Crypto();
+
+// add TrustedCrypto native module
+
+var trustedCrypto = null;
+try {
+    trustedCrypto = require("trustcrypto");
+} catch (e) {
+    console.warn("Node.JS is not found. Crypto is not avelable.");
+}
+
+trusted.Crypto = trustedCrypto;

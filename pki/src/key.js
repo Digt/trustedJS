@@ -23,7 +23,7 @@
 
         this.__proto__.encode = function() {
             var key = this.toObject();
-            return trusted.ASN.fromObject(key, "SubjectPublicKeyInfo").encode();
+            return trusted.ASN.fromObject(key, "SubjectPublicKeyInfo").blob();
         };
 
         this.__proto__.export = function(format) {
@@ -113,35 +113,22 @@
             }
         };
 
+        /*
+         * Exports key in PrivateKeyInfo
+         */
         this.__proto__.export = function(format) {
             var err_t = "PublicKey.export: ";
             if (format === undefined) {
-                format=trusted.ExportType.binary;
+                format = trusted.ExportType.binary;
             }
+            var res = trusted.PKI.PrivateKeyInfo.create(this.algorithm, key);
             switch (format) {
                 case trusted.ExportType.binary:
-                    return this.key;
-                    break;
+                    return res;
                 case trusted.ExportType.hex:
-                    return Der.toHex(this.key);
-                    break;
+                    return res.toString("hex");
                 case trusted.ExportType.pem:
-                    var keyName = "";
-                    switch (this.algorithm.OID.value) {
-                        case "1.2.840.113549.1.1.1":
-                        case "1.2.840.113549.1.1.2":
-                        case "1.2.840.113549.1.1.3":
-                        case "1.2.840.113549.1.1.4":
-                        case "1.2.840.113549.1.1.5":
-                        case "1.2.840.113549.1.1.11":
-                        case "1.2.840.113549.1.1.12":
-                        case "1.2.840.113549.1.1.13":
-                        case "1.2.840.113549.1.1.14":
-                            keyName = "rsa ";
-                            break;
-                    }
-                    return Base64.format(Base64.fromDer(key), keyName + "private key");
-                    break;
+                    return res.toString("base64");
                 default:
                     throw err_t + "Unknown export format";
             }
@@ -159,7 +146,7 @@
                 algorithm: algorithm.toObject(),
                 key: key
             };
-            return trusted.ASN.fromObject(pkcs8, "PKCS8").encode();
+            return trusted.ASN.fromObject(pkcs8, "PKCS8").blob();
         };
 
         function init(v, a) {
@@ -182,29 +169,184 @@
 
     trusted.PKI.PrivateKey = PrivateKey;
 
-    function KeyPair(){
-        
+    function KeyPair() {
+
         this.__proto__ = {
-            set mediaName(v){},
-            get mediaName(){},
-            set name(v){},
-            get name(){},
-            set path(v){},
-            get path(){},
-            set privateKey(v){},
-            get privateKey(){},
-            set publicKey(v){},
-            get publicKey(){},
-            set mediaType(v){},
-            get mediaType(){}
+            set mediaName(v) {
+            },
+            get mediaName() {
+            },
+            set name(v) {
+            },
+            get name() {
+            },
+            set path(v) {
+            },
+            get path() {
+            },
+            set privateKey(v) {
+            },
+            get privateKey() {
+            },
+            set publicKey(v) {
+            },
+            get publicKey() {
+            },
+            set mediaType(v) {
+            },
+            get mediaType() {
+            }
         };
-        
-        function init(args){
-            
+
+        function init(args) {
+
         }
-        
+
         init.call(this, arguments);
     }
-    
+
     trusted.PKI.PrivateKey = PrivateKey;
+
+
+    function PrivateKeyInfo() {
+        var _obj;
+
+        this.__proto__ = {
+            get version() {
+                return _obj.version.toNumber();
+            },
+            get algorithm() {
+                return new trusted.PKI.Algorithm(_obj.privateKeyAlgorithm);
+            },
+            get content() {
+                return _obj.privateKey;
+            },
+            get attributes() {
+                if (_obj.attributes === null)
+                    return [];
+                var res = [];
+                for (var i in _obj.attributes)
+                    res.push(new trusted.PKI.Attribute(_obj.attributes[i]));
+                return res;
+            },
+            get type() {
+                return "PrivateKeyInfo";
+            }
+        };
+
+        this.__proto__.getAttribute = function(oid) {
+            if (trusted.isString(oid))
+                oid = new trusted.PKI.OID(oid);
+            for (var i in this.attributes)
+                if (this.attributes[i].type.value === oid.value)
+                    return this.attributes[i];
+            return null;
+        };
+
+        this.__proto__.encrypt = function(pass, alg) {
+            if (alg.type !== "Algorithm")
+                throw this.type + ".encrypt: parameter alg must be type of Algorithm."
+            var derAlg = trusted.ASN.fromObject(alg.toObject(), "AlgorithmIdentifier").blob();
+            var derPKI = trusted.ASN.fromObject(this.toObject(), "PrivateKeyInfo").blob();
+            return trusted.Crypto.pkcs12.encrypt(pass, derAlg, derPKI);
+        };
+
+        this.__proto__.toObject = function() {
+            if (_obj !== undefined)
+                return _obj;
+        };
+
+        function init(args) {
+            _obj = objFromBuffer(args[0], "PrivateKeyInfo");
+        }
+
+        init.call(this, arguments);
+    }
+
+    PrivateKeyInfo.create = function(alg, content, attrs) {
+        if (trusted.isString(alg))
+            alg = trusted.PKI.Algorithm.fromName(alg);
+        if (alg.type !== "Algorithm")
+            throw "PrivateKeyInfo.create: Parameter 1 must be type of Algorithm";
+        var pki = {
+            version: 0,
+            privateKeyAlgorithm: alg.toObject(),
+            privateKey: content,
+            attributes: []
+        };
+        if (attrs !== undefined) {
+            if (!trusted.isArray(attrs))
+                attrs = [attrs];
+            for (var i in attrs)
+                pki.attributes.push(attrs[i]);
+        }
+        return trusted.ASN.fromObject(pki, "PrivateKeyInfo").blob();
+    };
+
+    trusted.PKI.PrivateKeyInfo = PrivateKeyInfo;
+
+    function EncryptedPrivateKey() {
+        var _obj;
+
+        this.__proto__ = {
+            get algorithm() {
+                return new trusted.PKI.Algorithm(_obj.encryptionAlgorithm);
+            },
+            get content() {
+                return _obj.encryptedData;
+            },
+            get type() {
+                return "EncyptedPrivateKey";
+            }
+        };
+        
+        this.toObject=function(){
+            return _obj;
+        };
+
+        function init(args) {
+            _obj = objFromBuffer(args[0], "EncryptedPrivateKeyInfo");
+        }
+
+        this.__proto__.decrypt = function(pass) {
+            var alg = this.algorithm.toObject();
+            console.log("Algorithm:", alg);
+            //alg.algorithm = "1.2.840.113549.1.12.1.3";
+            var derAlg = trusted.ASN.fromObject(alg, "AlgorithmIdentifier").blob();
+            
+            return trusted.Crypto.pkcs12.decrypt(derAlg, pass, this.content);
+        };
+
+        init.call(this, arguments);
+    }
+
+    EncryptedPrivateKey.create = function(alg, pass, content, attrs) {
+        var pki = PrivateKeyInfo.create(alg, content, attrs);
+
+        var params = trusted.ASN.fromObject(
+                {
+                    salt: trusted.Crypto.randomBytes(8),
+                    iterations: 2000
+                },
+        "PBEParams"
+                ).blob();
+        var x509_alg = trusted.ASN.fromObject(
+                {
+                    algorithm: "1.2.840.113549.1.12.1.3",
+                    parameters: params
+                },
+        "AlgorithmIdentifier"
+                ).blob();
+        
+        var algObj = new trusted.PKI.Algorithm(x509_alg);
+        var encData = trusted.Crypto.pkcs12.encrypt(algObj.encode(), pass, pki);
+
+        var epki = {
+            encryptionAlgorithm: algObj.toObject(),
+            encryptedData: encData
+        };
+        return trusted.ASN.fromObject(epki, "EncryptedPrivateKeyInfo").blob();
+    };
+
+    trusted.PKI.EncryptedPrivateKey = EncryptedPrivateKey;
 })();

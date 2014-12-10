@@ -1,3 +1,5 @@
+var b64 = /-----BEGIN [^-]+-----([A-Za-z0-9+\/=\s]+)-----END [^-]+-----|begin-base64[^\n]+\n([A-Za-z0-9+\/=\s]+)====/;
+
 trusted.Buffer = (function() {
 
     function Buffer() {
@@ -62,6 +64,20 @@ trusted.Buffer = (function() {
             return btoa(v.toString("binary"));
         },
         fromString: function(v) {
+            function unarmor(a) {
+                var m = b64.exec(a);
+                if (m) {
+                    if (m[1])
+                        a = m[1];
+                    else if (m[2])
+                        a = m[2];
+                    else
+                        throw "RegExp out of sync";
+                }
+                return a;
+            }
+            if (b64.test(v))
+                v = unarmor(v);
             var buf = new Buffer(atob(v), "binary");
             return buf;
         }
@@ -107,7 +123,7 @@ trusted.Buffer = (function() {
                 var res = "";
                 for (var i = 0; i < v.length; i++) {
                     var c = v[i].toString(16);
-                    if (c % 2 !== 0)
+                    if (c.length % 2 !== 0)
                         res += '0';
                     res += c;
                 }

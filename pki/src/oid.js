@@ -1,4 +1,5 @@
 (function(undefined) {
+    
     function OID() {
         var _value;
 
@@ -7,7 +8,7 @@
 
         this.__proto__ = {
             set value(v) {
-                if (!checkValue(v))
+                if (!OID.test(v))
                     throw "OID.setValue: Wrong value. (" + v + ")";
                 if (v !== _value) {
                     _value = v;
@@ -41,12 +42,6 @@
             return this.value;
         };
 
-        function checkValue(v) {
-            if (typeof (v) !== "string")
-                return false;
-            var regex = /^[0-2](\.\d+)+$/g;
-            return regex.test(v);
-        }
 
         //constructor
         switch (arguments.length) {
@@ -55,6 +50,14 @@
         }
 
     }
+    
+    OID.test = function(v){
+        var oid_regex = /^[0-2](\.\d+)+$/g;
+        if (typeof (v) !== "string")
+                return false;
+            
+        return oid_regex.test(v);
+    };
 
     trusted.PKI.OID = OID;
 })();
