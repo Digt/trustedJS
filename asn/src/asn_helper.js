@@ -119,7 +119,10 @@ function atoo(a, s) {
     }
 
     if (s.isAny) {
-        o = a.blob();
+        if (s.stream)
+            o = new trusted.Stream(a.stream, "stream", a.posStart(), a.length);
+        else
+            o = a.blob();
         return o;
     }
 
@@ -155,7 +158,10 @@ function atoo(a, s) {
         }
     }
     else
-        o = ("context" in s) ? a.toValue(s.tag.number) : a.toValue();
+        if (s.stream){
+            o = new trusted.Stream(a.stream, "stream", a.posContent(), a.length);
+        }else
+            o = ("context" in s) ? a.toValue(s.tag.number) : a.toValue();
 
     return o;
 }
@@ -403,23 +409,33 @@ function encode(obj, schema) {
 
                     var content = [];
                     content.push(encodeTag(schema.tag.class, schema.tag.constructed, schema.tag.number)); //tag
-                    content = content.concat(encodeLength(obj.length)); // length
+                    content = encodeHelper(obj.length, obj);
 
-                    asn = asn.concat(encodeLength(content.length + obj.length)); // length
-                    asn = asn.concat(content);
+                    asn = asn.concat(encodeHelper(content.length, content)); // length
                 } else { //implicit
                     asn.push(encodeTag(0x02, schema.tag.constructed, schema.context)); //tag
-                    asn = asn.concat(encodeLength(obj.length)); // length
+                    asn = asn.concat(encodeHelper(obj.length, obj)); // length
                 }
             } else {
                 asn.push(encodeTag(schema.tag.class, schema.tag.constructed, schema.tag.number)); //tag
-                asn = asn.concat(encodeLength(obj.length)); // length
+                asn = asn.concat(encodeHelper(obj.length, obj)); // length
             }
-            asn = asn.concat(obj); // value
             break;
     }
 
     return asn;
+}
+
+function encodeHelper(length, data) {
+    var fLen = length > 65535;
+    if (fLen) {
+        data = (([0x80]).concat(data)).concat([0x00, 0x00]); // not fixed length
+
+    }
+    else {
+        data = encodeLength(length).concat(data); // fixed length
+    }
+    return data;
 }
 
 function encodeTag(tag_class, tag_constructed, tag_number) {
@@ -435,6 +451,8 @@ function encodeLength(length) {
         case "undefined":
             break;
         case "number":
+            if (length > 65535)
+                return [0x80];
             var enc = [];
             if (length !== (length & 0x7F)) {
                 var code = length.toString(16);
@@ -457,7 +475,7 @@ function encodeLength(length) {
 
 function encodeInteger(num) {
     var asn = [];
-    if (num.toNumber!== undefined)
+    if (num.toNumber !== undefined)
         num = num.toNumber();
     if (typeof (num) === "number") {
         // number to der

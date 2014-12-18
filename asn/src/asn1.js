@@ -1,5 +1,5 @@
 //check for nodejs
-if (window.module !== undefined) {
+if (window.require !== undefined) {
     var fs = require("fs");
 } else
     console.warn("Module nodejs is not found");
@@ -10,11 +10,13 @@ var reTime = /^((?:1[89]|2\d)?\d\d)(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])([01]\d|2
 
 function Stream() {
     var BUFFER_SIZE = 1024;
+    var _start, _end;
     var _this = this;
     var _buf = new trusted.Buffer(BUFFER_SIZE);
     var _fd = null;
     var _pos, _curBufS, _curBufP, _curBufE;
     this.length = 0;
+    this.type = "Stream";
     this.filePointer = function() {
         return _fd;
     };
@@ -35,16 +37,37 @@ function Stream() {
     }
 
     this.load = function(obj, type, start, end) {
+        if (start === undefined)
+            start = 0;
         switch (type) {
             case "file":
                 _fd = fs.openSync(obj, "rs");
                 this.length = fs.fstatSync(_fd).size;
+                if (end === undefined)
+                    end = this.length - start;
+                _start = start;
+                _end = end;
                 _pos = 0;
                 fileRead(0);
+                break;
+            case "stream":
+                if (obj.type !== "Stream")
+                    throw "Stream.laod: Parameter 1 must be type of Stream";
+                _buf = obj;
+                _pos = _curBufS = _curBufP = 0;
+                if (end === undefined)
+                    end = obj.length - start;
+                _start = start;
+                _end = end;
+                this.length = _curBufE = _end;
                 break;
             default: // binary;
                 _buf = new trusted.Buffer(obj, "binary");
                 this.length = _curBufE = _buf.length;
+                if (end === undefined)
+                    end = this.length - start;
+                _start = start;
+                _end = end;
                 _pos = _curBufS = _curBufP = 0;
         }
     };
@@ -69,10 +92,17 @@ function Stream() {
                 _curBufP += v - _pos;
             }
             _pos = v;
-            return _buf[_curBufP];
+            if (_buf.type === "Stream")
+                _c = _buf.get(_start + _curBufP);
+            else
+                _c = _buf[_start + _curBufP];
+
         }
         else {
-            _c = _buf[_curBufP];
+            if (_buf.type === "Stream")
+                _c = _buf.get(_start + _curBufP);
+            else
+                _c = _buf[_start + _curBufP];
             //console.log(_curBufP+1, _c);
             if (++_curBufP >= _curBufE && !isStreamFromFile()) {
                 fileRead(_pos + 1);
@@ -94,11 +124,15 @@ function Stream() {
 }
 
 function ASN1() {
+    var _this = this;
     this.tag;
     this.length;
     this.sub = [];
     this.stream;
-    var _this = this;
+    this.parent = null;
+    this.__defineGetter__("root", function() {
+        return getRoot(this);
+    });
     this.__proto__.posStart = function() {
         return this.position;
     };
@@ -141,6 +175,14 @@ function ASN1() {
                 }
         return ASNType[type].decode(this.content());
     };
+
+    function getRoot(asn) {
+        if (asn.parent)
+            return getRoot(asn.parent);
+        else
+            return asn;
+    }
+
     function decode() {
         this.tag = ASNTag.fromByte(this.stream.get());
         this.length = decodeLength(this.stream);
@@ -149,8 +191,11 @@ function ASN1() {
             var _end = this.posEnd() + 1;
             while ((this.stream.position() < _end || this.length === null)) {
                 var asn = new ASN1(this.stream, this.stream.position());
-                if (asn.isNull())
+                if (asn.isNull()) {
+                    this.length = asn.posStart()-this.posStart();
                     break;
+                }
+                asn.parent = this;
                 this.sub.push(asn);
             }
         }
@@ -158,6 +203,44 @@ function ASN1() {
             this.stream.position(this.posEnd() + 1);
         }
     }
+
+    this.__proto__.slice = function() {
+        if (!this.tag.constructed) {
+            throw "ASN1.slice: Can nto slice of no constructed element.";
+        }
+
+        var res = {
+            begin: new trusted.Buffer(0),
+            end: new trusted.Buffer(0)
+        };
+
+        var begin = res.begin.concat([this.tag.value, 0x80]); // add parent tag with length
+        var end = res.end.concat([0x00, 0x00]); //close tag
+
+        if (this.parent) {
+            var sObj = this.parent.slice();
+            res.begin = sObj.begin.concat(res.begin);
+            var i = 0;
+            for (i; i < this.parent.sub.length; i++) {
+                var item = this.parent.sub[i];
+                if (item === this)
+                    break;
+                res.begin = res.begin.concat(item.blob()); //add parent children blobs
+            }
+
+            for (++i; i < this.parent.sub.length; i++) {
+                var item = this.parent.sub[i];
+                res.end = res.end.concat(item.blob());
+            }
+            res.end = res.end.concat(sObj.end);
+        }
+
+        res.begin = res.begin.concat(begin); // add this tag
+        res.end = end.concat(res.end);
+
+        return res;
+    };
+
 
     function decodeLength(stream) {
         var buf = stream.get(),
@@ -196,6 +279,10 @@ function ASN1() {
     init.call(this, arguments);
 }
 
+ASN1.__defineGetter__("null", function() {
+    return new trusted.Buffer([0x05, 0x00]);
+});
+
 ASN1.fromObject = function(obj, schema) {
     var arr = ObjectToASN(obj, schema);
     return new ASN1(arr);
@@ -205,6 +292,7 @@ function ASNTag() {
     this.class;
     this.constructed;
     this.number;
+    this.value;
     // return name of tag universal type
     this.__defineGetter__("type", function() {
         if (this.class === ASN1TagClass.UNIVERSAL) {
@@ -227,6 +315,7 @@ ASNTag.fromByte = function(b) {
     tag.class = b >> 6;
     tag.constructed = ((b & 0x20) !== 0);
     tag.number = b & 0x1F;
+    tag.value = b;
     if (tag.number === 0x1F)
         throw "Long tag is not used";
     return tag;

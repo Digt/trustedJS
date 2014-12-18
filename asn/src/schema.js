@@ -141,7 +141,8 @@ function Schema() {
         name: null,
         implicit: null,
         explicit: null,
-        length: null
+        length: null,
+        stream:null
     };
 
     function verify(schema) {
